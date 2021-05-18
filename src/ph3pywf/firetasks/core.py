@@ -49,9 +49,9 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             doc = coll.find_one(
                 {
                     "task_label": {"$regex": f"{tag} structure optimization"},
-                    "formula_pretty": struct_unitcell.composition.reduced_formula,
+#                     "formula_pretty": structure.composition.reduced_formula, # TODO: need to fix this by adding arg
                 },
-#                 {"calcs_reversed": 1}, # not sure what it does?
+#                 {"calcs_reversed": 1}, # appears to be "projection", not sure if necessary
             )
             
             struct_unitcell = Structure.from_dict(doc["calcs_reversed"][0]["output"]["structure"])
