@@ -2,7 +2,7 @@ from datetime import datetime
 from fireworks.core.firework import FWAction, Firework, FiretaskBase, Workflow
 from atomate.vasp.database import VaspCalcDb
 from pymatgen.core import Structure
-from ph3py.firetasks.core import DisplacedStructuresAdderTask
+from ph3pywf.firetasks.core import DisplacedStructuresAdderTask
 from atomate.vasp.config import DB_FILE
 
 def wf_phono3py(structure, 
