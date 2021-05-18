@@ -19,7 +19,7 @@ def wf_phono3py(structure,
     Returns Phono3py calculation workflow.
     Args:
         structure (Structure): input structure.
-        supercell_size (tuple)
+        supercell_size (tuple): (2, 2, 2) by default. 
         cutoff_pair_distance (float)
         vasp_input_set_relax (VaspInputSet)
         vasp_input_set_static (VaspInputSet)

@@ -32,14 +32,13 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         vis_static (VaspInputSet)
     """
     required_params = ["tag", "db_file"]
-    optional_params = ["supercell_size", "cutoff_pair_distance", "name", "struct_unitcell", "vis_static"]
+    optional_params = ["supercell_size", "cutoff_pair_distance", "struct_unitcell", "vis_static"]
         
     def run_task(self, fw_spec):
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
         supercell_size = self.get("supercell_size", (2,2,2))
         cutoff_pair_distance = self.get("cutoff_pair_distance", None)
-        name = self.get("name", "DisplacedStructuresAdderTask")
         struct_unitcell = self.get("struct_unitcell", None)
         vis_static = self.get("vis_static", MPStaticSet)
         
