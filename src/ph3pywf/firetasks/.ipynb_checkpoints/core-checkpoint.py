@@ -6,6 +6,8 @@ from ph3pywf.utils.ph3py import get_displaced_structures
 from fireworks import explicit_serialize
 from atomate.utils.utils import env_chk
 import numpy as np
+from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
+from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
 
 ### Intermediate Firetask that reads optimized structure, generate displaced structures, and make addition of StaticFWs.
 @explicit_serialize
