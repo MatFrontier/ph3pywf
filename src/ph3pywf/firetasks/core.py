@@ -1,3 +1,8 @@
+# coding: utf-8
+
+__author__ = "Kerui Lai"
+__email__ = "kerui.lai@mail.mcgill.ca"
+
 from datetime import datetime
 from fireworks.core.firework import FWAction, Firework, FiretaskBase, Workflow
 from atomate.vasp.database import VaspCalcDb
@@ -9,13 +14,22 @@ import numpy as np
 from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
 
-### Intermediate Firetask that reads optimized structure, generate displaced structures, and make addition of StaticFWs.
 @explicit_serialize
 class DisplacedStructuresAdderTask(FiretaskBase):
     """
     Intermediate Firetask that reads optimized structure, 
     generate displaced structures, 
-    and make addition of StaticFWs.
+    and dynamically add StaticFWs to WF.
+    
+    Required params: 
+        tag (str): unique label to identify contents related to this WF.
+        db_file (str): path to file containing the database credentials. Supports env_chk.
+        
+    Optional params: 
+        supercell_size (tuple): (2, 2, 2) by default. 
+        cutoff_pair_distance (float)
+        struct_unitcell (Structure): optimized unitcell structure
+        vis_static (VaspInputSet)
     """
     required_params = ["tag", "db_file"]
     optional_params = ["supercell_size", "cutoff_pair_distance", "name", "struct_unitcell", "vis_static"]
