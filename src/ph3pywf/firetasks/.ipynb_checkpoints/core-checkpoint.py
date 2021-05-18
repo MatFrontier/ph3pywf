@@ -57,19 +57,20 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             struct_unitcell = Structure.from_dict(doc["calcs_reversed"][0]["output"]["structure"])
         
         # generate displaced structures from optimized structure
-        supercell_matrix = np.eye(3) * np.array(supercell_size) # supercell size = 2*2*2
+        supercell_matrix = np.eye(3) * np.array(supercell_size) 
         struct_displaced = get_displaced_structures(
             structure=struct_unitcell,
             supercell_matrix=supercell_matrix,
             yaml_fname="phonopy_disp.yaml",
             cutoff_pair_distance=cutoff_pair_distance,
         )
-        # TODO: save phonopy_disp.yaml to DB collection?
+        # TODO: save phonopy_disp.yaml to DB collection? 
+        # perhaps this should be another firetask?
         
         # initialize new fws
         new_fws = []
         
-        # for each structure in the displaced structures create a StaticFW
+        # for each structure in the displaced structures append a StaticFW
         for i, structure in enumerate(struct_displaced):
             if i==0: 
                 continue # Skip undeformed supercell
@@ -82,7 +83,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                          )
             new_fws.append(fw)
         
-        # return WF of combined FW
+        # return WF of combined FWs
         wf = Workflow(new_fws)
         if len(new_fws) != 0:
             return FWAction(addition=wf)
