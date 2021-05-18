@@ -4,6 +4,8 @@ from atomate.vasp.database import VaspCalcDb
 from pymatgen.core import Structure
 from ph3pywf.firetasks.core import DisplacedStructuresAdderTask
 from atomate.vasp.config import DB_FILE
+from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
+from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
 
 def wf_phono3py(structure, 
                 supercell_size=None, 
