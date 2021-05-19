@@ -93,7 +93,7 @@ def wf_disp_from_optimized(structure,
             tag=tag, 
             db_file=db_file, 
             supercell_size=supercell_size, 
-            cutoff_pair_distance=cutoff_pair_distance
+            cutoff_pair_distance=cutoff_pair_distance, 
             struct_unitcell=structure, 
             vis_static=vasp_input_set_static, 
         ), 
@@ -101,7 +101,7 @@ def wf_disp_from_optimized(structure,
     )
     
     # create the workflow
-    wf = Workflow(fw)
+    wf = Workflow([fw])
     wf.name = "{}:{}".format(structure.composition.reduced_formula, 
                              "phono3py calculation from optimized struct")
     
