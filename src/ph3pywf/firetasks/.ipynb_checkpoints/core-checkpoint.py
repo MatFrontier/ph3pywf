@@ -30,9 +30,10 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         cutoff_pair_distance (float)
         struct_unitcell (Structure): optimized unitcell structure
         vis_static (VaspInputSet)
+        name (str)
     """
     required_params = ["tag", "db_file"]
-    optional_params = ["supercell_size", "cutoff_pair_distance", "struct_unitcell", "vis_static"]
+    optional_params = ["supercell_size", "cutoff_pair_distance", "struct_unitcell", "vis_static", "name"]
         
     def run_task(self, fw_spec):
         tag = self["tag"]
@@ -41,6 +42,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         cutoff_pair_distance = self.get("cutoff_pair_distance", None)
         struct_unitcell = self.get("struct_unitcell", None)
         vis_static = self.get("vis_static", MPStaticSet)
+        name = self.get("name", "DisplacedStructuresAdderTask")
         
         # read optimized structures
         if struct_unitcell is None:
