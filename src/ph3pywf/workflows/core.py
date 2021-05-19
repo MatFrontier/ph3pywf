@@ -68,3 +68,41 @@ def wf_phono3py(structure,
     # TODO: write post analysis FW
     
     return wf_ph3py
+
+
+def wf_disp_from_optimized(structure, 
+                           supercell_size=None, 
+                           cutoff_pair_distance=None, 
+                           vasp_input_set_static=None, 
+                           tag=None, 
+                           db_file=DB_FILE, 
+                          ):
+    tag = tag or datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S-%f')
+    
+    # get the input set for the static calculations and update it if we passed custom settings
+    vis_static = vasp_input_set_static or MPStaticSet(structure, force_gamma=True)
+    
+    # call adder FW
+    fw_name = "{}-{} DisplacedStructuresAdderTask".format(
+        structure.composition.reduced_formula if structure else "unknown", 
+        tag, 
+    )
+    
+    fw = Firework(
+        DisplacedStructuresAdderTask(
+            tag=tag, 
+            db_file=db_file, 
+            supercell_size=supercell_size, 
+            cutoff_pair_distance=cutoff_pair_distance
+            struct_unitcell=structure, 
+            vis_static=vasp_input_set_static, 
+        ), 
+        name=fw_name, 
+    )
+    
+    # create the workflow
+    wf = Workflow(fw)
+    wf.name = "{}:{}".format(structure.composition.reduced_formula, 
+                             "phono3py calculation from optimized struct")
+    
+    return wf
