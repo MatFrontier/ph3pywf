@@ -87,8 +87,9 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         
         # return WF of combined FWs
         wf = Workflow(new_fws)
-#         if len(new_fws) != 0:
-        return FWAction(additions=wf,exit=True)
+        if len(new_fws) != 0:
+            print("returning FWAction")
+            return FWAction(additions=wf)
         
         
         
