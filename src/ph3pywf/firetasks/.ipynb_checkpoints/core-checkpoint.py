@@ -49,7 +49,6 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             doc = coll.find_one(
                 {
                     "task_label": {"$regex": f"{tag} structure optimization"},
-#                     "formula_pretty": structure.composition.reduced_formula, # TODO: need to fix this by adding arg
                 },
 #                 {"calcs_reversed": 1}, # appears to be "projection", not sure if necessary
             )
@@ -64,8 +63,10 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             yaml_fname="phonopy_disp.yaml",
             cutoff_pair_distance=cutoff_pair_distance,
         )
-        # TODO: save phonopy_disp.yaml to DB collection? 
-        # perhaps this should be another firetask?
+        # TODO: save phonopy_disp.yaml to DB collection
+        # Should it be stored in "fireworks" collection
+        # or "tasks" collection?
+        # Perhaps this should be another firetask?
         
         # initialize new fws
         new_fws = []
@@ -86,7 +87,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         # return WF of combined FWs
         wf = Workflow(new_fws)
         if len(new_fws) != 0:
-            return FWAction(addition=wf)
+            return FWAction(additions=wf)
         
         
         
