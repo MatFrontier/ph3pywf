@@ -94,4 +94,30 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             return FWAction(additions=wf)
         
         
+@explicit_serialize
+class StoreStructureTask(FiretaskBase):
+    required_params = ["tag", "db_file", "structure", "name", "terminate"]
+    
+    def run_task(self, fw_spec):
+        tag = self["tag"]
+        db_file = env_chk(self.get("db_file"), fw_spec)
+        structure = self.get("structure", None)
+        name = self.get("name", "NoName")
+        terminate = bool(self.get("terminate", False))
         
+        # connect to DB
+        atomate_db = VaspCalcDb.from_db_file(db_file)
+#         coll = atomate_db.db.get_collection("_IOtest")
+        coll = atomate_db.db.get_collection("tasks")
+        
+        # create structure dict
+        struct_dict = {"calcs_reversed":[{"output":{"structure":None}}],"task_label":None}
+        struct_dict["task_label"] = f"{tag} {name}"
+        struct_dict["calcs_reversed"][0]["output"]["structure"] = structure.as_dict()
+        
+        # store structure in DB collection
+        coll.insert_one(struct_dict)
+        
+        # terminate FW dependently
+        if terminate:
+            return FWAction()

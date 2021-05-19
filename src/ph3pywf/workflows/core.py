@@ -109,3 +109,57 @@ def wf_disp_from_optimized(structure,
                              "phono3py calculation from optimized struct")
     
     return wf
+
+
+def wf_disp_from_dynatest(structure, 
+                          supercell_size=None, 
+                          cutoff_pair_distance=None, 
+                          vasp_input_set_static=None, 
+                          tag=None, 
+                          db_file=DB_FILE, 
+                         ):
+    from ph3pywf.firetasks.core import StoreStructureTask
+    
+    tag = tag or datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S-%f')
+    
+    fws = [Firework(
+        StoreStructureTask(
+            tag=tag, 
+            db_file=db_file, 
+            structure=structure, 
+            name="structure optimization",
+            terminate=False,
+        ),
+        name="pseudo structure optimization",
+    )]
+    
+    # get the input set for the static calculations and update it if we passed custom settings
+    vis_static = vasp_input_set_static or MPStaticSet(structure, force_gamma=True)
+    
+    # call adder FW
+    fw_name = "{}-{} DisplacedStructuresAdderTask".format(
+        structure.composition.reduced_formula if structure else "unknown", 
+        tag, 
+    )
+    
+    parents = fws[0]
+    
+    fw = Firework(
+        DisplacedStructuresAdderTask(
+            tag=tag, 
+            db_file=db_file, 
+            supercell_size=supercell_size, 
+            cutoff_pair_distance=cutoff_pair_distance, 
+            vis_static=vasp_input_set_static, 
+        ), 
+        name=fw_name, 
+        parents=parents,
+    )
+    fws.append(fw)
+    
+    # create the workflow
+    wf = Workflow(fws)
+    wf.name = "{}:{}".format(structure.composition.reduced_formula, 
+                             "phono3py calculation using pseudo struct opt")
+    
+    return wf
