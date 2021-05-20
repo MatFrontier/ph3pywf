@@ -44,6 +44,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         vis_static = self.get("vis_static", MPStaticSet)
         name = self.get("name", "DisplacedStructuresAdderTask")
         
+        print("Adder: DEBUG VER 05/20 14:55")
         # read optimized structures
         if struct_unitcell is None:
             atomate_db = VaspCalcDb.from_db_file(db_file)
@@ -54,7 +55,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                 },
 #                 {"calcs_reversed": 1}, # appears to be "projection", not sure if necessary
             )
-            
+            print("Adder: Found doc task_id = {}".format(doc["task_id"]))
             struct_unitcell = Structure.from_dict(doc["calcs_reversed"][0]["output"]["structure"])
         
         # generate displaced structures from optimized structure
@@ -77,20 +78,21 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         for i, structure in enumerate(struct_displaced):
             if i==0: 
                 continue # Skip undeformed supercell
-            if i>10: # JUST FOR TESTING !!!!!!!!!!!!!!!!
+            if i>5: # JUST FOR TESTING !!!!!!!!!!!!!!!!
                 break # JUST FOR TESTING !!!!!!!!!!!!!!!!
             disp_id = f"{i:05d}"
             fw = StaticFW(structure=structure,
                           vasp_input_set=vis_static, 
                           name=f"{tag} disp-{disp_id}",
+                          prev_calc_loc=None,
+                          prev_calc_dir=None,
                          )
-            print(f"adding FW {disp_id}")
-            print(structure.composition.reduced_formula)
+            print(f"Adder: adding FW {disp_id}")
             new_fws.append(fw)
         
         # return additions of combined FWs
         if len(new_fws) != 0:
-            print("returning FWAction")
+            print("Adder: returning FWAction")
             return FWAction(detours=new_fws)
         
         
