@@ -84,14 +84,14 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                           vasp_input_set=vis_static, 
                           name=f"{tag} disp-{disp_id}",
                          )
-            print("adding FW")
+            print(f"adding FW {disp_id}")
+            print(structure.composition.reduced_formula)
             new_fws.append(fw)
         
-        # return WF of combined FWs
-        wf = Workflow(new_fws)
+        # return additions of combined FWs
         if len(new_fws) != 0:
             print("returning FWAction")
-            return FWAction(additions=wf)
+            return FWAction(detours=new_fws)
         
         
 @explicit_serialize
