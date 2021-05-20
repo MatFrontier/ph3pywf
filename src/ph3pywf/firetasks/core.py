@@ -123,3 +123,4 @@ class StoreStructureTask(FiretaskBase):
         # terminate FW dependently
         if terminate:
             return FWAction()
+        
