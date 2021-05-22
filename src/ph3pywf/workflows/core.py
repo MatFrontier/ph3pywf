@@ -13,12 +13,14 @@ from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
 
 def wf_phono3py(structure, 
-                supercell_size=None, 
-                cutoff_pair_distance=None, 
-                vasp_input_set_relax=None, 
-                vasp_input_set_static=None, 
-                tag=None, 
-                db_file=DB_FILE, 
+                name="phono3py wf",
+                c=None,
+#                 supercell_size=None, 
+#                 cutoff_pair_distance=None, 
+#                 vasp_input_set_relax=None, 
+#                 vasp_input_set_static=None, 
+#                 tag=None, 
+#                 db_file=DB_FILE, 
                ):
     """
     Returns Phono3py calculation workflow.
@@ -32,19 +34,22 @@ def wf_phono3py(structure,
     Returns:
         Workflow
     """
-    tag = tag or datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S-%f')
     
-    # get the input set for the optimization and update it if we passed custom settings
-    vis_relax = vasp_input_set_relax or MPRelaxSet(structure, force_gamma=True)
+    c = c or {}
+    tag = c.get("tag", datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S-%f'))
+    supercell_size = c.get("supercell_size", None)
+    cutoff_pair_distance = c.get("cutoff_pair_distance", None)
+    vasp_input_set_relax = c.get("vasp_input_set_relax", MPRelaxSet(structure, force_gamma=True))
+    vasp_input_set_static = c.get("vasp_input_set_static", MPStaticSet(structure, force_gamma=True))
+    db_file = c.get("db_file", DB_FILE)
+    metadata = c.get("metadata", None)
+    spec = c.get("spec", None)
     
     # Structure optimization firework
     fws = [OptimizeFW(structure=structure, 
-                      vasp_input_set=vis_relax, 
+                      vasp_input_set=vasp_input_set_relax, 
                       name=f"{tag} structure optimization", 
                      )]
-    
-    # get the input set for the static calculations and update it if we passed custom settings
-    vis_static = vasp_input_set_static or MPStaticSet(structure, force_gamma=True)
     
     # convert GetDisplacedStructuresFWs to FW and add to FW list
     parents = fws[0]
@@ -70,7 +75,7 @@ def wf_phono3py(structure,
     
     # create the workflow
     wf_ph3py = Workflow(fws)
-    wf_ph3py.name = "{}:{}".format(structure.composition.reduced_formula, "phono3py calculation")
+    wf_ph3py.name = "{}:{}".format(structure.composition.reduced_formula, name)
         
     # post analysis 
     # TODO: write post analysis FW
