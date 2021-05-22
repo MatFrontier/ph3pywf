@@ -1,3 +1,8 @@
+# coding: utf-8
+
+__author__ = "Kerui Lai"
+__email__ = "kerui.lai@mail.mcgill.ca"
+
 from datetime import datetime
 from fireworks.core.firework import FWAction, Firework, FiretaskBase, Workflow
 from atomate.vasp.database import VaspCalcDb

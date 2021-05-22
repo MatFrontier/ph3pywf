@@ -1,3 +1,8 @@
+# coding: utf-8
+
+__author__ = "Kerui Lai"
+__email__ = "kerui.lai@mail.mcgill.ca"
+
 import numpy as np
 from monty.dev import requires
 from monty.serialization import loadfn
