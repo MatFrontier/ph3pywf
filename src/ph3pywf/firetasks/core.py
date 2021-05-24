@@ -70,6 +70,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         )
         
         # save phonopy_disp.yaml to DB collection
+        # TODO: fix issue where task doc do not update if replicate dir_name exist 
         phonopy_disp_dict = {}
         with open("phonopy_disp.yaml", "r") as fh:
             phonopy_disp_dict["yaml"] = yaml.load(fh, Loader=yaml.SafeLoader)
