@@ -15,6 +15,9 @@ from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
 import yaml
 import os
+from atomate.utils.utils import get_logger
+
+logger = get_logger(__name__)
 
 @explicit_serialize
 class DisplacedStructuresAdderTask(FiretaskBase):
@@ -48,7 +51,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         name = self.get("name", "DisplacedStructuresAdderTask")
         is_reduced_test = self.get("is_reduced_test", False)
         
-        print("Adder: DEBUG VER 05/20 14:55")
+        logger.info("Adder: DEBUG VER 05/24 21:00")
         
         # read optimized structures
         mmdb = VaspCalcDb.from_db_file(db_file)
@@ -59,7 +62,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                 },
 #                 {"calcs_reversed": 1}, # appears to be "projection", not sure if necessary
             )
-            print("Adder: Found doc task_id = {}".format(doc["task_id"]))
+            logger.info("Adder: Found doc task_id = {}".format(doc["task_id"]))
             struct_unitcell = Structure.from_dict(doc["calcs_reversed"][0]["output"]["structure"])
         
         # generate displaced structures from optimized structure
@@ -99,12 +102,12 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                           prev_calc_loc=None,
                           prev_calc_dir=None,
                          )
-            print(f"Adder: adding FW {disp_id}")
+            logger.info(f"Adder: adding FW {disp_id}")
             new_fws.append(fw)
         
         # return additions of combined FWs
         if len(new_fws) != 0:
-            print("Adder: returning FWAction")
+            logger.info("Adder: returning FWAction")
             return FWAction(detours=new_fws)
         
         
