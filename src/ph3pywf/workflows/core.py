@@ -44,6 +44,7 @@ def wf_phono3py(structure,
     db_file = c.get("db_file", DB_FILE)
     metadata = c.get("metadata", None)
     spec = c.get("spec", None)
+    is_reduced_test = c.get("is_reduced_test", False)
 #     user_incar_settings = c.get("USER_INCAR_SETTINGS", {})
 #     user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
 #     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
@@ -69,6 +70,7 @@ def wf_phono3py(structure,
             supercell_size=supercell_size, 
             cutoff_pair_distance=cutoff_pair_distance, 
             vis_static=vasp_input_set_static, 
+            is_reduced_test=is_reduced_test,
         ), 
         name=fw_name, 
         parents=parents, 
@@ -79,7 +81,8 @@ def wf_phono3py(structure,
     # create the workflow
     wf_ph3py = Workflow(fws)
     wf_ph3py.name = "{}:{}".format(structure.composition.reduced_formula, name)
-        
+    wf_ph3py.metadata = metadata
+    
     # post analysis 
     # TODO: write post analysis FW
     

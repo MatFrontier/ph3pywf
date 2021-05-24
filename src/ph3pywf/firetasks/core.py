@@ -33,9 +33,10 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         struct_unitcell (Structure): optimized unitcell structure
         vis_static (VaspInputSet)
         name (str)
+        is_reduced_test (bool): if switch on, there'll be only a few staticFW generated
     """
     required_params = ["tag", "db_file"]
-    optional_params = ["supercell_size", "cutoff_pair_distance", "struct_unitcell", "vis_static", "name"]
+    optional_params = ["supercell_size", "cutoff_pair_distance", "struct_unitcell", "vis_static", "name", "is_reduced_test"]
         
     def run_task(self, fw_spec):
         tag = self["tag"]
@@ -45,6 +46,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         struct_unitcell = self.get("struct_unitcell", None)
         vis_static = self.get("vis_static", MPStaticSet)
         name = self.get("name", "DisplacedStructuresAdderTask")
+        is_reduced_test = self.get("is_reduced_test", False)
         
         print("Adder: DEBUG VER 05/20 14:55")
         
@@ -88,8 +90,8 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         for i, structure in enumerate(struct_displaced):
             if i==0: 
                 continue # Skip undeformed supercell
-            if i>5: # JUST FOR TESTING !!!!!!!!!!!!!!!!
-                break # JUST FOR TESTING !!!!!!!!!!!!!!!!
+            if is_reduced_test and i=5: # For dynamic wf testing
+                break # For dynamic wf testing
             disp_id = f"{i:05d}"
             fw = StaticFW(structure=structure,
                           vasp_input_set=vis_static, 
