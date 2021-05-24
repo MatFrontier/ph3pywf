@@ -44,6 +44,9 @@ def wf_phono3py(structure,
     db_file = c.get("db_file", DB_FILE)
     metadata = c.get("metadata", None)
     spec = c.get("spec", None)
+#     user_incar_settings = c.get("USER_INCAR_SETTINGS", {})
+#     user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
+#     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
     
     # Structure optimization firework
     fws = [OptimizeFW(structure=structure, 
@@ -54,7 +57,7 @@ def wf_phono3py(structure,
     # convert GetDisplacedStructuresFWs to FW and add to FW list
     parents = fws[0]
     
-    fw_name = "{}-{} DisplacedStructuresAdderTask".format(
+    fw_name = "{}:{} DisplacedStructuresAdderTask".format(
         structure.composition.reduced_formula if structure else "unknown", 
         tag, 
     )

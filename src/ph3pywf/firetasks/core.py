@@ -13,6 +13,8 @@ from atomate.utils.utils import env_chk
 import numpy as np
 from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
+import yaml
+import os
 
 @explicit_serialize
 class DisplacedStructuresAdderTask(FiretaskBase):
@@ -47,9 +49,8 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         print("Adder: DEBUG VER 05/20 14:55")
         # read optimized structures
         if struct_unitcell is None:
-            atomate_db = VaspCalcDb.from_db_file(db_file)
-            coll = atomate_db.db.get_collection("tasks")
-            doc = coll.find_one(
+            mmdb = VaspCalcDb.from_db_file(db_file)
+            doc = mmdb.collection.find_one(
                 {
                     "task_label": {"$regex": f"{tag} structure optimization"},
                 },
@@ -66,10 +67,18 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             yaml_fname="phonopy_disp.yaml",
             cutoff_pair_distance=cutoff_pair_distance,
         )
-        # TODO: save phonopy_disp.yaml to DB collection
-        # Should it be stored in "fireworks" collection
-        # or "tasks" collection?
-        # Perhaps this should be another firetask?
+        
+        # save phonopy_disp.yaml to DB collection
+        phonopy_disp_dict = {}
+        with open("phonopy_disp.yaml", "r") as fh:
+            phonopy_disp_dict["yaml"] = yaml.load(fh, Loader=yaml.SafeLoader)
+        
+        calc_dir = os.getcwd()
+        fullpath = os.path.abspath(calc_dir)
+        phonopy_disp_dict["dir_name"] = fullpath
+        phonopy_disp_dict["last_updated"] = datetime.utcnow()
+        phonopy_disp_dict["task_label"] = f"{tag} {name}"
+        mmdb.insert_task(phonopy_disp_dict)
         
         # initialize new fws
         new_fws = []
@@ -108,9 +117,9 @@ class StoreStructureTask(FiretaskBase):
         terminate = bool(self.get("terminate", False))
         
         # connect to DB
-        atomate_db = VaspCalcDb.from_db_file(db_file)
-#         coll = atomate_db.db.get_collection("_IOtest")
-        coll = atomate_db.db.get_collection("tasks")
+        mmdb = VaspCalcDb.from_db_file(db_file)
+        coll = mmdb.collection
+#         coll = mmdb.db.get_collection("_IOtest")
         
         # create structure dict
         struct_dict = {"calcs_reversed":[{"output":{"structure":None}}],"task_label":None}
