@@ -81,7 +81,6 @@ def wf_phono3py(structure,
     # create the workflow
     wf_ph3py = Workflow(fws)
     wf_ph3py.name = "{}:{}".format(structure.composition.reduced_formula, name)
-    wf_ph3py.metadata = metadata
     
     # post analysis 
     # TODO: write post analysis FW
