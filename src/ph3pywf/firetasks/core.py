@@ -47,9 +47,10 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         name = self.get("name", "DisplacedStructuresAdderTask")
         
         print("Adder: DEBUG VER 05/20 14:55")
+        
         # read optimized structures
+        mmdb = VaspCalcDb.from_db_file(db_file)
         if struct_unitcell is None:
-            mmdb = VaspCalcDb.from_db_file(db_file)
             doc = mmdb.collection.find_one(
                 {
                     "task_label": {"$regex": f"{tag} structure optimization"},
