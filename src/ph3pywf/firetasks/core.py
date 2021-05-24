@@ -90,7 +90,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         for i, structure in enumerate(struct_displaced):
             if i==0: 
                 continue # Skip undeformed supercell
-            if is_reduced_test and i=5: # For dynamic wf testing
+            if is_reduced_test and i==5: # For dynamic wf testing
                 break # For dynamic wf testing
             disp_id = f"{i:05d}"
             fw = StaticFW(structure=structure,
