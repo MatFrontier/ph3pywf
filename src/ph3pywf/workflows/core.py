@@ -99,7 +99,7 @@ def wf_disp_from_optimized(structure,
     vis_static = vasp_input_set_static or MPStaticSet(structure, force_gamma=True)
     
     # call adder FW
-    fw_name = "{}-{} DisplacedStructuresAdderTask".format(
+    fw_name = "{}:{} DisplacedStructuresAdderTask".format(
         structure.composition.reduced_formula if structure else "unknown", 
         tag, 
     )
@@ -150,7 +150,7 @@ def wf_disp_from_dynatest(structure,
     vis_static = vasp_input_set_static or MPStaticSet(structure, force_gamma=True)
     
     # call adder FW
-    fw_name = "{}-{} DisplacedStructuresAdderTask".format(
+    fw_name = "{}:{} DisplacedStructuresAdderTask".format(
         structure.composition.reduced_formula if structure else "unknown", 
         tag, 
     )
