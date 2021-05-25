@@ -15,12 +15,6 @@ from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
 def wf_phono3py(structure, 
                 name="phono3py wf",
                 c=None,
-#                 supercell_size=None, 
-#                 cutoff_pair_distance=None, 
-#                 vasp_input_set_relax=None, 
-#                 vasp_input_set_static=None, 
-#                 tag=None, 
-#                 db_file=DB_FILE, 
                ):
     """
     Returns Phono3py calculation workflow.
@@ -39,21 +33,35 @@ def wf_phono3py(structure,
     tag = c.get("tag", datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S-%f'))
     supercell_size = c.get("supercell_size", None)
     cutoff_pair_distance = c.get("cutoff_pair_distance", None)
-    vasp_input_set_relax = c.get("vasp_input_set_relax", MPRelaxSet(structure, force_gamma=True))
-    vasp_input_set_static = c.get("vasp_input_set_static", MPStaticSet(structure, force_gamma=True))
+    vasp_input_set_relax = c.get("vasp_input_set_relax", None)
+    vasp_input_set_static = c.get("vasp_input_set_static", None)
     db_file = c.get("db_file", DB_FILE)
     metadata = c.get("metadata", None)
     spec = c.get("spec", None)
     is_reduced_test = c.get("is_reduced_test", False)
-#     user_incar_settings = c.get("USER_INCAR_SETTINGS", {})
-#     user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
-#     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
+    user_incar_settings = c.get("USER_INCAR_SETTINGS", {})
+    user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
+    user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
     
-    # Structure optimization firework
+    # update vasp_input_set_relax
+    vasp_input_set_relax = vasp_input_set_relax or MPRelaxSet(structure,
+                                                              user_incar_settings=user_incar_settings,
+                                                              user_potcar_settings=user_potcar_settings,
+                                                              user_potcar_functional=user_potcar_functional,
+                                                             )
+    
+    # structure optimization firework
     fws = [OptimizeFW(structure=structure, 
                       vasp_input_set=vasp_input_set_relax, 
                       name=f"{tag} structure optimization", 
                      )]
+    
+    # update vasp_input_set_static
+    vasp_input_set_static = vasp_input_set_static or MPStaticSet(structure,
+                                                                 user_incar_settings=user_incar_settings,
+                                                                 user_potcar_settings=user_potcar_settings,
+                                                                 user_potcar_functional=user_potcar_functional,
+                                                                )
     
     # convert GetDisplacedStructuresFWs to FW and add to FW list
     parents = fws[0]
@@ -78,14 +86,13 @@ def wf_phono3py(structure,
     
     fws.append(fw)
     
-    # create the workflow
-    wf_ph3py = Workflow(fws)
-    wf_ph3py.name = "{}:{}".format(structure.composition.reduced_formula, name)
-    
     # post analysis 
     # TODO: write post analysis FW
     
-    return wf_ph3py
+    # create the workflow
+    wfname = "{}:{}".format(structure.composition.reduced_formula, name)
+    
+    return Workflow(fws, name=wfname, metadata=metadata)
 
 
 def wf_disp_from_optimized(structure, 

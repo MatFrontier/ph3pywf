@@ -47,7 +47,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         supercell_size = self.get("supercell_size", (2,2,2))
         cutoff_pair_distance = self.get("cutoff_pair_distance", None)
         struct_unitcell = self.get("struct_unitcell", None)
-        vis_static = self.get("vis_static", MPStaticSet)
+        vis_static = self.get("vis_static", MPStaticSet(struct_unitcell, force_gamma=True))
         name = self.get("name", "DisplacedStructuresAdderTask")
         is_reduced_test = self.get("is_reduced_test", False)
         
@@ -73,7 +73,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             yaml_fname="phonopy_disp.yaml",
             cutoff_pair_distance=cutoff_pair_distance,
         )
-        
+                
         # save phonopy_disp.yaml to DB collection
         phonopy_disp_dict = {}
         with open("phonopy_disp.yaml", "r") as fh:
