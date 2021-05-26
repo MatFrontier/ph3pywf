@@ -47,7 +47,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         supercell_size = self.get("supercell_size", (2,2,2))
         cutoff_pair_distance = self.get("cutoff_pair_distance", None)
         struct_unitcell = self.get("struct_unitcell", None)
-        vis_static = self.get("vis_static", MPStaticSet)
+        vis_static = self.get("vis_static", None)
         name = self.get("name", "DisplacedStructuresAdderTask")
         is_reduced_test = self.get("is_reduced_test", False)
         
@@ -89,6 +89,9 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         # initialize new fws
         new_fws = []
         
+        # update vis_static preparation
+        dd = vis_static.as_dict()
+        
         # for each structure in the displaced structures append a StaticFW
         for i, structure in enumerate(struct_displaced):
             if i==0: 
@@ -97,6 +100,8 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                 logger.info("Adder: Stop FW generation for dynamic WF testing")
                 break # For dynamic wf testing
             disp_id = f"{i:05d}"
+            dd["structure"] = structure # update vis_static
+            vis_static.from_dict(dd) # update vis_static
             fw = StaticFW(structure=structure,
                           vasp_input_set=vis_static, 
                           name=f"{tag} disp-{disp_id}",
