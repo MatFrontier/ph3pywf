@@ -127,20 +127,37 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         db_file (str): path to file containing the database credentials. Supports env_chk.
         
     Optional params: 
+        
     
     """
     required_params = ["tag", "db_file"]
-    optional_params = []
+    optional_params = ["metadata"]
         
     def run_task(self, fw_spec):
+        # initialize doc
+        ph3py_dict = {}
+        
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
+        ph3py_dict["metadata"] = self.get("metadata", {})
         
-        # read force_sets from task docs in DB
+        # read force_sets from the disp-* runs
         force_sets = []
+        mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
+        docs = mmdb.collection.find(
+            {
+                "task_label": {"$regex": f"{tag} disp*"},
+            },
+#             {"calcs_reversed": 1}, # appears to be "projection", not sure if necessary
+        )
         
         
         
+        # generate FC3
+        
+        # store results in ph3py_tasks collection
+        coll = mmdb.db["ph3py_tasks"]
+        coll.insert_one(ph3py_dict)
         
         
         
