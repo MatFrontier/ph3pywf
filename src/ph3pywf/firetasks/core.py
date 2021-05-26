@@ -116,7 +116,40 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             logger.info("Adder: returning FWAction")
             return FWAction(detours=new_fws)
         
+
+@explicit_serialize
+class Phono3pyAnalysisToDb(FiretaskBase):
+    """
+    Compute thermal conductivity?
+    
+    Required params: 
+        tag (str): unique label to identify contents related to this WF.
+        db_file (str): path to file containing the database credentials. Supports env_chk.
         
+    Optional params: 
+    
+    """
+    required_params = ["tag", "db_file"]
+    optional_params = []
+        
+    def run_task(self, fw_spec):
+        tag = self["tag"]
+        db_file = env_chk(self.get("db_file"), fw_spec)
+        
+        # read force_sets from task docs in DB
+        force_sets = []
+        
+        
+        
+        
+        
+        
+        
+    
+#########################
+# TESTING MODULES BELOW #
+#########################
+
 @explicit_serialize
 class StoreStructureTask(FiretaskBase):
     required_params = ["tag", "db_file", "structure", "name", "terminate"]

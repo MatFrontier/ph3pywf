@@ -7,7 +7,7 @@ from datetime import datetime
 from fireworks.core.firework import FWAction, Firework, FiretaskBase, Workflow
 from atomate.vasp.database import VaspCalcDb
 from pymatgen.core import Structure
-from ph3pywf.firetasks.core import DisplacedStructuresAdderTask
+from ph3pywf.firetasks.core import DisplacedStructuresAdderTask, # Phono3pyAnalysisToDb
 from atomate.vasp.config import DB_FILE
 from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
@@ -86,8 +86,23 @@ def wf_phono3py(structure,
     
     fws.append(fw)
     
-    # post analysis 
-    # TODO: write post analysis FW
+#     # post analysis 
+#     parents = fws[-1]
+#     fw_name = "{}:{} Phono3pyAnalysisToDb".format(
+#         structure.composition.reduced_formula if structure else "unknown", 
+#         tag, 
+#     )
+    
+#     fw = Firework(
+#         Phono3pyAnalysisToDb(
+#             tag=tag, 
+#             db_file=db_file,
+#         ),
+#         name=fw_name, 
+#         parents=parents,
+#     )
+    
+#     fws.append(fw)
     
     # create the workflow
     wfname = "{}:{}".format(structure.composition.reduced_formula, name)
