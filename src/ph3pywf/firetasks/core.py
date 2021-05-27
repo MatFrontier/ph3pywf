@@ -152,21 +152,21 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         mesh = self.get("mesh", [20, 20, 20])
         ph3py_dict["metadata"] = self.get("metadata", {})
         
-        # read force_sets from the disp-* runs
+        # get force_sets from the disp-* runs in DB
         force_sets = []
         mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
-        docs = mmdb.collection.find(
+        docs_disp = mmdb.collection.find(
             {
                 "task_label": {"$regex": f"{tag} disp*"},
-            },
-#             {"calcs_reversed": 1}, # appears to be "projection", not sure if necessary
+            }
         )
         
-        for d in docs:
+        for d in docs_disp:
             forces = np.array(d["output"]["forces"])
             force_sets.append(forces)
         
-        # get disp_dataset from phonopy_disp.yaml
+        # get phonopy_disp.yaml from DB
+        # and get disp_dataset from phonopy_disp.yaml
         phonopy_disp_dict = mmdb.collection.find_one(
             {
                 "task_label": {"$regex": f"{tag} DisplacedStructuresAdderTask"},
@@ -181,15 +181,14 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # generate FORCES_FC3
         write_FORCES_FC3(disp_dataset, force_sets, filename="FORCES_FC3")
         
-        # once we have phonopy_disp.yaml and FORCES_FC3,
-        # use run_thermal_conductivity()
-        # which will read these 2 files
-        doc = mmdb.collection.find_one(
+        # prepare Phono3py object
+        doc_opt = mmdb.collection.find_one(
             {
                 "task_label": {"$regex": f"{tag} structure optimization"},
             }
         )
-        unitcell = Structure.from_dict(doc["calcs_reversed"][0]["output"]["structure"])
+        
+        unitcell = Structure.from_dict(doc_opt["calcs_reversed"][0]["output"]["structure"])
         supercell_matrix = np.eye(3) * np.array(supercell_size) 
         phono3py = Phono3py(unitcell=unitcell,
                             supercell_matrix=supercell_matrix,
@@ -197,6 +196,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                             log_level=1, # log_level=0 make phono3py quiet
                            )
         
+        # use run_thermal_conductivity()
+        # which will read phonopy_disp.yaml and FORCES_FC3
         run_thermal_conductivity(phono3py)
         
         # store results in ph3py_tasks collection
