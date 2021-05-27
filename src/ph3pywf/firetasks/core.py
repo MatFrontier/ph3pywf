@@ -7,7 +7,7 @@ from datetime import datetime
 from fireworks.core.firework import FWAction, Firework, FiretaskBase, Workflow
 from atomate.vasp.database import VaspCalcDb
 from pymatgen.core import Structure
-from ph3pywf.utils.ph3py import get_displaced_structures
+from ph3pywf.utils.ph3py import get_displaced_structures, run_thermal_conductivity
 from fireworks import explicit_serialize
 from atomate.utils.utils import env_chk
 import numpy as np
@@ -153,9 +153,24 @@ class Phono3pyAnalysisToDb(FiretaskBase):
 #             {"calcs_reversed": 1}, # appears to be "projection", not sure if necessary
         )
         
+        for d in docs:
+            forces = np.array(d["output"]["forces"])
+            force_sets.append(forces)
         
+        # get disp_dataset from phonopy_disp.yaml
+        phonopy_disp_dict = mmdb.collection.find_one(
+            {
+                "task_label": {"$regex": f"{tag} DisplacedStructuresAdderTask"},
+            }
+        )
+        
+        with open("phonopy_disp.yaml", "w") as outfile:
+            yaml.dump(phonopy_disp_dict["yaml"], outfile, default_flow_style=False)
+        
+        disp_dataset = parse_disp_fc3_yaml(filename="phonopy_disp.yaml")
         
         # generate FC3
+        write_FORCES_FC3(disp_dataset, force_sets, filename="FORCES_FC3")
         
         # store results in ph3py_tasks collection
         coll = mmdb.db["ph3py_tasks"]
