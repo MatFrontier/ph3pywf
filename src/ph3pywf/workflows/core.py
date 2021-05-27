@@ -160,6 +160,8 @@ def wf_disp_from_optimized(structure,
 #         parents=parents, 
     )
     
+    fws = [fw]
+    
     # create the workflow
     wfname = "{}:{}".format(structure.composition.reduced_formula, name)
     
