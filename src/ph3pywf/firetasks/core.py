@@ -73,7 +73,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             yaml_fname="phonopy_disp.yaml",
             cutoff_pair_distance=cutoff_pair_distance,
         )
-                
+        
         # save phonopy_disp.yaml to DB collection
         phonopy_disp_dict = {}
         with open("phonopy_disp.yaml", "r") as fh:
@@ -90,7 +90,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         new_fws = []
         
         # update vis_static preparation
-        dd = vis_static.as_dict()
+        vis_dict = vis_static.as_dict()
         
         # for each structure in the displaced structures append a StaticFW
         for i, structure in enumerate(struct_displaced):
@@ -100,8 +100,10 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                 logger.info("Adder: Stop FW generation for dynamic WF testing")
                 break # For dynamic wf testing
             disp_id = f"{i:05d}"
-            dd["structure"] = structure # update vis_static
-            vis_static.from_dict(dd) # update vis_static
+            logger.info(f"Adder: Before update: vis.structure.num_sites={vis_static.structure.num_sites}")
+            vis_dict["structure"] = structure.as_dict() # update vis_static
+            vis_static = vis_static.from_dict(vis_dict) # update vis_static
+            logger.info(f"Adder: After update: vis.structure.num_sites={vis_static.structure.num_sites}")
             fw = StaticFW(structure=structure,
                           vasp_input_set=vis_static, 
                           name=f"{tag} disp-{disp_id}",

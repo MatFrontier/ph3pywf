@@ -133,6 +133,13 @@ def wf_disp_from_optimized(structure,
     user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
     
+    # update vasp_input_set_static
+    vasp_input_set_static = vasp_input_set_static or MPStaticSet(structure,
+                                                                 user_incar_settings=user_incar_settings,
+                                                                 user_potcar_settings=user_potcar_settings,
+                                                                 user_potcar_functional=user_potcar_functional,
+                                                                )
+    
     # call adder FW
     fw_name = "{}:{} DisplacedStructuresAdderTask".format(
         structure.composition.reduced_formula if structure else "unknown", 
