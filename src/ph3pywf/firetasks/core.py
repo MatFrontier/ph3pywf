@@ -138,7 +138,9 @@ class Phono3pyAnalysisToDb(FiretaskBase):
     
     """
     required_params = ["tag", "db_file"]
-    optional_params = ["metadata"]
+    optional_params = ["supercell_size", 
+                       "mesh",
+                       "metadata"]
         
     def run_task(self, fw_spec):
         # initialize doc
@@ -146,6 +148,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
+        supercell_size = self.get("supercell_size", (2,2,2))
+        mesh = self.get("mesh", [20, 20, 20])
         ph3py_dict["metadata"] = self.get("metadata", {})
         
         # read force_sets from the disp-* runs
@@ -174,8 +178,26 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         
         disp_dataset = parse_disp_fc3_yaml(filename="phonopy_disp.yaml")
         
-        # generate FC3
+        # generate FORCES_FC3
         write_FORCES_FC3(disp_dataset, force_sets, filename="FORCES_FC3")
+        
+        # once we have phonopy_disp.yaml and FORCES_FC3,
+        # use run_thermal_conductivity()
+        # which will read these 2 files
+        doc = mmdb.collection.find_one(
+            {
+                "task_label": {"$regex": f"{tag} structure optimization"},
+            }
+        )
+        unitcell = Structure.from_dict(doc["calcs_reversed"][0]["output"]["structure"])
+        supercell_matrix = np.eye(3) * np.array(supercell_size) 
+        phono3py = Phono3py(unitcell=unitcell,
+                            supercell_matrix=supercell_matrix,
+                            mesh=mesh,
+                            log_level=1, # log_level=0 make phono3py quiet
+                           )
+        
+        run_thermal_conductivity(phono3py)
         
         # store results in ph3py_tasks collection
         coll = mmdb.db["ph3py_tasks"]
