@@ -110,17 +110,28 @@ def wf_phono3py(structure,
     return Workflow(fws, name=wfname, metadata=metadata)
 
 
+
+#########################
+# TESTING MODULES BELOW #
+#########################
+
 def wf_disp_from_optimized(structure, 
-                           supercell_size=None, 
-                           cutoff_pair_distance=None, 
-                           vasp_input_set_static=None, 
-                           tag=None, 
-                           db_file=DB_FILE, 
+                           name="phono3py wf from optimized struct", 
+                           c=None, 
                           ):
-    tag = tag or datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S-%f')
-    
-    # get the input set for the static calculations and update it if we passed custom settings
-    vis_static = vasp_input_set_static or MPStaticSet(structure, force_gamma=True)
+    c = c or {}
+    tag = c.get("tag", datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S-%f'))
+    supercell_size = c.get("supercell_size", None)
+    cutoff_pair_distance = c.get("cutoff_pair_distance", None)
+    vasp_input_set_relax = c.get("vasp_input_set_relax", None)
+    vasp_input_set_static = c.get("vasp_input_set_static", None)
+    db_file = c.get("db_file", DB_FILE)
+    metadata = c.get("metadata", None)
+    spec = c.get("spec", None)
+    is_reduced_test = c.get("is_reduced_test", False)
+    user_incar_settings = c.get("USER_INCAR_SETTINGS", {})
+    user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
+    user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
     
     # call adder FW
     fw_name = "{}:{} DisplacedStructuresAdderTask".format(
@@ -136,16 +147,16 @@ def wf_disp_from_optimized(structure,
             cutoff_pair_distance=cutoff_pair_distance, 
             struct_unitcell=structure, 
             vis_static=vasp_input_set_static, 
+            is_reduced_test=is_reduced_test,
         ), 
         name=fw_name, 
+#         parents=parents, 
     )
     
     # create the workflow
-    wf = Workflow([fw])
-    wf.name = "{}:{}".format(structure.composition.reduced_formula, 
-                             "phono3py calculation from optimized struct")
+    wfname = "{}:{}".format(structure.composition.reduced_formula, name)
     
-    return wf
+    return Workflow(fws, name=wfname, metadata=metadata)
 
 
 def wf_disp_from_dynatest(structure, 
