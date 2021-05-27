@@ -51,7 +51,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         name = self.get("name", "DisplacedStructuresAdderTask")
         is_reduced_test = self.get("is_reduced_test", False)
         
-        logger.info("Adder: DEBUG VER 05/24 21:00")
+        logger.info("Adder: DEBUG VER 05/27 10:52")
         
         # read optimized structures
         mmdb = VaspCalcDb.from_db_file(db_file)
@@ -100,7 +100,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                 logger.info("Adder: Stop FW generation for dynamic WF testing")
                 break # For dynamic wf testing
             disp_id = f"{i:05d}"
-            logger.info(f"Adder: Before update: vis.structure.num_sites={vis_static.structure.num_sites}")
+#             logger.info(f"Adder: Before update: vis.structure.num_sites={vis_static.structure.num_sites}")
             vis_dict["structure"] = structure.as_dict() # update vis_static
             vis_static = vis_static.from_dict(vis_dict) # update vis_static
             logger.info(f"Adder: After update: vis.structure.num_sites={vis_static.structure.num_sites}")
