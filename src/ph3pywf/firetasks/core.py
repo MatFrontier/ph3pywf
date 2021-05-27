@@ -39,7 +39,12 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         is_reduced_test (bool): if switch on, there'll be only a few staticFW generated
     """
     required_params = ["tag", "db_file"]
-    optional_params = ["supercell_size", "cutoff_pair_distance", "struct_unitcell", "vis_static", "name", "is_reduced_test"]
+    optional_params = ["supercell_size", 
+                       "cutoff_pair_distance", 
+                       "struct_unitcell", 
+                       "vis_static", 
+#                        "name", 
+                       "is_reduced_test"]
         
     def run_task(self, fw_spec):
         tag = self["tag"]
@@ -48,7 +53,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         cutoff_pair_distance = self.get("cutoff_pair_distance", None)
         struct_unitcell = self.get("struct_unitcell", None)
         vis_static = self.get("vis_static", None)
-        name = self.get("name", "DisplacedStructuresAdderTask")
+#         name = self.get("name", "DisplacedStructuresAdderTask")
         is_reduced_test = self.get("is_reduced_test", False)
         
         logger.info("Adder: DEBUG VER 05/27 10:52")
@@ -83,7 +88,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         fullpath = os.path.abspath(calc_dir)
         phonopy_disp_dict["dir_name"] = fullpath
         phonopy_disp_dict["last_updated"] = datetime.utcnow()
-        phonopy_disp_dict["task_label"] = f"{tag} {name}"
+        phonopy_disp_dict["task_label"] = f"{tag} DisplacedStructuresAdderTask"
         mmdb.insert_task(phonopy_disp_dict)
         
         # initialize new fws
