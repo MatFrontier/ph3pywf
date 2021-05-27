@@ -134,6 +134,8 @@ def wf_disp_from_optimized(structure,
     user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
     
+    from ph3pywf.firetasks.core import Phono3pyAnalysisToDb # just to check if detours work
+    
     # update vasp_input_set_static
     vasp_input_set_static = vasp_input_set_static or MPStaticSet(structure,
                                                                  user_incar_settings=user_incar_settings,
@@ -163,10 +165,29 @@ def wf_disp_from_optimized(structure,
     
     fws = [fw]
     
+    # post analysis 
+    parents = fws[-1]
+    fw_name = "{}:{} Phono3pyAnalysisToDb".format(
+        structure.composition.reduced_formula if structure else "unknown", 
+        tag, 
+    )
+    
+    fw = Firework(
+        Phono3pyAnalysisToDb(
+            tag=tag, 
+            db_file=db_file,
+        ),
+        name=fw_name, 
+        parents=parents,
+    )
+    
+    fws.append(fw)
+
     # create the workflow
     wfname = "{}:{}".format(structure.composition.reduced_formula, name)
     
     return Workflow(fws, name=wfname, metadata=metadata)
+
 
 
 def wf_disp_from_dynatest(structure, 
