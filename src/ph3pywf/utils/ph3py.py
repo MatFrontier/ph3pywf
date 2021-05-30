@@ -103,7 +103,9 @@ def run_thermal_conductivity(phono3py):
 
     show_drift_fc3(fc3)
     show_drift_force_constants(fc2, name='fc2')
-
+    
+    phono3py.init_phph_interaction()
+    
     phono3py.run_thermal_conductivity(
         temperatures=range(0, 1001, 10), # TODO: add argument to change temperature range
         boundary_mfp=1e6, # This is to avoid divergence of phonon life time.
