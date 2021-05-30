@@ -16,6 +16,7 @@ from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
 import yaml
 import os
 from atomate.utils.utils import get_logger
+from phono3py import Phono3py
 
 logger = get_logger(__name__)
 
@@ -189,8 +190,9 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         )
         
         unitcell = Structure.from_dict(doc_opt["calcs_reversed"][0]["output"]["structure"])
+        ph_unitcell = get_phonopy_structure(unitcell)
         supercell_matrix = np.eye(3) * np.array(supercell_size) 
-        phono3py = Phono3py(unitcell=unitcell,
+        phono3py = Phono3py(unitcell=ph_unitcell,
                             supercell_matrix=supercell_matrix,
                             mesh=mesh,
                             log_level=1, # log_level=0 make phono3py quiet
