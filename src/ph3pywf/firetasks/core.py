@@ -17,6 +17,7 @@ import yaml
 import os
 from atomate.utils.utils import get_logger
 from phono3py import Phono3py
+from pymatgen.io.phonopy import get_phonopy_structure
 
 logger = get_logger(__name__)
 
