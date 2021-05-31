@@ -18,6 +18,7 @@ import os
 from atomate.utils.utils import get_logger
 from phono3py import Phono3py
 from pymatgen.io.phonopy import get_phonopy_structure
+import h5py
 
 logger = get_logger(__name__)
 
@@ -151,8 +152,9 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
         supercell_size = self.get("supercell_size", (2,2,2))
-        mesh = self.get("mesh", [20, 20, 20])
+        mesh = self.get("mesh", [11, 11, 11])
         ph3py_dict["metadata"] = self.get("metadata", {})
+        ph3py_dict["metadata"].update({"task_label_tag": tag})
         
         # get force_sets from the disp-* runs in DB
         force_sets = []
@@ -201,7 +203,20 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         
         # use run_thermal_conductivity()
         # which will read phonopy_disp.yaml and FORCES_FC3
+        # this operation will generate file kappa-*.hdf5
         run_thermal_conductivity(phono3py)
+        
+        # parse kappa-*.hdf5
+        f = h5py.File("kappa-m{}{}{}.hdf5".format(*mesh))
+        ph3py_dict["temperature"] = f["temperature"][:].tolist()
+        ph3py_dict["kappa"] = f["kappa"][:].tolist()
+        ph3py_dict["mesh"] = f["mesh"][:].tolist()
+        
+        # add more informations in ph3py_dict
+        ph3py_dict["structure"] = unitcell.as_dict()
+        ph3py_dict["formula_pretty"] = unitcell.composition.reduced_formula
+        ph3py_dict["success"] = True
+        ph3py_dict["supercell_size"] = supercell_size
         
         # store results in ph3py_tasks collection
         coll = mmdb.db["ph3py_tasks"]
