@@ -91,13 +91,14 @@ from phono3py.file_IO import (parse_disp_fc3_yaml,
                               read_fc3_from_hdf5,
                               read_fc2_from_hdf5)
 
-def run_thermal_conductivity(phono3py):
+def run_thermal_conductivity(phono3py, t_min=0, t_max=1001, t_step=10):
     # Create fc3 and fc2 from disp_fc3.yaml and FORCES_FC3
     disp_dataset = parse_disp_fc3_yaml(filename="phonopy_disp.yaml")
     forces_fc3 = parse_FORCES_FC3(disp_dataset, filename="FORCES_FC3")
     phono3py.produce_fc3(forces_fc3,
                          displacement_dataset=disp_dataset,
                          symmetrize_fc3r=True)
+    print("INFO: phono3py.produce_fc3: symmetrize_fc3r=True")
     fc3 = phono3py.get_fc3()
     fc2 = phono3py.get_fc2()
 
@@ -107,7 +108,7 @@ def run_thermal_conductivity(phono3py):
     phono3py.init_phph_interaction()
     
     phono3py.run_thermal_conductivity(
-        temperatures=range(0, 1001, 10), # TODO: add argument to change temperature range
+        temperatures=range(t_min, t_max, t_step), 
         boundary_mfp=1e6, # This is to avoid divergence of phonon life time.
         write_kappa=True)
 
