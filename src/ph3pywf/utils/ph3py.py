@@ -46,7 +46,7 @@ def get_displaced_structures(structure, atom_disp=0.01, supercell_matrix=None, y
     ph_structure = get_phonopy_structure(structure)
 
     if supercell_matrix is None:
-        supercell_matrix = np.eye(3) * np.array((1, 1, 1))
+        supercell_matrix = np.eye(3) * np.array((2, 2, 2))
 
     phonon = Phono3py(unitcell=ph_structure, supercell_matrix=supercell_matrix)
     phonon.generate_displacements(
