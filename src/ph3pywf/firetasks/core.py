@@ -159,11 +159,14 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # get force_sets from the disp-* runs in DB
         force_sets = []
         mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
-        docs_disp = mmdb.collection.find(
+        docs_p = mmdb.collection.find(
             {
                 "task_label": {"$regex": f"{tag} disp*"},
             }
         )
+        docs_disp = []
+        for p in docs_p:
+            docs_disp.append(p)
         
         for d in docs_disp:
             forces = np.array(d["output"]["forces"])
