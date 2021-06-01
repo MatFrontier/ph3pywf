@@ -141,7 +141,10 @@ class Phono3pyAnalysisToDb(FiretaskBase):
     
     """
     required_params = ["tag", "db_file"]
-    optional_params = ["supercell_size", 
+    optional_params = ["t_min",
+                       "t_max",
+                       "t_step",
+                       "supercell_size", 
                        "mesh",
                        "metadata"]
         
@@ -151,6 +154,9 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
+        t_min = self.get("t_min", 0)
+        t_max = self.get("t_max", 1001)
+        t_step = self.get("t_step", 10)
         supercell_size = self.get("supercell_size", (2,2,2))
         mesh = self.get("mesh", [11, 11, 11])
         ph3py_dict["metadata"] = self.get("metadata", {})
@@ -207,7 +213,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # use run_thermal_conductivity()
         # which will read phonopy_disp.yaml and FORCES_FC3
         # this operation will generate file kappa-*.hdf5
-        run_thermal_conductivity(phono3py)
+        run_thermal_conductivity(phono3py, t_min, t_max, t_step)
         
         # parse kappa-*.hdf5
         f = h5py.File("kappa-m{}{}{}.hdf5".format(*mesh))
