@@ -82,13 +82,13 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             structure=struct_unitcell,
             atom_disp=atom_disp,
             supercell_matrix=supercell_matrix,
-            yaml_fname="phonopy_disp.yaml",
+            yaml_fname="disp_fc3.yaml",
             cutoff_pair_distance=cutoff_pair_distance,
         )
         
-        # save phonopy_disp.yaml to DB collection
+        # save disp_fc3.yaml to DB collection
         phonopy_disp_dict = {}
-        with open("phonopy_disp.yaml", "r") as fh:
+        with open("disp_fc3.yaml", "r") as fh:
             phonopy_disp_dict["yaml"] = yaml.load(fh, Loader=yaml.SafeLoader)
         
         calc_dir = os.getcwd()
@@ -184,18 +184,18 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             forces = np.array(d["output"]["forces"])
             force_sets.append(forces)
         
-        # get phonopy_disp.yaml from DB
-        # and get disp_dataset from phonopy_disp.yaml
+        # get disp_fc3.yaml from DB
+        # and get disp_dataset from disp_fc3.yaml
         phonopy_disp_dict = mmdb.collection.find_one(
             {
                 "task_label": {"$regex": f"{tag} DisplacedStructuresAdderTask"},
             }
         )
         
-        with open("phonopy_disp.yaml", "w") as outfile:
+        with open("disp_fc3.yaml", "w") as outfile:
             yaml.dump(phonopy_disp_dict["yaml"], outfile, default_flow_style=False)
         
-        disp_dataset = parse_disp_fc3_yaml(filename="phonopy_disp.yaml")
+        disp_dataset = parse_disp_fc3_yaml(filename="disp_fc3.yaml")
         
         # generate FORCES_FC3
         write_FORCES_FC3(disp_dataset, force_sets, filename="FORCES_FC3")
@@ -217,7 +217,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                            )
         
         # use run_thermal_conductivity()
-        # which will read phonopy_disp.yaml and FORCES_FC3
+        # which will read disp_fc3.yaml and FORCES_FC3
         # this operation will generate file kappa-*.hdf5
         run_thermal_conductivity(phono3py, t_min, t_max, t_step)
         

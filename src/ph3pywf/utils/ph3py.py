@@ -93,7 +93,7 @@ from phono3py.file_IO import (parse_disp_fc3_yaml,
 
 def run_thermal_conductivity(phono3py, t_min=0, t_max=1001, t_step=10):
     # Create fc3 and fc2 from disp_fc3.yaml and FORCES_FC3
-    disp_dataset = parse_disp_fc3_yaml(filename="phonopy_disp.yaml")
+    disp_dataset = parse_disp_fc3_yaml(filename="disp_fc3.yaml")
     forces_fc3 = parse_FORCES_FC3(disp_dataset, filename="FORCES_FC3")
     phono3py.produce_fc3(forces_fc3,
                          displacement_dataset=disp_dataset,
