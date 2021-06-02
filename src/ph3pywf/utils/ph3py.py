@@ -33,7 +33,7 @@ except ImportError:
 from pymatgen.io.phonopy import get_phonopy_structure, get_pmg_structure
 
 @requires(Phono3py, "phono3py not installed!")
-def get_displaced_structures(structure, atom_disp=0.01, supercell_matrix=None, yaml_fname=None, **kwargs):
+def get_displaced_structures(structure, atom_disp=0.03, supercell_matrix=None, yaml_fname=None, **kwargs):
     """
     Modified based on pymatgen.io.phonopy.get_displaced_structures()
     Replaced all phonopy features with phono3py

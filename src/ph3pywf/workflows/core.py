@@ -34,6 +34,7 @@ def wf_phono3py(structure,
     tag = c.get("tag", datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S-%f'))
     supercell_size = c.get("supercell_size", None)
     cutoff_pair_distance = c.get("cutoff_pair_distance", None)
+    atom_disp = c.get("atom_disp", None)
     vasp_input_set_relax = c.get("vasp_input_set_relax", None)
     vasp_input_set_static = c.get("vasp_input_set_static", None)
     db_file = c.get("db_file", DB_FILE)
@@ -81,6 +82,7 @@ def wf_phono3py(structure,
             db_file=db_file, 
             supercell_size=supercell_size, 
             cutoff_pair_distance=cutoff_pair_distance, 
+            atom_disp=atom_disp, 
             vis_static=vasp_input_set_static, 
             is_reduced_test=is_reduced_test,
         ), 

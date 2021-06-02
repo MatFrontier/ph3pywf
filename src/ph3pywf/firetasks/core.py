@@ -36,6 +36,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
     Optional params: 
         supercell_size (tuple): (2, 2, 2) by default. 
         cutoff_pair_distance (float)
+        atom_disp (float)
         struct_unitcell (Structure): optimized unitcell structure
         vis_static (VaspInputSet)
         name (str)
@@ -44,6 +45,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
     required_params = ["tag", "db_file"]
     optional_params = ["supercell_size", 
                        "cutoff_pair_distance", 
+                       "atom_disp"
                        "struct_unitcell", 
                        "vis_static", 
 #                        "name", 
@@ -54,6 +56,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         db_file = env_chk(self.get("db_file"), fw_spec)
         supercell_size = self.get("supercell_size", (2,2,2))
         cutoff_pair_distance = self.get("cutoff_pair_distance", None)
+        atom_disp = self.get("atom_disp", 0.03)
         struct_unitcell = self.get("struct_unitcell", None)
         vis_static = self.get("vis_static", None)
 #         name = self.get("name", "DisplacedStructuresAdderTask")
@@ -77,6 +80,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         supercell_matrix = np.eye(3) * np.array(supercell_size) 
         struct_displaced = get_displaced_structures(
             structure=struct_unitcell,
+            atom_disp=atom_disp,
             supercell_matrix=supercell_matrix,
             yaml_fname="phonopy_disp.yaml",
             cutoff_pair_distance=cutoff_pair_distance,
