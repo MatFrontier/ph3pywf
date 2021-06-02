@@ -37,12 +37,15 @@ def wf_phono3py(structure,
     vasp_input_set_relax = c.get("vasp_input_set_relax", None)
     vasp_input_set_static = c.get("vasp_input_set_static", None)
     db_file = c.get("db_file", DB_FILE)
-    metadata = c.get("metadata", None)
+    metadata = c.get("metadata", {})
     spec = c.get("spec", None)
     is_reduced_test = c.get("is_reduced_test", False)
     user_incar_settings = c.get("USER_INCAR_SETTINGS", {})
     user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
+    
+    # store tag in metadata
+    metadata["label"] = tag
     
     # update vasp_input_set_relax
     vasp_input_set_relax = vasp_input_set_relax or MPRelaxSet(structure,
