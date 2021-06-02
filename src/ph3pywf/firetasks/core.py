@@ -174,6 +174,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         for p in docs_p:
             docs_disp.append(p)
         
+        docs_disp = sorted(docs_disp, key = lambda i: i["task_label"])
+        
         for d in docs_disp:
             forces = np.array(d["output"]["forces"])
             force_sets.append(forces)
