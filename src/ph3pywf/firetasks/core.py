@@ -45,7 +45,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
     required_params = ["tag", "db_file"]
     optional_params = ["supercell_size", 
                        "cutoff_pair_distance", 
-                       "atom_disp"
+                       "atom_disp", 
                        "struct_unitcell", 
                        "vis_static", 
 #                        "name", 
