@@ -42,6 +42,7 @@ def wf_phono3py(structure,
     spec = c.get("spec", None)
     is_reduced_test = c.get("is_reduced_test", False)
     user_incar_settings = c.get("USER_INCAR_SETTINGS", {})
+    user_incar_settings_static = c.get("USER_INCAR_SETTINGS_STATIC", {})
     user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
     
@@ -63,7 +64,7 @@ def wf_phono3py(structure,
     
     # update vasp_input_set_static
     vasp_input_set_static = vasp_input_set_static or MPStaticSet(structure,
-                                                                 user_incar_settings=user_incar_settings,
+                                                                 user_incar_settings=user_incar_settings_static,
                                                                  user_potcar_settings=user_potcar_settings,
                                                                  user_potcar_functional=user_potcar_functional,
                                                                 )
