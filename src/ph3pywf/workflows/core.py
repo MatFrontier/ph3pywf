@@ -74,7 +74,7 @@ def wf_phono3py(structure,
     # convert GetDisplacedStructuresFWs to FW and add to FW list
     parents = fws[0]
     
-    fw_name = "{}:{} DisplacedStructuresAdderTask".format(
+    fw_name = "{}-{} DisplacedStructuresAdderTask".format(
         structure.composition.reduced_formula if structure else "unknown", 
         tag, 
     )
