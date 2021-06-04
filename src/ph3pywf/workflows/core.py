@@ -48,6 +48,8 @@ def wf_phono3py(structure,
     
     # store tag in metadata
     metadata["label"] = tag
+    print(f"tag: {tag}")
+    print(f"\{task_label: \{$regex:"{tag}"\}\}")
     
     # update vasp_input_set_relax
     vasp_input_set_relax = vasp_input_set_relax or MPRelaxSet(structure,
