@@ -45,6 +45,7 @@ def wf_phono3py(structure,
     user_incar_settings_static = c.get("USER_INCAR_SETTINGS_STATIC", {})
     user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
+    primitive_matrix = c.get("primitive_matrix", None)
     
     # store tag in metadata
     metadata["label"] = tag
@@ -95,26 +96,32 @@ def wf_phono3py(structure,
     
     fws.append(fw)
     
-#     # post analysis 
-#     parents = fws[-1]
-#     fw_name = "{}:{} Phono3pyAnalysisToDb".format(
-#         structure.composition.reduced_formula if structure else "unknown", 
-#         tag, 
-#     )
-#     
-#     fw = Firework(
-#         Phono3pyAnalysisToDb(
-#             tag=tag, 
-#             db_file=db_file,
-#         ),
-#         name=fw_name, 
-#         parents=parents,
-#     )
-#     
-#     fws.append(fw)
+    # post analysis 
+    parents = fws[-1]
+    fw_name = "{}-{} Phono3pyAnalysisToDb".format(
+        structure.composition.reduced_formula if structure else "unknown", 
+        tag, 
+    )
+    
+    fw = Firework(
+        Phono3pyAnalysisToDb(
+            tag=tag, 
+            db_file=db_file,
+            t_min=t_min,
+            t_max=t_max,
+            t_step=t_step,
+            supercell_size=supercell_size,
+            primitive_matrix=primitive_matrix,
+#             metadata=metadata,
+        ),
+        name=fw_name, 
+        parents=parents,
+    )
+    
+    fws.append(fw)
     
     # create the workflow
-    wfname = "{}:{}".format(structure.composition.reduced_formula, name)
+    wfname = "{}-{}".format(structure.composition.reduced_formula, name)
     
     return Workflow(fws, name=wfname, metadata=metadata)
 

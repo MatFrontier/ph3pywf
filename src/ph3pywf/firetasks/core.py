@@ -149,6 +149,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                        "t_max",
                        "t_step",
                        "supercell_size", 
+                       "primitive_matrix",
                        "mesh",
                        "metadata"]
         
@@ -162,6 +163,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         t_max = self.get("t_max", 1001)
         t_step = self.get("t_step", 10)
         supercell_size = self.get("supercell_size", (2,2,2))
+        primitive_matrix = self.get("primitive_matrix", None)
         mesh = self.get("mesh", [11, 11, 11])
         ph3py_dict["metadata"] = self.get("metadata", {})
         ph3py_dict["metadata"].update({"task_label_tag": tag})
@@ -212,6 +214,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         supercell_matrix = np.eye(3) * np.array(supercell_size) 
         phono3py = Phono3py(unitcell=ph_unitcell,
                             supercell_matrix=supercell_matrix,
+                            primitive_matrix=primitive_matrix,
                             mesh=mesh,
                             log_level=1, # log_level=0 make phono3py quiet
                            )
