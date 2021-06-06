@@ -45,6 +45,9 @@ def wf_phono3py(structure,
     user_incar_settings_static = c.get("USER_INCAR_SETTINGS_STATIC", {})
     user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
+    t_min=c.get("t_min", None)
+    t_max=c.get("t_max", None)
+    t_step=c.get("t_step", None)
     primitive_matrix = c.get("primitive_matrix", None)
     
     # store tag in metadata
