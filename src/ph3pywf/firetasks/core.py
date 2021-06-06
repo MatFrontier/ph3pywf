@@ -181,7 +181,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             docs_disp.append(p)
         
         docs_disp = sorted(docs_disp, key = lambda i: i["task_label"])
-        
+        logger.info("PostAnalysis: Read {} docs".format(len(docs_disp)))
+        logger.info("PostAnalysis: Generating force sets")
         for d in docs_disp:
             forces = np.array(d["output"]["forces"])
             force_sets.append(forces)
@@ -193,13 +194,14 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                 "task_label": {"$regex": f"{tag} DisplacedStructuresAdderTask"},
             }
         )
-        
+        logger.info("PostAnalysis: Writing disp_fc3.yaml")
         with open("disp_fc3.yaml", "w") as outfile:
             yaml.dump(phonopy_disp_dict["yaml"], outfile, default_flow_style=False)
         
         disp_dataset = parse_disp_fc3_yaml(filename="disp_fc3.yaml")
         
         # generate FORCES_FC3
+        logger.info("PostAnalysis: Writing FORCES_FC3")
         write_FORCES_FC3(disp_dataset, force_sets, filename="FORCES_FC3")
         
         # prepare Phono3py object
@@ -222,9 +224,11 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # use run_thermal_conductivity()
         # which will read disp_fc3.yaml and FORCES_FC3
         # this operation will generate file kappa-*.hdf5
+        logger.info("PostAnalysis: Evaluating thermal conductivity")
         run_thermal_conductivity(phono3py, t_min, t_max, t_step)
         
         # parse kappa-*.hdf5
+        logger.info("PostAnalysis: Parsing kappa-*.hdf5")
         f = h5py.File("kappa-m{}{}{}.hdf5".format(*mesh))
         ph3py_dict["temperature"] = f["temperature"][:].tolist()
         ph3py_dict["kappa"] = f["kappa"][:].tolist()
