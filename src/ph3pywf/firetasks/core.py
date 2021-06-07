@@ -19,6 +19,7 @@ from atomate.utils.utils import get_logger
 from phono3py import Phono3py
 from pymatgen.io.phonopy import get_phonopy_structure
 import h5py
+from phono3py.file_IO import parse_disp_fc3_yaml, write_FORCES_FC3
 
 logger = get_logger(__name__)
 
