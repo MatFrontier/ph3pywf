@@ -169,10 +169,11 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         primitive_matrix = self.get("primitive_matrix", None)
         mesh = self.get("mesh", [11, 11, 11])
         ph3py_dict["metadata"] = self.get("metadata", {})
-        ph3py_dict["metadata"].update({"task_label_tag": tag})
+        ph3py_dict["task_label"] = tag
         
         # get force_sets from the disp-* runs in DB
         force_sets = []
+        logger.info("PostAnalysis: Extracting docs from DB")
         mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
         docs_p = mmdb.collection.find(
             {
@@ -182,14 +183,14 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         docs_disp = []
         for p in docs_p:
             docs_disp.append(p)
-        
+
         docs_disp = sorted(docs_disp, key = lambda i: i["task_label"])
         logger.info("PostAnalysis: Read {} docs".format(len(docs_disp)))
         logger.info("PostAnalysis: Generating force sets")
         for d in docs_disp:
             forces = np.array(d["output"]["forces"])
             force_sets.append(forces)
-        
+
         # get disp_fc3.yaml from DB
         # and get disp_dataset from disp_fc3.yaml
         phonopy_disp_dict = mmdb.collection.find_one(
@@ -200,20 +201,20 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         logger.info("PostAnalysis: Writing disp_fc3.yaml")
         with open("disp_fc3.yaml", "w") as outfile:
             yaml.dump(phonopy_disp_dict["yaml"], outfile, default_flow_style=False)
-        
+
         disp_dataset = parse_disp_fc3_yaml(filename="disp_fc3.yaml")
-        
+
         # generate FORCES_FC3
         logger.info("PostAnalysis: Writing FORCES_FC3")
         write_FORCES_FC3(disp_dataset, force_sets, filename="FORCES_FC3")
-        
+
         # prepare Phono3py object
         doc_opt = mmdb.collection.find_one(
             {
                 "task_label": {"$regex": f"{tag} structure optimization"},
             }
         )
-        
+
         unitcell = Structure.from_dict(doc_opt["calcs_reversed"][0]["output"]["structure"])
         ph_unitcell = get_phonopy_structure(unitcell)
         supercell_matrix = np.eye(3) * np.array(supercell_size) 
@@ -223,59 +224,73 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                             mesh=mesh,
                             log_level=1, # log_level=0 make phono3py quiet
                            )
-        
+
         # use run_thermal_conductivity()
         # which will read disp_fc3.yaml and FORCES_FC3
         # this operation will generate file kappa-*.hdf5
         logger.info("PostAnalysis: Evaluating thermal conductivity")
+        if "kappa-m{}{}{}.hdf5".format(*mesh) in os.listdir(os.getcwd()):
+            logger.info("PostAnalysis: Deleting previous kappa-m{}{}{}.hdf5 file".format(*mesh))
+            os.remove("kappa-m{}{}{}.hdf5".format(*mesh))
         run_thermal_conductivity(phono3py, t_min, t_max, t_step)
-        
+
 #         # write band.conf
 #         elements = [elem.symbol for elem in unitcell.composition.elements]
 #         with open("band.conf", "w") as outfile:
 #             outfile.write("ATOM_NAME = {}".format(" ".join(elements)))
 #             outfile.write("DIM = {}".format(" ".join(map(str,supercell_size))))
 #             outfile.write("BAND = auto")
-        
+
         # create phonopy FORCE_SETS
+        logger.info("PostAnalysis: Creating FORCE_SETS")
         create_FORCE_SETS_from_FORCES_FC3(forces_filename="FORCES_FC3", 
                                           disp_filename="disp_fc3.yaml",
                                          )
-        
-        # get FORCE_CONSTANTS
+
+        # create FORCE_CONSTANTS
+        logger.info("PostAnalysis: Creating FORCE_CONSTANTS")
         phonon = phonopy.load(supercell_matrix=supercell_matrix,
                               primitive_matrix=primitive_matrix,
                               unitcell_filename="POSCAR-unitcell",
                               force_sets_filename="FORCE_SETS")
         write_FORCE_CONSTANTS(phonon.get_force_constants(),
                               filename="FORCE_CONSTANTS")
-        
+
         # save phonon dispersion band structure object
+        logger.info("PostAnalysis: Evaluating phonon dispersion band structure")
         force_constants = parse_FORCE_CONSTANTS()
-        bs = get_phonon_band_structure_symm_line_from_fc(struct_unitcell, 
+        bs = get_phonon_band_structure_symm_line_from_fc(unitcell, 
                                                          supercell_matrix, 
                                                          force_constants, 
                                                          primitive_matrix=primitive_matrix)
         ph3py_dict["band_structure"] = bs.as_dict()
 #         plotter = PhononBSPlotter(bs)
 #         plotter.save_plot("plot.png","png")
-        
+
         # parse kappa-*.hdf5
         logger.info("PostAnalysis: Parsing kappa-*.hdf5")
         f = h5py.File("kappa-m{}{}{}.hdf5".format(*mesh))
         ph3py_dict["temperature"] = f["temperature"][:].tolist()
         ph3py_dict["kappa"] = f["kappa"][:].tolist()
         ph3py_dict["mesh"] = f["mesh"][:].tolist()
-        
+
         # add more informations in ph3py_dict
         ph3py_dict["structure"] = unitcell.as_dict()
         ph3py_dict["formula_pretty"] = unitcell.composition.reduced_formula
         ph3py_dict["success"] = True
         ph3py_dict["supercell_size"] = supercell_size
-        
+
+        calc_dir = os.getcwd()
+        fullpath = os.path.abspath(calc_dir)
+        ph3py_dict["dir_name"] = fullpath
+
         # store results in ph3py_tasks collection
         coll = mmdb.db["ph3py_tasks"]
-        coll.insert_one(ph3py_dict)
+        # if coll.find_one({"task_label": {"$regex": f"{tag}"}}) is not None:
+        ph3py_dict["last_updated"] = datetime.utcnow()
+        coll.update_one(
+            {"task_label": {"$regex": f"{tag}"}}, {"$set": ph3py_dict}, upsert=True
+        )
         
         
         
