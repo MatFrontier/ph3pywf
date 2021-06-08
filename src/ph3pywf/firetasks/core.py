@@ -7,7 +7,7 @@ from datetime import datetime
 from fireworks.core.firework import FWAction, Firework, FiretaskBase, Workflow
 from atomate.vasp.database import VaspCalcDb
 from pymatgen.core import Structure
-from ph3pywf.utils.ph3py import get_displaced_structures, run_thermal_conductivity
+from ph3pywf.utils.ph3py import get_displaced_structures, run_thermal_conductivity, create_FORCE_SETS_from_FORCES_FC3
 from fireworks import explicit_serialize
 from atomate.utils.utils import env_chk
 import numpy as np
@@ -17,9 +17,11 @@ import yaml
 import os
 from atomate.utils.utils import get_logger
 from phono3py import Phono3py
-from pymatgen.io.phonopy import get_phonopy_structure
+from pymatgen.io.phonopy import get_phonopy_structure, get_phonon_band_structure_symm_line_from_fc
 import h5py
 from phono3py.file_IO import parse_disp_fc3_yaml, write_FORCES_FC3
+from phonopy.file_IO import parse_FORCE_CONSTANTS, write_FORCE_CONSTANTS
+import phonopy
 
 logger = get_logger(__name__)
 
@@ -227,6 +229,36 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # this operation will generate file kappa-*.hdf5
         logger.info("PostAnalysis: Evaluating thermal conductivity")
         run_thermal_conductivity(phono3py, t_min, t_max, t_step)
+        
+#         # write band.conf
+#         elements = [elem.symbol for elem in unitcell.composition.elements]
+#         with open("band.conf", "w") as outfile:
+#             outfile.write("ATOM_NAME = {}".format(" ".join(elements)))
+#             outfile.write("DIM = {}".format(" ".join(map(str,supercell_size))))
+#             outfile.write("BAND = auto")
+        
+        # create phonopy FORCE_SETS
+        create_FORCE_SETS_from_FORCES_FC3(forces_filename="FORCES_FC3", 
+                                          disp_filename="disp_fc3.yaml",
+                                         )
+        
+        # get FORCE_CONSTANTS
+        phonon = phonopy.load(supercell_matrix=supercell_matrix,
+                              primitive_matrix=primitive_matrix,
+                              unitcell_filename="POSCAR-unitcell",
+                              force_sets_filename="FORCE_SETS")
+        write_FORCE_CONSTANTS(phonon.get_force_constants(),
+                              filename="FORCE_CONSTANTS")
+        
+        # save phonon dispersion band structure object
+        force_constants = parse_FORCE_CONSTANTS()
+        bs = get_phonon_band_structure_symm_line_from_fc(struct_unitcell, 
+                                                         supercell_matrix, 
+                                                         force_constants, 
+                                                         primitive_matrix=primitive_matrix)
+        ph3py_dict["band_structure"] = bs.as_dict()
+#         plotter = PhononBSPlotter(bs)
+#         plotter.save_plot("plot.png","png")
         
         # parse kappa-*.hdf5
         logger.info("PostAnalysis: Parsing kappa-*.hdf5")

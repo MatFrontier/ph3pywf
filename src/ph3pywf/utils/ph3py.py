@@ -116,3 +116,25 @@ def run_thermal_conductivity(phono3py, t_min=0, t_max=1001, t_step=10):
     cond_rta = phono3py.get_thermal_conductivity()
     
     return cond_rta
+
+
+from phonopy.cui.phonopy_script import file_exists
+from phono3py.file_IO import parse_disp_fc2_yaml, parse_FORCES_FC2, get_length_of_first_line
+from phonopy.file_IO import write_FORCE_SETS
+
+def create_FORCE_SETS_from_FORCES_FC3(forces_filename="FORCES_FC3", disp_filename="disp_fc3.yaml", log_level=1):
+    with open(forces_filename, 'r') as f:
+        len_first_line = get_length_of_first_line(f)
+
+    if len_first_line == 3:
+        file_exists(disp_filename, log_level)
+        disp_dataset = parse_disp_fc2_yaml(filename=disp_filename)
+        file_exists(forces_filename, log_level)
+        parse_FORCES_FC2(disp_dataset, filename=forces_filename)
+        if log_level:
+            print("Displacement dataset was read from \"%s\"."
+                  % disp_filename)
+        write_FORCE_SETS(disp_dataset)
+
+        if log_level:
+            print("FORCE_SETS has been created.")
