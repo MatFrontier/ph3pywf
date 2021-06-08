@@ -251,7 +251,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         logger.info("PostAnalysis: Creating FORCE_CONSTANTS")
         phonon = phonopy.load(supercell_matrix=supercell_matrix,
                               primitive_matrix=primitive_matrix,
-                              unitcell_filename="POSCAR-unitcell",
+                              unitcell=ph_unitcell,
                               force_sets_filename="FORCE_SETS")
         write_FORCE_CONSTANTS(phonon.get_force_constants(),
                               filename="FORCE_CONSTANTS")
