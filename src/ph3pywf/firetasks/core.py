@@ -17,7 +17,7 @@ import yaml
 import os
 from atomate.utils.utils import get_logger
 from phono3py import Phono3py
-from pymatgen.io.phonopy import get_phonopy_structure, get_phonon_band_structure_symm_line_from_fc
+from pymatgen.io.phonopy import get_phonopy_structure, get_phonon_band_structure_symm_line_from_fc, get_phonon_dos_from_fc
 import h5py
 from phono3py.file_IO import parse_disp_fc3_yaml, write_FORCES_FC3
 from phonopy.file_IO import parse_FORCE_CONSTANTS, write_FORCE_CONSTANTS
@@ -266,6 +266,15 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         ph3py_dict["band_structure"] = bs.as_dict()
 #         plotter = PhononBSPlotter(bs)
 #         plotter.save_plot("plot.png","png")
+        
+        # parse phonon DOS
+        logger.info("PostAnalysis: Parsing phonon DOS")
+        dos = get_phonon_dos_from_fc(unitcell, 
+                                     supercell_matrix, 
+                                     force_constants, 
+                                     primitive_matrix=primitive_matrix)
+        
+        ph3py_dict["dos"] = dos.as_dict()
 
         # parse kappa-*.hdf5
         logger.info("PostAnalysis: Parsing kappa-*.hdf5")
