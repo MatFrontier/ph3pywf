@@ -279,9 +279,12 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # parse kappa-*.hdf5
         logger.info("PostAnalysis: Parsing kappa-*.hdf5")
         f = h5py.File("kappa-m{}{}{}.hdf5".format(*mesh))
-        ph3py_dict["temperature"] = f["temperature"][:].tolist()
-        ph3py_dict["kappa"] = f["kappa"][:].tolist()
-        ph3py_dict["mesh"] = f["mesh"][:].tolist()
+        for item in list(f):
+            logger.info("PostAnalysis: Reading property: {}".format(item))
+            if item == "kappa_unit_conversion":
+                ph3py_dict[item] = f[item][()]
+                continue
+            ph3py_dict[item] = f[item][:].tolist()
 
         # add more informations in ph3py_dict
         ph3py_dict["structure"] = unitcell.as_dict()
