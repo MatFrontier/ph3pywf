@@ -233,13 +233,11 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             logger.info("PostAnalysis: Deleting previous kappa-m{}{}{}.hdf5 file".format(*mesh))
             os.remove("kappa-m{}{}{}.hdf5".format(*mesh))
         run_thermal_conductivity(phono3py, t_min, t_max, t_step)
-
-#         # write band.conf
-#         elements = [elem.symbol for elem in unitcell.composition.elements]
-#         with open("band.conf", "w") as outfile:
-#             outfile.write("ATOM_NAME = {}".format(" ".join(elements)))
-#             outfile.write("DIM = {}".format(" ".join(map(str,supercell_size))))
-#             outfile.write("BAND = auto")
+        
+        # save fc2 and fc3
+        logger.info("PostAnalysis: Saving fc2 and fc3")
+        ph3py_dict["fc3"] = phono3py.fc3
+        ph3py_dict["fc2"] = phono3py.fc2
 
         # create phonopy FORCE_SETS
         logger.info("PostAnalysis: Creating FORCE_SETS")
