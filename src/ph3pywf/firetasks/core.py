@@ -38,12 +38,11 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         
     Optional params: 
         supercell_size (tuple): (2, 2, 2) by default. 
-        cutoff_pair_distance (float)
-        atom_disp (float)
-        struct_unitcell (Structure): optimized unitcell structure
-        vis_static (VaspInputSet)
-        name (str)
-        is_reduced_test (bool): if switch on, there'll be only a few staticFW generated
+        cutoff_pair_distance (float): set to reduce the number of supercells with displacements to be calculated.
+        atom_disp (float): atomic displacement. Default is 0.01 Angstrom.
+        struct_unitcell (Structure): optimized unitcell structure. 
+        vis_static (VaspInputSet): input set for static VASP jobs.
+        is_reduced_test (bool): if set to True, there'll be only a few staticFW generated.
     """
     required_params = ["tag", "db_file"]
     optional_params = ["supercell_size", 
@@ -51,7 +50,6 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                        "atom_disp", 
                        "struct_unitcell", 
                        "vis_static", 
-#                        "name", 
                        "is_reduced_test"]
         
     def run_task(self, fw_spec):
@@ -144,7 +142,15 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         db_file (str): path to file containing the database credentials. Supports env_chk.
         
     Optional params: 
-        
+        t_min (float): min temperature (in K)
+        t_max (float): max temperature (in K)
+        t_step (float): temperature step (in K)
+        supercell_size (tuple)
+        primitive_matrix (ndarray): transformation matrix to primitive cell from unit cell.
+            Primitive matrix with respect to unit cell.
+            shape=(3, 3), dtype='double', order='C'
+        mesh (list): sampling mesh numbers in reciprocal space.
+        metadata (dict): meta data.
     
     """
     required_params = ["tag", "db_file"]

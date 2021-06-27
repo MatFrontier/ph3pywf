@@ -20,11 +20,23 @@ def wf_phono3py(structure,
     Returns Phono3py calculation workflow.
     Args:
         structure (Structure): input structure.
-        supercell_size (tuple): (2, 2, 2) by default. 
-        cutoff_pair_distance (float)
-        vasp_input_set_relax (VaspInputSet)
-        vasp_input_set_static (VaspInputSet)
-        tag (str): unique label to identify contents related to this WF.
+        c (dict): workflow config dict:
+            tag (str): unique label to identify contents related to this WF.
+            supercell_size (tuple): (2, 2, 2) by default. 
+            cutoff_pair_distance (float): set to reduce the number of supercells with displacements to be calculated.
+            atom_disp (float): atomic displacement. Default is 0.01 Angstrom.
+            vasp_input_set_relax (VaspInputSet): input set for optimization VASP job. 
+            vasp_input_set_static (VaspInputSet): input set for static VASP jobs.
+            db_file (str): path to the db file.
+            metadata (dict): meta data.
+            is_reduced_test (bool): if set to True, there'll be only a few staticFW generated.
+            USER_*_SETTINGS (dict): VASP input parameters to override default VaspInputSet settings.
+            t_min (float): min temperature (in K)
+            t_max (float): max temperature (in K)
+            t_step (float): temperature step (in K)
+            primitive_matrix (ndarray): transformation matrix to primitive cell from unit cell.
+                Primitive matrix with respect to unit cell.
+                shape=(3, 3), dtype='double', order='C'
     Returns:
         Workflow
     """
@@ -38,7 +50,6 @@ def wf_phono3py(structure,
     vasp_input_set_static = c.get("vasp_input_set_static", None)
     db_file = c.get("db_file", DB_FILE)
     metadata = c.get("metadata", {})
-    spec = c.get("spec", None)
     is_reduced_test = c.get("is_reduced_test", False)
     user_incar_settings = c.get("USER_INCAR_SETTINGS", {})
     user_incar_settings_static = c.get("USER_INCAR_SETTINGS_STATIC", {})
