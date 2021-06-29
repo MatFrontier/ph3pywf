@@ -151,6 +151,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             shape=(3, 3), dtype='double', order='C'
         mesh (list): sampling mesh numbers in reciprocal space.
         metadata (dict): meta data.
+        user_settings (dict): c
     
     """
     required_params = ["tag", "db_file"]
@@ -160,7 +161,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                        "supercell_size", 
                        "primitive_matrix",
                        "mesh",
-                       "metadata"]
+                       "metadata",
+                       "user_settings"]
         
     def run_task(self, fw_spec):
         # initialize doc
@@ -175,6 +177,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         primitive_matrix = self.get("primitive_matrix", None)
         mesh = self.get("mesh", [11, 11, 11])
         ph3py_dict["metadata"] = self.get("metadata", {})
+        ph3py_dict["user_settings"] = self.get("user_settings", {})
         ph3py_dict["task_label"] = tag
         
         # get force_sets from the disp-* runs in DB
