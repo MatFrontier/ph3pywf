@@ -245,8 +245,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         
         # save fc2 and fc3
         logger.info("PostAnalysis: Saving fc2 and fc3")
-        ph3py_dict["fc3"] = phono3py.fc3
-        ph3py_dict["fc2"] = phono3py.fc2
+        ph3py_dict["fc3"] = phono3py.fc3.tolist()
+        ph3py_dict["fc2"] = phono3py.fc2.tolist()
 
         # create phonopy FORCE_SETS
         logger.info("PostAnalysis: Creating FORCE_SETS")
