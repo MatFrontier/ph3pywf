@@ -243,10 +243,10 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             os.remove("kappa-m{}{}{}.hdf5".format(*mesh))
         run_thermal_conductivity(phono3py, t_min, t_max, t_step)
         
-        # save fc2 and fc3
-        logger.info("PostAnalysis: Saving fc2 and fc3")
-        ph3py_dict["fc3"] = phono3py.fc3.tolist()
-        ph3py_dict["fc2"] = phono3py.fc2.tolist()
+#         # save fc2 and fc3
+#         logger.info("PostAnalysis: Saving fc2 and fc3")
+#         ph3py_dict["fc3"] = phono3py.fc3.tolist()
+#         ph3py_dict["fc2"] = phono3py.fc2.tolist()
 
         # create phonopy FORCE_SETS
         logger.info("PostAnalysis: Creating FORCE_SETS")

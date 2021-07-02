@@ -88,6 +88,8 @@ from phono3py.file_IO import (parse_disp_fc3_yaml,
                               parse_disp_fc2_yaml,
                               parse_FORCES_FC2,
                               parse_FORCES_FC3,
+                              write_fc3_to_hdf5,
+                              write_fc2_to_hdf5,
                               read_fc3_from_hdf5,
                               read_fc2_from_hdf5)
 
@@ -99,9 +101,11 @@ def run_thermal_conductivity(phono3py, t_min=0, t_max=1001, t_step=10):
                          displacement_dataset=disp_dataset,
                          symmetrize_fc3r=True)
     print("INFO: phono3py.produce_fc3: symmetrize_fc3r=True")
-    fc3 = phono3py.get_fc3()
-    fc2 = phono3py.get_fc2()
-
+    fc3 = phono3py.fc3
+    fc2 = phono3py.fc2
+    write_fc3_to_hdf5(fc3)
+    write_fc2_to_hdf5(fc2)
+    
     show_drift_fc3(fc3)
     show_drift_force_constants(fc2, name='fc2')
     
