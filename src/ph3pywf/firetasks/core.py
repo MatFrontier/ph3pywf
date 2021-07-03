@@ -15,6 +15,7 @@ from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
 import yaml
 import os
+import sys
 from atomate.utils.utils import get_logger
 from phono3py import Phono3py
 from pymatgen.io.phonopy import get_phonopy_structure, get_phonon_band_structure_symm_line_from_fc, get_phonon_dos_from_fc
