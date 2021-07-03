@@ -271,6 +271,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                                                          force_constants, 
                                                          primitive_matrix=primitive_matrix)
         ph3py_dict["band_structure"] = bs.as_dict()
+        logger.info("PostAnalysis: Current document size = {}".format(sys.getsizeof(ph3py_dict)))
 #         plotter = PhononBSPlotter(bs)
 #         plotter.save_plot("plot.png","png")
         
@@ -282,6 +283,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                                      primitive_matrix=primitive_matrix)
         
         ph3py_dict["dos"] = dos.as_dict()
+        logger.info("PostAnalysis: Current document size = {}".format(sys.getsizeof(ph3py_dict)))
 
         # parse kappa-*.hdf5
         logger.info("PostAnalysis: Parsing kappa-*.hdf5")
@@ -292,13 +294,16 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                 ph3py_dict[item] = f[item][()]
                 continue
             ph3py_dict[item] = f[item][:].tolist()
-
+            logger.info("PostAnalysis: Current document size = {}".format(sys.getsizeof(ph3py_dict)))
+        
+        
         # add more informations in ph3py_dict
         ph3py_dict["structure"] = unitcell.as_dict()
         ph3py_dict["formula_pretty"] = unitcell.composition.reduced_formula
         ph3py_dict["success"] = True
         ph3py_dict["supercell_size"] = supercell_size
-
+        logger.info("PostAnalysis: Current document size = {}".format(sys.getsizeof(ph3py_dict)))
+        
         calc_dir = os.getcwd()
         fullpath = os.path.abspath(calc_dir)
         ph3py_dict["dir_name"] = fullpath
