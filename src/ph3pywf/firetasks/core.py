@@ -272,7 +272,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                                                          force_constants, 
                                                          primitive_matrix=primitive_matrix)
         ph3py_dict["band_structure"] = bs.as_dict()
-        logger.info("PostAnalysis: Current document size = {}".format(sys.getsizeof(ph3py_dict)))
+        with open("band_structure.yaml", "w") as outfile: # FOR TESTING
+            yaml.dump(ph3py_dict["band_structure"], outfile, default_flow_style=False) # FOR TESTING
 #         plotter = PhononBSPlotter(bs)
 #         plotter.save_plot("plot.png","png")
         
@@ -284,7 +285,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                                      primitive_matrix=primitive_matrix)
         
         ph3py_dict["dos"] = dos.as_dict()
-        logger.info("PostAnalysis: Current document size = {}".format(sys.getsizeof(ph3py_dict)))
+        with open("dos.yaml", "w") as outfile: # FOR TESTING
+            yaml.dump(ph3py_dict["dos"], outfile, default_flow_style=False) # FOR TESTING
 
         # parse kappa-*.hdf5
         logger.info("PostAnalysis: Parsing kappa-*.hdf5")
@@ -295,7 +297,6 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                 ph3py_dict[item] = f[item][()]
                 continue
             ph3py_dict[item] = f[item][:].tolist()
-            logger.info("PostAnalysis: Current document size = {}".format(sys.getsizeof(ph3py_dict)))
         
         
         # add more informations in ph3py_dict
@@ -303,7 +304,6 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         ph3py_dict["formula_pretty"] = unitcell.composition.reduced_formula
         ph3py_dict["success"] = True
         ph3py_dict["supercell_size"] = supercell_size
-        logger.info("PostAnalysis: Current document size = {}".format(sys.getsizeof(ph3py_dict)))
         
         calc_dir = os.getcwd()
         fullpath = os.path.abspath(calc_dir)
@@ -313,6 +313,10 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         coll = mmdb.db["ph3py_tasks"]
         # if coll.find_one({"task_label": {"$regex": f"{tag}"}}) is not None:
         ph3py_dict["last_updated"] = datetime.utcnow()
+        
+        with open("ph3py_dict.yaml", "w") as outfile: # FOR TESTING
+            yaml.dump(ph3py_dict, outfile, default_flow_style=False) # FOR TESTING
+            
         coll.update_one(
             {"task_label": {"$regex": f"{tag}"}}, {"$set": ph3py_dict}, upsert=True
         )
