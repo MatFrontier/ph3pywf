@@ -296,6 +296,9 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             if item == "kappa_unit_conversion":
                 ph3py_dict[item] = f[item][()]
                 continue
+            if item == "mode_kappa": # skip mode_kappa to reduce size of document
+                logger.info("PostAnalysis: Skipping property: mode_kappa")
+                continue
             ph3py_dict[item] = f[item][:].tolist()
         
         
