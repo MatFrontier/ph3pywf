@@ -33,10 +33,17 @@ except ImportError:
 from pymatgen.io.phonopy import get_phonopy_structure, get_pmg_structure
 
 @requires(Phono3py, "phono3py not installed!")
-def get_displaced_structures(structure, atom_disp=0.03, supercell_matrix=None, yaml_fname=None, **kwargs):
+def get_displaced_structures(structure, 
+                             atom_disp=0.03, 
+                             supercell_matrix_fc3=None, 
+                             supercell_matrix_fc2=None,
+                             yaml_fname_fc3=None, 
+                             yaml_fname_fc2=None, 
+                             **kwargs):
     """
     Modified based on pymatgen.io.phonopy.get_displaced_structures()
     Replaced all phonopy features with phono3py
+    supercell_matrix_fc2: for fc2 calculation
     """
 
     cutoff_pair_distance = kwargs.get("cutoff_pair_distance", None)
@@ -45,37 +52,67 @@ def get_displaced_structures(structure, atom_disp=0.03, supercell_matrix=None, y
 
     ph_structure = get_phonopy_structure(structure)
 
-    if supercell_matrix is None:
-        supercell_matrix = np.eye(3) * np.array((2, 2, 2))
+    if supercell_matrix_fc3 is None:
+        supercell_matrix_fc3 = np.eye(3) * np.array((2, 2, 2))
 
-    phonon = Phono3py(unitcell=ph_structure, supercell_matrix=supercell_matrix)
+    phonon = Phono3py(
+        unitcell=ph_structure, 
+        supercell_matrix=supercell_matrix_fc3,
+        phonon_supercell_matrix=supercell_matrix_fc2,
+    )
+    
     phonon.generate_displacements(
         distance=atom_disp,
         cutoff_pair_distance=cutoff_pair_distance,
         is_plusminus=is_plusminus,
         is_diagonal=is_diagonal,
     )
+    
 
-    if yaml_fname is not None:
+    
+    if yaml_fname_fc3 is not None:
         dataset = phonon.dataset
         write_disp_fc3_yaml(
             dataset=dataset,
-            supercell=phonon.get_supercell(),
-            filename=yaml_fname,
+            supercell=phonon.supercell,
+            filename=yaml_fname_fc3,
         )
 
     # Supercell structures with displacement
-    disp_supercells = phonon.get_supercells_with_displacements()
+    disp_supercells_fc3 = phonon.get_supercells_with_displacements()
     # Perfect supercell structure
-    init_supercell = phonon.get_supercell()
+    init_supercell = phonon.supercell
     # Structure list to be returned
-    structure_list = [get_pmg_structure(init_supercell)]
+    structure_list_fc3 = [get_pmg_structure(init_supercell)]
 
-    for c in disp_supercells:
+    for c in disp_supercells_fc3:
         if c is not None:
-            structure_list.append(get_pmg_structure(c))
+            structure_list_fc3.append(get_pmg_structure(c))
+            
+    # For 2nd order (fc2)
+    structure_list_fc2 = []
+    if supercell_matrix_fc2 is not None:
+        
+        phonon.generate_fc2_displacements(
+            distance=atom_disp,
+            is_plusminus=is_plusminus,
+            is_diagonal=is_diagonal,
+        )
+        
+        if yaml_fname_fc2 is not None:
+            dataset = phonon.dataset
+            write_disp_fc2_yaml(
+                dataset=dataset,
+                supercell=phonon.phonon_supercell,
+                filename=yaml_fname_fc2,
+            )
+            
+        disp_supercells_fc2 = phonon.get_phonon_supercells_with_displacements()
+        for c in disp_supercells_fc2:
+            if c is not None:
+                structure_list_fc2.append(get_pmg_structure(c))
 
-    return structure_list
+    return structure_list_fc3, structure_list_fc2
 
 
 from phonopy.interface.vasp import read_vasp
@@ -126,7 +163,7 @@ from phonopy.cui.phonopy_script import file_exists
 from phono3py.file_IO import parse_disp_fc2_yaml, parse_FORCES_FC2, get_length_of_first_line
 from phonopy.file_IO import write_FORCE_SETS
 
-def create_FORCE_SETS_from_FORCES_FC3(forces_filename="FORCES_FC3", disp_filename="disp_fc3.yaml", log_level=1):
+def create_FORCE_SETS_from_FORCES_FCx(forces_filename="FORCES_FC3", disp_filename="disp_fc3.yaml", log_level=1):
     with open(forces_filename, 'r') as f:
         len_first_line = get_length_of_first_line(f)
 
@@ -142,3 +179,4 @@ def create_FORCE_SETS_from_FORCES_FC3(forces_filename="FORCES_FC3", disp_filenam
 
         if log_level:
             print("FORCE_SETS has been created.")
+
