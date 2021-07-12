@@ -53,6 +53,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                        "atom_disp", 
                        "struct_unitcell", 
                        "vis_static", 
+                       "primitive_matrix",
                        "is_reduced_test"]
         
     def run_task(self, fw_spec):
@@ -64,6 +65,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         atom_disp = self.get("atom_disp", 0.03)
         struct_unitcell = self.get("struct_unitcell", None)
         vis_static = self.get("vis_static", None)
+        primitive_matrix = self.get("primitive_matrix", None)
 #         name = self.get("name", "DisplacedStructuresAdderTask")
         is_reduced_test = self.get("is_reduced_test", False)
         
@@ -96,6 +98,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             yaml_fname_fc3="disp_fc3.yaml",
             yaml_fname_fc2="disp_fc2.yaml",
             cutoff_pair_distance=cutoff_pair_distance,
+            primitive_matrix=primitive_matrix,
         )
         
         # save disp_fc3.yaml to DB collection
@@ -296,8 +299,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             supercell_matrix_fc2 = supercell_matrix_fc3
 
         phono3py = Phono3py(unitcell=ph_unitcell,
-                            supercell_matrix_fc3=supercell_matrix_fc3,
-                            supercell_matrix_fc2=supercell_matrix_fc2,
+                            supercell_matrix=supercell_matrix_fc3,
+                            phonon_supercell_matrix=supercell_matrix_fc2,
                             primitive_matrix=primitive_matrix,
                             mesh=mesh,
                             log_level=1, # log_level=0 make phono3py quiet

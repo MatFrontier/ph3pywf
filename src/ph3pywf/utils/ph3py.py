@@ -49,6 +49,7 @@ def get_displaced_structures(structure,
     cutoff_pair_distance = kwargs.get("cutoff_pair_distance", None)
     is_plusminus = kwargs.get("is_plusminus", "auto")
     is_diagonal = kwargs.get("is_diagonal", True)
+    primitive_matrix = kwargs.get("primitive_matrix", None),
 
     ph_structure = get_phonopy_structure(structure)
 
