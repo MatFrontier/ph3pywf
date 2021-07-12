@@ -81,7 +81,7 @@ def get_displaced_structures(structure,
     # Original supercell structure
     init_supercell_fc3 = phonon.supercell
     # Structure list to be returned
-    structure_list_fc3 = [get_pmg_structure(init_supercell)]
+    structure_list_fc3 = [get_pmg_structure(init_supercell_fc3)]
 
     for c in disp_supercells_fc3:
         if c is not None:
