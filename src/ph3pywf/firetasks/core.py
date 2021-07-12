@@ -101,10 +101,17 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             primitive_matrix=primitive_matrix,
         )
         
-        # save disp_fc3.yaml to DB collection
+        # initialize document to be saved in DB
         phonopy_disp_dict = {}
+        
+        # save disp_fc3.yaml in DB collection
         with open("disp_fc3.yaml", "r") as fh:
-            phonopy_disp_dict["yaml"] = yaml.load(fh, Loader=yaml.SafeLoader)
+            phonopy_disp_dict["yaml_fc3"] = yaml.load(fh, Loader=yaml.SafeLoader)
+        
+        # save disp_fc2.yaml in DB collection
+        if supercell_size_fc2 is not None:
+            with open("disp_fc2.yaml", "r") as fh:
+                phonopy_disp_dict["yaml_fc2"] = yaml.load(fh, Loader=yaml.SafeLoader)
         
         calc_dir = os.getcwd()
         fullpath = os.path.abspath(calc_dir)
@@ -262,7 +269,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         )
         logger.info("PostAnalysis: Writing disp_fc3.yaml")
         with open("disp_fc3.yaml", "w") as outfile:
-            yaml.dump(phonopy_disp_dict["yaml"], outfile, default_flow_style=False)
+            yaml.dump(phonopy_disp_dict["yaml_fc3"], outfile, default_flow_style=False)
 
         disp_dataset = parse_disp_fc3_yaml(filename="disp_fc3.yaml")
 
@@ -275,7 +282,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         if supercell_size_fc2 is not None:
             logger.info("PostAnalysis: Writing disp_fc2.yaml")
             with open("disp_fc2.yaml", "w") as outfile:
-                yaml.dump(phonopy_disp_dict["yaml"], outfile, default_flow_style=False)
+                yaml.dump(phonopy_disp_dict["yaml_fc2"], outfile, default_flow_style=False)
             
             disp_dataset_fc2 = parse_disp_fc2_yaml(filename="disp_fc2.yaml")
             
