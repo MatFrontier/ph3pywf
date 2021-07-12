@@ -150,6 +150,8 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         # append StaticFWs for fc2
         if supercell_size_fc2 is not None:
             for i, structure in enumerate(struct_displaced_fc2):
+                if i==0: 
+                    continue # Skip undeformed supercell
                 disp_id = f"{i:05d}"
                 vis_dict["structure"] = structure.as_dict() # update vis_static
                 vis_static = vis_static.from_dict(vis_dict) # update vis_static

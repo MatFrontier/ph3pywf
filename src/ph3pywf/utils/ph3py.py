@@ -69,20 +69,17 @@ def get_displaced_structures(structure,
         is_diagonal=is_diagonal,
     )
     
-
-    
     if yaml_fname_fc3 is not None:
-        dataset = phonon.dataset
         write_disp_fc3_yaml(
-            dataset=dataset,
+            dataset=phonon.dataset,
             supercell=phonon.supercell,
             filename=yaml_fname_fc3,
         )
 
     # Supercell structures with displacement
     disp_supercells_fc3 = phonon.get_supercells_with_displacements()
-    # Perfect supercell structure
-    init_supercell = phonon.supercell
+    # Original supercell structure
+    init_supercell_fc3 = phonon.supercell
     # Structure list to be returned
     structure_list_fc3 = [get_pmg_structure(init_supercell)]
 
@@ -91,7 +88,11 @@ def get_displaced_structures(structure,
             structure_list_fc3.append(get_pmg_structure(c))
             
     # For 2nd order (fc2)
-    structure_list_fc2 = []
+    # Original supercell structure
+    init_supercell_fc2 = phonon.phonon_supercell
+    # Structure list to be returned
+    structure_list_fc2 = [get_pmg_structure(init_supercell_fc2)]
+    
     if supercell_matrix_fc2 is not None:
         
         phonon.generate_fc2_displacements(
@@ -101,9 +102,8 @@ def get_displaced_structures(structure,
         )
         
         if yaml_fname_fc2 is not None:
-            dataset = phonon.dataset
             write_disp_fc2_yaml(
-                dataset=dataset,
+                dataset=phonon.phonon_dataset,
                 supercell=phonon.phonon_supercell,
                 filename=yaml_fname_fc2,
             )
