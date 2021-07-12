@@ -384,6 +384,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         ph3py_dict["formula_pretty"] = unitcell.composition.reduced_formula
         ph3py_dict["success"] = True
         ph3py_dict["supercell_size_fc3"] = supercell_size_fc3
+        ph3py_dict["supercell_size_fc2"] = supercell_size_fc2
         
         calc_dir = os.getcwd()
         fullpath = os.path.abspath(calc_dir)
