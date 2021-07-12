@@ -83,7 +83,11 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         
         # generate displaced structures from optimized structure
         supercell_matrix_fc3 = np.eye(3) * np.array(supercell_size_fc3)
-        supercell_matrix_fc2 = np.eye(3) * np.array(supercell_size_fc2)
+        if supercell_size_fc2 is not None:
+            supercell_matrix_fc2 = np.eye(3) * np.array(supercell_size_fc2)
+        else:
+            supercell_matrix_fc2 = supercell_matrix_fc3
+        
         struct_displaced_fc3, struct_displaced_fc2 = get_displaced_structures(
             structure=struct_unitcell,
             atom_disp=atom_disp,
