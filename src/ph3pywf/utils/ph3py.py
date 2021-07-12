@@ -26,7 +26,7 @@ from pymatgen.symmetry.bandstructure import HighSymmKpath
 
 try:
     from phono3py import Phono3py
-    from phono3py.file_IO import write_disp_fc3_yaml
+    from phono3py.file_IO import write_disp_fc3_yaml, write_disp_fc2_yaml
 except ImportError:
     Phono3py = None
     
