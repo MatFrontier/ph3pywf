@@ -44,6 +44,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         atom_disp (float): atomic displacement. Default is 0.01 Angstrom.
         struct_unitcell (Structure): optimized unitcell structure. 
         vis_static (VaspInputSet): input set for static VASP jobs.
+        user_settings (dict): c
         is_reduced_test (bool): if set to True, there'll be only a few staticFW generated.
     """
     required_params = ["tag", "db_file"]
@@ -54,6 +55,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                        "struct_unitcell", 
                        "vis_static", 
                        "primitive_matrix",
+                       "user_settings",
                        "is_reduced_test"]
         
     def run_task(self, fw_spec):
@@ -66,10 +68,13 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         struct_unitcell = self.get("struct_unitcell", None)
         vis_static = self.get("vis_static", None)
         primitive_matrix = self.get("primitive_matrix", None)
-#         name = self.get("name", "DisplacedStructuresAdderTask")
         is_reduced_test = self.get("is_reduced_test", False)
         
         logger.info("Adder: DEBUG VER 05/27 10:52")
+        
+        # initialize document to be saved in DB
+        addertask_dict = {}
+        addertask_dict["user_settings"] = self.get("user_settings", {})
         
         # read optimized structures
         mmdb = VaspCalcDb.from_db_file(db_file)
@@ -101,24 +106,21 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             primitive_matrix=primitive_matrix,
         )
         
-        # initialize document to be saved in DB
-        phonopy_disp_dict = {}
-        
         # save disp_fc3.yaml in DB collection
         with open("disp_fc3.yaml", "r") as fh:
-            phonopy_disp_dict["yaml_fc3"] = yaml.load(fh, Loader=yaml.SafeLoader)
+            addertask_dict["yaml_fc3"] = yaml.load(fh, Loader=yaml.SafeLoader)
         
         # save disp_fc2.yaml in DB collection
         if supercell_size_fc2 is not None:
             with open("disp_fc2.yaml", "r") as fh:
-                phonopy_disp_dict["yaml_fc2"] = yaml.load(fh, Loader=yaml.SafeLoader)
+                addertask_dict["yaml_fc2"] = yaml.load(fh, Loader=yaml.SafeLoader)
         
         calc_dir = os.getcwd()
         fullpath = os.path.abspath(calc_dir)
-        phonopy_disp_dict["dir_name"] = fullpath
-        phonopy_disp_dict["last_updated"] = datetime.utcnow()
-        phonopy_disp_dict["task_label"] = f"{tag} DisplacedStructuresAdderTask"
-        mmdb.insert_task(phonopy_disp_dict)
+        addertask_dict["dir_name"] = fullpath
+        addertask_dict["last_updated"] = datetime.utcnow()
+        addertask_dict["task_label"] = f"{tag} DisplacedStructuresAdderTask"
+        mmdb.insert_task(addertask_dict)
         
         # initialize new fws
         new_fws = []
@@ -184,11 +186,6 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         t_min (float): min temperature (in K)
         t_max (float): max temperature (in K)
         t_step (float): temperature step (in K)
-        supercell_size_fc3 (tuple): Supercell dimension for 3rd order force constants. (2, 2, 2) by default. 
-        supercell_size_fc2 (tuple): Optional supercell dimension for 2nd order force constants. 
-        primitive_matrix (ndarray): transformation matrix to primitive cell from unit cell.
-            Primitive matrix with respect to unit cell.
-            shape=(3, 3), dtype='double', order='C'
         mesh (list): sampling mesh numbers in reciprocal space.
         metadata (dict): meta data.
         user_settings (dict): c
@@ -198,9 +195,6 @@ class Phono3pyAnalysisToDb(FiretaskBase):
     optional_params = ["t_min",
                        "t_max",
                        "t_step",
-                       "supercell_size_fc3", 
-                       "supercell_size_fc2",
-                       "primitive_matrix",
                        "mesh",
                        "metadata",
                        "user_settings"]
@@ -214,31 +208,40 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         t_min = self.get("t_min", 0)
         t_max = self.get("t_max", 1001)
         t_step = self.get("t_step", 10)
-        supercell_size_fc3 = self.get("supercell_size_fc3", (2,2,2))
-        supercell_size_fc2 = self.get("supercell_size_fc2", None)
-        primitive_matrix = self.get("primitive_matrix", None)
         mesh = self.get("mesh", [11, 11, 11])
         ph3py_dict["metadata"] = self.get("metadata", {})
         ph3py_dict["user_settings"] = self.get("user_settings", {})
         ph3py_dict["task_label"] = tag
         
+        # read addertask_dict from DB
+        addertask_dict = mmdb.collection.find_one(
+            {
+                "task_label": {"$regex": f"{tag} DisplacedStructuresAdderTask"},
+            }
+        )
+        
+        # get user settings from adder task
+        supercell_size_fc3 = addertask_dict["user_settings"].get("supercell_size_fc3", None)
+        supercell_size_fc2 = addertask_dict["user_settings"].get("supercell_size_fc2", None)
+        primitive_matrix = addertask_dict["user_settings"].get("primitive_matrix", None)
+        
         # get force_sets from the disp-* runs in DB
         force_sets_fc3 = []
         logger.info("PostAnalysis: Extracting docs from DB")
         mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
-        docs_p = mmdb.collection.find(
+        docs_p_fc3 = mmdb.collection.find(
             {
                 "task_label": {"$regex": f"{tag} disp-*"},
             }
         )
-        docs_disp = []
-        for p in docs_p:
-            docs_disp.append(p)
+        docs_disp_fc3 = []
+        for p in docs_p_fc3:
+            docs_disp_fc3.append(p)
         
-        docs_disp = sorted(docs_disp, key = lambda i: i["task_label"])
-        logger.info("PostAnalysis: Read {} docs".format(len(docs_disp)))
+        docs_disp_fc3 = sorted(docs_disp_fc3, key = lambda i: i["task_label"])
+        logger.info("PostAnalysis: Read {} docs".format(len(docs_disp_fc3)))
         logger.info("PostAnalysis: Generating force sets")
-        for d in docs_disp:
+        for d in docs_disp_fc3:
             forces = np.array(d["output"]["forces"])
             force_sets_fc3.append(forces)
         
@@ -264,14 +267,9 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             
         # get disp_fc3.yaml from DB
         # and get disp_dataset from disp_fc3.yaml
-        phonopy_disp_dict = mmdb.collection.find_one(
-            {
-                "task_label": {"$regex": f"{tag} DisplacedStructuresAdderTask"},
-            }
-        )
         logger.info("PostAnalysis: Writing disp_fc3.yaml")
         with open("disp_fc3.yaml", "w") as outfile:
-            yaml.dump(phonopy_disp_dict["yaml_fc3"], outfile, default_flow_style=False)
+            yaml.dump(addertask_dict["yaml_fc3"], outfile, default_flow_style=False)
 
         disp_dataset = parse_disp_fc3_yaml(filename="disp_fc3.yaml")
 
@@ -284,7 +282,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         if supercell_size_fc2 is not None:
             logger.info("PostAnalysis: Writing disp_fc2.yaml")
             with open("disp_fc2.yaml", "w") as outfile:
-                yaml.dump(phonopy_disp_dict["yaml_fc2"], outfile, default_flow_style=False)
+                yaml.dump(addertask_dict["yaml_fc2"], outfile, default_flow_style=False)
             
             disp_dataset_fc2 = parse_disp_fc2_yaml(filename="disp_fc2.yaml")
             

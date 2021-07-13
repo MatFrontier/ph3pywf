@@ -62,6 +62,7 @@ def wf_phono3py(structure,
     t_max = c.get("t_max", 1001)
     t_step = c.get("t_step", 10)
     primitive_matrix = c.get("primitive_matrix", None)
+    mesh = c.get("mesh", [11,11,11])
     
     # store tag in metadata
     metadata["label"] = tag
@@ -106,8 +107,9 @@ def wf_phono3py(structure,
             supercell_size_fc2=supercell_size_fc2, 
             cutoff_pair_distance=cutoff_pair_distance, 
             atom_disp=atom_disp, 
-            vis_static=vasp_input_set_static, 
+            vis_static=vasp_input_set_static,
             is_reduced_test=is_reduced_test,
+            user_settings=c,
         ), 
         name=fw_name, 
         parents=parents, 
@@ -129,10 +131,7 @@ def wf_phono3py(structure,
             t_min=t_min,
             t_max=t_max,
             t_step=t_step,
-            supercell_size_fc3=supercell_size_fc3, 
-            supercell_size_fc2=supercell_size_fc2, 
-            primitive_matrix=primitive_matrix,
-#             metadata=metadata,
+            mesh=mesh,
             user_settings=c,
         ),
         name=fw_name, 
@@ -147,6 +146,7 @@ def wf_phono3py(structure,
     return Workflow(fws, name=wfname, metadata=metadata)
 
 def wf_ph3py_post_analysis(tag,
+                           db_file_local,
                            name="phono3py post analysis only wf",
                            c=None,
                           ):
@@ -157,16 +157,17 @@ def wf_ph3py_post_analysis(tag,
     t_step = c.get("t_step", 10)
     mesh = c.get("mesh", None)
     
-    mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
-    ph3py_coll = atomate_db.db["ph3py_tasks"]
+    mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
+    ph3py_coll = mmdb.db["ph3py_tasks"]
     doc_prev = ph3py_coll.find_one(
             {
                 "task_label": {"$regex": f"{tag}"},
             }
         )
     c_prev = doc_prev["user_settings"]
+    c_prev.update(c)
+    user_settings = c_prev.copy()
     
-    user_settings = c_prev.update(c)
     supercell_size_fc3 = user_settings.get("supercell_size_fc3", None)
     supercell_size_fc2 = user_settings.get("supercell_size_fc2", None)
     primitive_matrix = user_settings.get("primitive_matrix", None)
@@ -195,7 +196,7 @@ def wf_ph3py_post_analysis(tag,
     
     wfname = "{}-{}".format(formula_pretty, name)
 
-    return Workflow(fw, name=wfname)
+    return Workflow([fw], name=wfname)
 
 #########################
 # TESTING MODULES BELOW #
