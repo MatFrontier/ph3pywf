@@ -213,6 +213,9 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         ph3py_dict["user_settings"] = self.get("user_settings", {})
         ph3py_dict["task_label"] = tag
         
+        # connect to DB
+        mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
+        
         # read addertask_dict from DB
         addertask_dict = mmdb.collection.find_one(
             {
@@ -228,7 +231,6 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # get force_sets from the disp-* runs in DB
         force_sets_fc3 = []
         logger.info("PostAnalysis: Extracting docs from DB")
-        mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
         docs_p_fc3 = mmdb.collection.find(
             {
                 "task_label": {"$regex": f"{tag} disp_fc3-*"},
