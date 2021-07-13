@@ -142,7 +142,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
 #             logger.info(f"Adder: After update: vis.structure.num_sites={vis_static.structure.num_sites}")
             fw = StaticFW(structure=structure,
                           vasp_input_set=vis_static, 
-                          name=f"{tag} disp-{disp_id}",
+                          name=f"{tag} disp_fc3-{disp_id}",
                           prev_calc_loc=None,
                           prev_calc_dir=None,
                          )
@@ -231,7 +231,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
         docs_p_fc3 = mmdb.collection.find(
             {
-                "task_label": {"$regex": f"{tag} disp-*"},
+                "task_label": {"$regex": f"{tag} disp_fc3-*"},
             }
         )
         docs_disp_fc3 = []
@@ -291,13 +291,13 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             write_FORCES_FC2(disp_dataset_fc2, force_sets_fc2, filename="FORCES_FC2")
             
         # prepare Phono3py object
-        doc_opt = mmdb.collection.find_one(
+        optimization_dict = mmdb.collection.find_one(
             {
                 "task_label": {"$regex": f"{tag} structure optimization"},
             }
         )
-
-        unitcell = Structure.from_dict(doc_opt["calcs_reversed"][0]["output"]["structure"])
+        
+        unitcell = Structure.from_dict(optimization_dict["calcs_reversed"][0]["output"]["structure"])
         ph_unitcell = get_phonopy_structure(unitcell)
         supercell_matrix_fc3 = np.eye(3) * np.array(supercell_size_fc3)
         if supercell_size_fc2 is not None:
