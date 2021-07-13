@@ -58,9 +58,9 @@ def wf_phono3py(structure,
     user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
     user_kpoints_settings = c.get("USER_KPOINTS_SETTINGS", None)
-    t_min=c.get("t_min", 0)
-    t_max=c.get("t_max", 1001)
-    t_step=c.get("t_step", 10)
+    t_min = c.get("t_min", 0)
+    t_max = c.get("t_max", 1001)
+    t_step = c.get("t_step", 10)
     primitive_matrix = c.get("primitive_matrix", None)
     
     # store tag in metadata
@@ -146,7 +146,56 @@ def wf_phono3py(structure,
     
     return Workflow(fws, name=wfname, metadata=metadata)
 
+def wf_ph3py_post_analysis(tag,
+                           name="phono3py post analysis only wf",
+                           c=None,
+                          ):
+    c = c or {}
+    db_file = c.get("db_file", DB_FILE)
+    t_min = c.get("t_min", 0)
+    t_max = c.get("t_max", 1001)
+    t_step = c.get("t_step", 10)
+    mesh = c.get("mesh", None)
+    
+    mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
+    ph3py_coll = atomate_db.db["ph3py_tasks"]
+    doc_prev = ph3py_coll.find_one(
+            {
+                "task_label": {"$regex": f"{tag}"},
+            }
+        )
+    c_prev = doc_prev["user_settings"]
+    
+    user_settings = c_prev.update(c)
+    supercell_size_fc3 = user_settings.get("supercell_size_fc3", None)
+    supercell_size_fc2 = user_settings.get("supercell_size_fc2", None)
+    primitive_matrix = user_settings.get("primitive_matrix", None)
+    formula_pretty = doc_prev["formula_pretty"]
+    
+    fw_name = "{}-{} Phono3pyAnalysisToDb".format(
+        formula_pretty, 
+        tag, 
+    )
+    
+    fw = Firework(
+        Phono3pyAnalysisToDb(
+            tag=tag, 
+            db_file=db_file,
+            t_min=t_min,
+            t_max=t_max,
+            t_step=t_step,
+            supercell_size_fc3=supercell_size_fc3, 
+            supercell_size_fc2=supercell_size_fc2, 
+            primitive_matrix=primitive_matrix,
+            mesh=mesh,
+            user_settings=user_settings,
+        ),
+        name=fw_name, 
+    )
+    
+    wfname = "{}-{}".format(formula_pretty, name)
 
+    return Workflow(fw, name=wfname)
 
 #########################
 # TESTING MODULES BELOW #
