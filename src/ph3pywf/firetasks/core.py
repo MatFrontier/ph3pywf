@@ -228,9 +228,9 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         supercell_size_fc2 = addertask_dict["user_settings"].get("supercell_size_fc2", None)
         primitive_matrix = addertask_dict["user_settings"].get("primitive_matrix", None)
         
-        # get force_sets from the disp-* runs in DB
+        # get force_sets from the disp_fc3-* runs in DB
         force_sets_fc3 = []
-        logger.info("PostAnalysis: Extracting docs from DB")
+        logger.info("PostAnalysis: Extracting fc3 docs from DB")
         docs_p_fc3 = mmdb.collection.find(
             {
                 "task_label": {"$regex": f"{tag} disp_fc3-*"},
@@ -242,7 +242,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         
         docs_disp_fc3 = sorted(docs_disp_fc3, key = lambda i: i["task_label"])
         logger.info("PostAnalysis: Read {} docs".format(len(docs_disp_fc3)))
-        logger.info("PostAnalysis: Generating force sets")
+        logger.info("PostAnalysis: Generating fc3 force sets")
         for d in docs_disp_fc3:
             forces = np.array(d["output"]["forces"])
             force_sets_fc3.append(forces)
@@ -268,16 +268,16 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                 force_sets_fc2.append(forces)
             
         # get disp_fc3.yaml from DB
-        # and get disp_dataset from disp_fc3.yaml
+        # and get disp_dataset_fc3 from disp_fc3.yaml
         logger.info("PostAnalysis: Writing disp_fc3.yaml")
         with open("disp_fc3.yaml", "w") as outfile:
             yaml.dump(addertask_dict["yaml_fc3"], outfile, default_flow_style=False)
 
-        disp_dataset = parse_disp_fc3_yaml(filename="disp_fc3.yaml")
+        disp_dataset_fc3 = parse_disp_fc3_yaml(filename="disp_fc3.yaml")
 
         # generate FORCES_FC3
         logger.info("PostAnalysis: Writing FORCES_FC3")
-        write_FORCES_FC3(disp_dataset, force_sets_fc3, filename="FORCES_FC3")
+        write_FORCES_FC3(disp_dataset_fc3, force_sets_fc3, filename="FORCES_FC3")
         
         # get disp_fc2.yaml from DB
         # and get disp_dataset_fc2 from disp_fc2.yaml
