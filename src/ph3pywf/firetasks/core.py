@@ -188,16 +188,13 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         t_step (float): temperature step (in K)
         mesh (list): sampling mesh numbers in reciprocal space.
         metadata (dict): meta data.
-        user_settings (dict): c
     
     """
     required_params = ["tag", "db_file"]
     optional_params = ["t_min",
                        "t_max",
                        "t_step",
-                       "mesh",
-                       "metadata",
-                       "user_settings"]
+                       "mesh"]
         
     def run_task(self, fw_spec):
         # initialize doc
@@ -209,8 +206,6 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         t_max = self.get("t_max", 1001)
         t_step = self.get("t_step", 10)
         mesh = self.get("mesh", [11, 11, 11])
-        ph3py_dict["metadata"] = self.get("metadata", {})
-        ph3py_dict["user_settings"] = self.get("user_settings", {})
         ph3py_dict["task_label"] = tag
         
         # connect to DB
@@ -227,6 +222,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         supercell_size_fc3 = addertask_dict["user_settings"].get("supercell_size_fc3", None)
         supercell_size_fc2 = addertask_dict["user_settings"].get("supercell_size_fc2", None)
         primitive_matrix = addertask_dict["user_settings"].get("primitive_matrix", None)
+        ph3py_dict["user_settings"] = addertask_dict["user_settings"]
         
         # get force_sets from the disp_fc3-* runs in DB
         force_sets_fc3 = []
