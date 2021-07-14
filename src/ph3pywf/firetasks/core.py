@@ -240,6 +240,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         logger.info("PostAnalysis: Read {} docs".format(len(docs_disp_fc3)))
         logger.info("PostAnalysis: Generating fc3 force sets")
         for d in docs_disp_fc3:
+            logger.info("PostAnalysis: Reading doc: {}".format(d["task_label"]))
             forces = np.array(d["output"]["forces"])
             force_sets_fc3.append(forces)
         
@@ -260,6 +261,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             logger.info("PostAnalysis: Read {} docs".format(len(docs_disp_fc2)))
             logger.info("PostAnalysis: Generating fc2 force sets")
             for d in docs_disp_fc2:
+                logger.info("PostAnalysis: Reading doc: {}".format(d["task_label"]))
                 forces = np.array(d["output"]["forces"])
                 force_sets_fc2.append(forces)
             
