@@ -290,7 +290,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             logger.info("PostAnalysis: Writing FORCES_FC2")
             write_FORCES_FC2(disp_dataset_fc2, force_sets_fc2, filename="FORCES_FC2")
             
-        # prepare Phono3py object
+        # get optimized unitcell structure
         optimization_dict = mmdb.collection.find_one(
             {
                 "task_label": {"$regex": f"{tag} structure optimization"},
@@ -304,7 +304,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             supercell_matrix_fc2 = np.eye(3) * np.array(supercell_size_fc2)
         else:
             supercell_matrix_fc2 = supercell_matrix_fc3
-
+        
+        # prepare Phono3py instance
         phono3py = Phono3py(unitcell=ph_unitcell,
                             supercell_matrix=supercell_matrix_fc3,
                             phonon_supercell_matrix=supercell_matrix_fc2,

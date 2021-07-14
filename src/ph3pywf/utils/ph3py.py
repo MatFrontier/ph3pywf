@@ -122,6 +122,7 @@ from phonopy.units import Bohr, Hartree
 from phonopy.harmonic.force_constants import show_drift_force_constants
 from phono3py.phonon3.fc3 import show_drift_fc3
 from phono3py import Phono3py
+from phono3py.cui.create_force_constants import parse_forces
 from phono3py.file_IO import (parse_disp_fc3_yaml,
                               parse_disp_fc2_yaml,
                               parse_FORCES_FC2,
@@ -132,20 +133,56 @@ from phono3py.file_IO import (parse_disp_fc3_yaml,
                               read_fc2_from_hdf5)
 
 def run_thermal_conductivity(phono3py, t_min=0, t_max=1001, t_step=10):
-    # Create fc3 and fc2 from disp_fc3.yaml and FORCES_FC3
-    disp_dataset = parse_disp_fc3_yaml(filename="disp_fc3.yaml")
-    forces_fc3 = parse_FORCES_FC3(disp_dataset, filename="FORCES_FC3")
-    phono3py.produce_fc3(forces_fc3=forces_fc3,
-                         displacement_dataset=disp_dataset,
-                         symmetrize_fc3r=True)
-    print("INFO: phono3py.produce_fc3: symmetrize_fc3r=True")
+    """
+    Evaluate lattice thermal conductivity and write kappa-*.hdf5.
+    Phono3py object must be instantiated.
+    This function reads disp_fcx.yaml and FORCES_FCx.
+    """
+    
+    # create fc3 and fc2
+    if phono3py.phonon_supercell_matrix is not None:
+        # if fc2 supercell size is specified, 
+        # prepare dataset of fc3 from disp_fc3.yaml and FORCES_FC3
+        # and fc2 from disp_fc2.yaml and FORCES_FC2
+        print("INFO: preparing fc3 from disp_fc3.yaml and FORCES_FC3")
+        phono3py.dataset = parse_forces(phono3py,
+                                        # cutoff_pair_distance=None, # optional
+                                        force_filename="FORCES_FC3",
+                                        disp_filename="disp_fc3.yaml",
+                                        fc_type="fc3")
+        print("INFO: preparing fc2 from disp_fc2.yaml and FORCES_FC2")
+        phono3py.phonon_dataset = parse_forces(phono3py,
+                                               force_filename="FORCES_FC2",
+                                               disp_filename="disp_fc2.yaml",
+                                               fc_type="phonon_fc2")
+    else:
+        # if fc2 supercell size is NOT specified, 
+        # prepare dataset of fc3 and fc2 from disp_fc3.yaml and FORCES_FC3
+        print("INFO: preparing fc3 and fc2 from disp_fc3.yaml and FORCES_FC3")
+        phono3py.dataset = parse_forces(phono3py,
+                                        # cutoff_pair_distance=None, # optional
+                                        force_filename="FORCES_FC3",
+                                        disp_filename="disp_fc3.yaml",
+                                        fc_type="fc3")
+        phono3py.phonon_dataset = parse_forces(phono3py,
+                                               force_filename="FORCES_FC3",
+                                               disp_filename="disp_fc3.yaml",
+                                               fc_type="fc2")
+    print("INFO: fc3 and fc2 dataset prepared")
+    
+    # produce fc3 and fc2
+    print("INFO: phono3py.produce_fc3: using default paramters")
+    phono3py.produce_fc3()
+    print("INFO: phono3py.produce_fc2: using default paramters")
+    phono3py.produce_fc2()
+    
     fc3 = phono3py.fc3
     fc2 = phono3py.fc2
     write_fc3_to_hdf5(fc3)
     write_fc2_to_hdf5(fc2)
     
     show_drift_fc3(fc3)
-    show_drift_force_constants(fc2, name='fc2')
+    show_drift_force_constants(fc2, name="fc2")
     
     phono3py.init_phph_interaction()
     
