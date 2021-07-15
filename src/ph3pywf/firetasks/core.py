@@ -223,6 +223,11 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         supercell_size_fc2 = addertask_dict["user_settings"].get("supercell_size_fc2", None)
         primitive_matrix = addertask_dict["user_settings"].get("primitive_matrix", None)
         ph3py_dict["user_settings"] = addertask_dict["user_settings"]
+        # update user settings
+        ph3py_dict["user_settings"]["t_min"] = t_min
+        ph3py_dict["user_settings"]["t_max"] = t_max
+        ph3py_dict["user_settings"]["t_step"] = t_step
+        ph3py_dict["user_settings"]["mesh"] = mesh
         
         # get force_sets from the disp_fc3-* runs in DB
         force_sets_fc3 = []

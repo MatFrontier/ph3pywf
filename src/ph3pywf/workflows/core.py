@@ -149,6 +149,10 @@ def wf_ph3py_post_analysis(tag,
                            name="phono3py post analysis only wf",
                            c=None,
                           ):
+    """
+    Rerun Phono3pyAnalysisToDb task
+    and overwrite the previous post ph3py_task doc
+    """
     c = c or {}
     db_file = c.get("db_file", DB_FILE)
     t_min = c.get("t_min", 0)
@@ -156,22 +160,18 @@ def wf_ph3py_post_analysis(tag,
     t_step = c.get("t_step", 10)
     mesh = c.get("mesh", None)
     
+    # connect to DB
     mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
-    ph3py_coll = mmdb.db["ph3py_tasks"]
-    doc_prev = ph3py_coll.find_one(
-            {
-                "task_label": {"$regex": f"{tag}"},
-            }
-        )
-    c_prev = doc_prev["user_settings"]
-    c_prev.update(c)
-    user_settings = c_prev.copy()
     
-    supercell_size_fc3 = user_settings.get("supercell_size_fc3", None)
-    supercell_size_fc2 = user_settings.get("supercell_size_fc2", None)
-    primitive_matrix = user_settings.get("primitive_matrix", None)
-    formula_pretty = doc_prev["formula_pretty"]
+    # read addertask_dict from DB
+    opt_dict = mmdb.collection.find_one(
+        {
+            "task_label": {"$regex": f"{tag} structure optimization"},
+        }
+    )
+    formula_pretty = opt_dict["formula_pretty"]
     
+    # prepare FW
     fw_name = "{}-{} Phono3pyAnalysisToDb".format(
         formula_pretty, 
         tag, 
@@ -184,11 +184,7 @@ def wf_ph3py_post_analysis(tag,
             t_min=t_min,
             t_max=t_max,
             t_step=t_step,
-            supercell_size_fc3=supercell_size_fc3, 
-            supercell_size_fc2=supercell_size_fc2, 
-            primitive_matrix=primitive_matrix,
             mesh=mesh,
-            user_settings=user_settings,
         ),
         name=fw_name, 
     )
