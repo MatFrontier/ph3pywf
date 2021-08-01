@@ -205,7 +205,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         t_min = self.get("t_min", 0)
         t_max = self.get("t_max", 1001)
         t_step = self.get("t_step", 10)
-        mesh = self.get("mesh", [11, 11, 11])
+        mesh = self.get("mesh", [20, 20, 20])
         ph3py_dict["task_label"] = tag
         
         # connect to DB
