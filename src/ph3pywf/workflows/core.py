@@ -25,7 +25,7 @@ def wf_phono3py(structure,
             supercell_size_fc3 (tuple): Supercell dimension for 3rd order force constants. (2, 2, 2) by default. 
             supercell_size_fc2 (tuple): Optional supercell dimension for 2nd order force constants. 
             cutoff_pair_distance (float): set to reduce the number of supercells with displacements to be calculated.
-            atom_disp (float): atomic displacement. Default is 0.01 Angstrom.
+            atom_disp (float): atomic displacement. Default is 0.03 Angstrom.
             vasp_input_set_relax (VaspInputSet): input set for optimization VASP job. 
             vasp_input_set_static (VaspInputSet): input set for static VASP jobs.
             db_file (str): path to the db file.

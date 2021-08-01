@@ -41,7 +41,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         supercell_size_fc3 (tuple): Supercell dimension for 3rd order force constants. (2, 2, 2) by default. 
         supercell_size_fc2 (tuple): Optional supercell dimension for 2nd order force constants. 
         cutoff_pair_distance (float): set to reduce the number of supercells with displacements to be calculated.
-        atom_disp (float): atomic displacement. Default is 0.01 Angstrom.
+        atom_disp (float): atomic displacement. Default is 0.03 Angstrom.
         struct_unitcell (Structure): optimized unitcell structure. 
         vis_static (VaspInputSet): input set for static VASP jobs.
         user_settings (dict): c
