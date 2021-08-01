@@ -219,3 +219,26 @@ def create_FORCE_SETS_from_FORCES_FCx(forces_filename="FORCES_FC3", disp_filenam
         if log_level:
             print("FORCE_SETS has been created.")
 
+
+from phonopy.file_IO import write_BORN
+
+def create_BORN_file_from_tag(tag, db_file):
+    # connect to DB
+    mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
+    
+    # get relaxation task document 
+    print(f"Extracting doc with keyword: {tag} structure optimization")
+    doc_relaxation = mmdb.collection.find_one(
+        {
+            "task_label": {"$regex": f"{tag} structure optimization"},
+        }
+    )
+    
+    # extract unitcell structure, borns, and epsilon
+    unitcell = Structure.from_dict(doc_relaxation["calcs_reversed"][0]["output"]["structure"])
+    ph_unitcell = get_phonopy_structure(unitcell)
+    borns = np.array(doc_relaxation["calcs_reversed"][0]["output"]["outcar"]["born"])
+    epsilon = np.array(doc_relaxation["calcs_reversed"][0]["output"]["epsilon_static"])
+    
+    # write BORN file
+    write_BORN(ph_unitcell, borns, epsilon)

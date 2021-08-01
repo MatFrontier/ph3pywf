@@ -296,13 +296,13 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             write_FORCES_FC2(disp_dataset_fc2, force_sets_fc2, filename="FORCES_FC2")
             
         # get optimized unitcell structure
-        optimization_dict = mmdb.collection.find_one(
+        doc_relaxation = mmdb.collection.find_one(
             {
                 "task_label": {"$regex": f"{tag} structure optimization"},
             }
         )
         
-        unitcell = Structure.from_dict(optimization_dict["calcs_reversed"][0]["output"]["structure"])
+        unitcell = Structure.from_dict(doc_relaxation["calcs_reversed"][0]["output"]["structure"])
         ph_unitcell = get_phonopy_structure(unitcell)
         supercell_matrix_fc3 = np.eye(3) * np.array(supercell_size_fc3)
         if supercell_size_fc2 is not None:
