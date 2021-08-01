@@ -188,6 +188,7 @@ def run_thermal_conductivity(phono3py, t_min=0, t_max=1001, t_step=10):
     
     phono3py.run_thermal_conductivity(
         temperatures=range(t_min, t_max, t_step), 
+        is_isotope=True, 
         boundary_mfp=1e6, # This is to avoid divergence of phonon life time.
         write_kappa=True)
 
