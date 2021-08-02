@@ -7,7 +7,7 @@ from datetime import datetime
 from fireworks.core.firework import FWAction, Firework, FiretaskBase, Workflow
 from atomate.vasp.database import VaspCalcDb
 from pymatgen.core import Structure
-from ph3pywf.utils.ph3py import get_displaced_structures, run_thermal_conductivity, create_FORCE_SETS_from_FORCES_FCx
+from ph3pywf.utils.ph3py import get_displaced_structures, run_thermal_conductivity, create_FORCE_SETS_from_FORCES_FCx, create_BORN_file_from_tag
 from fireworks import explicit_serialize
 from atomate.utils.utils import env_chk
 import numpy as np
@@ -218,10 +218,12 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             }
         )
         
-        # get user settings from adder task
+        # get user settings from the adder task
         supercell_size_fc3 = addertask_dict["user_settings"].get("supercell_size_fc3", None)
         supercell_size_fc2 = addertask_dict["user_settings"].get("supercell_size_fc2", None)
         primitive_matrix = addertask_dict["user_settings"].get("primitive_matrix", None)
+        is_nac = addertask_dict["user_settings"].get("is_nac", False)
+        # copy user settings
         ph3py_dict["user_settings"] = addertask_dict["user_settings"]
         # update user settings
         ph3py_dict["user_settings"]["t_min"] = t_min
@@ -295,15 +297,23 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             logger.info("PostAnalysis: Writing FORCES_FC2")
             write_FORCES_FC2(disp_dataset_fc2, force_sets_fc2, filename="FORCES_FC2")
             
-        # get optimized unitcell structure
+        # get relaxation task document 
         doc_relaxation = mmdb.collection.find_one(
             {
                 "task_label": {"$regex": f"{tag} structure optimization"},
             }
         )
         
+        # get optimized unitcell structure
         unitcell = Structure.from_dict(doc_relaxation["calcs_reversed"][0]["output"]["structure"])
         ph_unitcell = get_phonopy_structure(unitcell)
+        
+        # if non-analytical term correction is on, generate BORN file
+        if is_nac:
+            logger.info("PostAnalysis: generating BORN file")
+            create_BORN_file_from_tag(tag, db_file)
+        
+        # get supercell_matrices
         supercell_matrix_fc3 = np.eye(3) * np.array(supercell_size_fc3)
         if supercell_size_fc2 is not None:
             supercell_matrix_fc2 = np.eye(3) * np.array(supercell_size_fc2)
@@ -349,6 +359,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         logger.info("PostAnalysis: Creating FORCE_CONSTANTS")
         phonon = phonopy.load(supercell_matrix=supercell_matrix_fc2,
                               primitive_matrix=primitive_matrix,
+                              is_nac=is_nac,
                               unitcell=ph_unitcell,
                               force_sets_filename="FORCE_SETS")
         write_FORCE_CONSTANTS(phonon.get_force_constants(),

@@ -38,6 +38,7 @@ def wf_phono3py(structure,
             primitive_matrix (ndarray): transformation matrix to primitive cell from unit cell.
                 Primitive matrix with respect to unit cell.
                 shape=(3, 3), dtype='double', order='C'
+            is_nac (bool): If True, non-analytical term correction is on. 
     Returns:
         Workflow
     """
@@ -62,12 +63,17 @@ def wf_phono3py(structure,
     t_max = c.get("t_max", 1001)
     t_step = c.get("t_step", 10)
     primitive_matrix = c.get("primitive_matrix", None)
-    mesh = c.get("mesh", [11,11,11])
+    mesh = c.get("mesh", [20,20,20])
+    is_nac = c.get("is_nac", False)
     
     # store tag in metadata
     metadata["label"] = tag
     print(f"tag: \"{tag}\"")
     print(f"{{task_label: {{$regex:\"{tag}\"}}}}")
+    
+    # if non-analytical term correction is on, update user_incar_settings 
+    if is_nac:
+        user_incar_settings["LEPSILON"] = ".TRUE."
     
     # update vasp_input_set_relax
     vasp_input_set_relax = vasp_input_set_relax or MPRelaxSet(structure,
@@ -77,6 +83,7 @@ def wf_phono3py(structure,
                                                               user_kpoints_settings=user_kpoints_settings,
                                                              )
     
+
     # structure optimization firework
     fws = [OptimizeFW(structure=structure, 
                       vasp_input_set=vasp_input_set_relax, 

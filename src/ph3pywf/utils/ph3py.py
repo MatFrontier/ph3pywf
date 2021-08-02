@@ -241,4 +241,5 @@ def create_BORN_file_from_tag(tag, db_file):
     epsilon = np.array(doc_relaxation["calcs_reversed"][0]["output"]["epsilon_static"])
     
     # write BORN file
+    print("Writing BORN file")
     write_BORN(ph_unitcell, borns, epsilon)
