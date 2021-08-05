@@ -221,6 +221,7 @@ def create_FORCE_SETS_from_FORCES_FCx(forces_filename="FORCES_FC3", disp_filenam
 
 
 from phonopy.file_IO import write_BORN
+from atomate.vasp.database import VaspCalcDb
 
 def create_BORN_file_from_tag(tag, db_file):
     # connect to DB
