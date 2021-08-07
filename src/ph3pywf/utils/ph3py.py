@@ -239,7 +239,7 @@ def create_BORN_file_from_tag(tag, db_file):
     unitcell = Structure.from_dict(doc_relaxation["calcs_reversed"][0]["output"]["structure"])
     ph_unitcell = get_phonopy_structure(unitcell)
     borns = np.array(doc_relaxation["calcs_reversed"][0]["output"]["outcar"]["born"])
-    epsilon = np.array(doc_relaxation["calcs_reversed"][0]["output"]["epsilon_static"])
+    epsilon = np.array(doc_relaxation["calcs_reversed"][0]["output"]["outcar"]["dielectric_tensor"])
     
     # write BORN file
     print("Writing BORN file")
