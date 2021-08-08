@@ -361,7 +361,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                               primitive_matrix=primitive_matrix,
                               is_nac=is_nac,
                               unitcell=ph_unitcell,
-                              force_sets_filename="FORCE_SETS")
+                              force_sets_filename="FORCE_SETS",
+                              born_filename="BORN")
         write_FORCE_CONSTANTS(phonon.get_force_constants(),
                               filename="FORCE_CONSTANTS")
 
