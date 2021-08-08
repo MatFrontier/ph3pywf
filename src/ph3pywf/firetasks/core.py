@@ -357,6 +357,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
 
         # create FORCE_CONSTANTS
         logger.info("PostAnalysis: Creating FORCE_CONSTANTS")
+        logger.info(f"PostAnalysis: is_nac = {is_nac}")
         phonon = phonopy.load(supercell_matrix=supercell_matrix_fc2,
                               primitive_matrix=primitive_matrix,
                               is_nac=is_nac,
