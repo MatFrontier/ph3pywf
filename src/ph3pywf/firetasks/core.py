@@ -364,6 +364,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                               unitcell=ph_unitcell,
                               force_sets_filename="FORCE_SETS",
                               born_filename="BORN" if is_nac else None)
+        if is_nac:
+            nac_params = phonon.nac_params
         write_FORCE_CONSTANTS(phonon.get_force_constants(),
                               filename="FORCE_CONSTANTS")
 
@@ -374,8 +376,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                                                          supercell_matrix_fc2, 
                                                          force_constants, 
                                                          primitive_matrix=primitive_matrix,
-                                                         is_nac=is_nac,
-                                                         born_filename="BORN" if is_nac else None)
+                                                         nac_params=nac_params if is_nac else None)
         ph3py_dict["band_structure"] = bs.as_dict()
         with open("band_structure.yaml", "w") as outfile: # FOR TESTING
             yaml.dump(ph3py_dict["band_structure"], outfile, default_flow_style=False) # FOR TESTING
