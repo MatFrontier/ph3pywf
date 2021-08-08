@@ -362,7 +362,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                               is_nac=is_nac,
                               unitcell=ph_unitcell,
                               force_sets_filename="FORCE_SETS",
-                              born_filename="BORN")
+                              born_filename="BORN" if is_nac else None)
         write_FORCE_CONSTANTS(phonon.get_force_constants(),
                               filename="FORCE_CONSTANTS")
 
