@@ -162,10 +162,11 @@ def wf_ph3py_post_analysis(tag,
     """
     c = c or {}
     db_file = c.get("db_file", DB_FILE)
-    t_min = c.get("t_min", 0)
+    t_min = c.get("t_min", 10)
     t_max = c.get("t_max", 1001)
     t_step = c.get("t_step", 10)
     mesh = c.get("mesh", None)
+    born_filename = c.get("born_filename", None)
     
     # connect to DB
     mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
@@ -192,6 +193,7 @@ def wf_ph3py_post_analysis(tag,
             t_max=t_max,
             t_step=t_step,
             mesh=mesh,
+            born_filename=born_filename,
         ),
         name=fw_name, 
     )
