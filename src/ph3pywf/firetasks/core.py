@@ -187,6 +187,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         t_max (float): max temperature (in K)
         t_step (float): temperature step (in K)
         mesh (list): sampling mesh numbers in reciprocal space.
+        born_filename (str): filename corresponding to "BORN", a file contains non-analytical term correction parameters.
         metadata (dict): meta data.
     
     """
@@ -194,7 +195,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
     optional_params = ["t_min",
                        "t_max",
                        "t_step",
-                       "mesh"]
+                       "mesh",
+                       "born_filename"]
         
     def run_task(self, fw_spec):
         # initialize doc
@@ -309,9 +311,10 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         ph_unitcell = get_phonopy_structure(unitcell)
         
         # if non-analytical term correction is on, generate BORN file
-        if is_nac:
+        if is_nac and born_filename is None:
             logger.info("PostAnalysis: generating BORN file")
             create_BORN_file_from_tag(tag, db_file)
+            born_filename = "BORN"
         
         # get supercell_matrices
         supercell_matrix_fc3 = np.eye(3) * np.array(supercell_size_fc3)
@@ -354,20 +357,25 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             create_FORCE_SETS_from_FORCES_FCx(forces_filename="FORCES_FC3", 
                                               disp_filename="disp_fc3.yaml",
                                              )
-
+        
         # create FORCE_CONSTANTS
         logger.info("PostAnalysis: Creating FORCE_CONSTANTS")
         logger.info(f"PostAnalysis: is_nac = {is_nac}")
+        if is_nac:
+            logger.info(f"PostAnalysis: Reading nac_params from file: \"{born_filename}\"")
         phonon = phonopy.load(supercell_matrix=supercell_matrix_fc2,
                               primitive_matrix=primitive_matrix,
                               is_nac=is_nac,
                               unitcell=ph_unitcell,
                               force_sets_filename="FORCE_SETS",
-                              born_filename="BORN" if is_nac else None)
-        if is_nac:
-            nac_params = phonon.nac_params
+                              born_filename=born_filename if is_nac else None)
+        
         write_FORCE_CONSTANTS(phonon.get_force_constants(),
                               filename="FORCE_CONSTANTS")
+        
+        # get born_params from phonopy instance
+        if is_nac:
+            nac_params = phonon.nac_params
 
         # save phonon dispersion band structure object
         logger.info("PostAnalysis: Evaluating phonon dispersion band structure")
