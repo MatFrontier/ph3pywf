@@ -386,6 +386,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                                                          force_constants, 
                                                          primitive_matrix=primitive_matrix,
                                                          nac_params=nac_params if is_nac else None)
+        if is_nac:
+            bs.has_nac = True # set has_nac param accordingly
         ph3py_dict["band_structure"] = bs.as_dict()
         with open("band_structure.yaml", "w") as outfile: # FOR TESTING
             yaml.dump(ph3py_dict["band_structure"], outfile, default_flow_style=False) # FOR TESTING
