@@ -244,3 +244,45 @@ def create_BORN_file_from_tag(tag, db_file):
     # write BORN file
     print("Writing BORN file")
     write_BORN(ph_unitcell, borns, epsilon)
+    
+
+from pymatgen.phonon.bandstructure import PhononBandStructureSymmLine
+from phonopy import Phonopy
+from pymatgen.symmetry.bandstructure import HighSymmKpath
+
+def get_phonon_band_structure_symm_line_ph3pywf(
+    phonon: Phonopy,
+    filename: str = None, 
+    line_density: float = 20.0,
+    symprec: float = 0.01,
+) -> PhononBandStructureSymmLine:
+    """
+    Get a phonon band structure along a high symmetry path from phonopy force
+    constants.
+    Args:
+        phonon: A Phonopy instance.
+        filename : str, optional
+            File name used to write ``band.yaml`` like file.
+        line_density: The density along the high symmetry path.
+        symprec: Symmetry precision passed to phonopy and used for determining
+            the band structure path.
+    Returns:
+        The line mode band structure.
+    """
+    structure_phonopy = phonon.unitcell
+    structure = get_pmg_structure(structure_phonopy)
+    kpath = HighSymmKpath(structure, symprec=symprec)
+    
+    kpoints, labels = kpath.get_kpoints(line_density=line_density, coords_are_cartesian=False)
+    
+    phonon.run_band_structure([kpoints])
+    
+    if filename is not None:
+        phonon.write_yaml_band_structure(filename=filename)
+    
+    frequencies = np.array(phonon.band_structure.frequencies)
+    frequencies = frequencies[0,:,:].T
+    
+    labels_dict = {a: k for a, k in zip(labels, kpoints) if a != ""}
+    
+    return PhononBandStructureSymmLine(kpoints, frequencies, structure.lattice, labels_dict=labels_dict)

@@ -7,7 +7,13 @@ from datetime import datetime
 from fireworks.core.firework import FWAction, Firework, FiretaskBase, Workflow
 from atomate.vasp.database import VaspCalcDb
 from pymatgen.core import Structure
-from ph3pywf.utils.ph3py import get_displaced_structures, run_thermal_conductivity, create_FORCE_SETS_from_FORCES_FCx, create_BORN_file_from_tag
+from ph3pywf.utils.ph3py import (
+    get_displaced_structures, 
+    run_thermal_conductivity, 
+    create_FORCE_SETS_from_FORCES_FCx, 
+    create_BORN_file_from_tag, 
+    get_phonon_band_structure_symm_line_ph3pywf,
+)
 from fireworks import explicit_serialize
 from atomate.utils.utils import env_chk
 import numpy as np
@@ -204,7 +210,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
-        t_min = self.get("t_min", 0)
+        t_min = self.get("t_min", 10)
         t_max = self.get("t_max", 1001)
         t_step = self.get("t_step", 10)
         mesh = self.get("mesh", [20, 20, 20])
@@ -325,6 +331,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             supercell_matrix_fc2 = supercell_matrix_fc3
         
         # prepare Phono3py instance
+        logger.info("PostAnalysis: Preparing Phono3py instance")
         phono3py = Phono3py(unitcell=ph_unitcell,
                             supercell_matrix=supercell_matrix_fc3,
                             phonon_supercell_matrix=supercell_matrix_fc2,
@@ -359,8 +366,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                                               disp_filename="disp_fc3.yaml",
                                              )
         
-        # create FORCE_CONSTANTS
-        logger.info("PostAnalysis: Creating FORCE_CONSTANTS")
+        # prepare Phonopy instance
+        logger.info("PostAnalysis: Preparing Phonopy instance")
         logger.info(f"PostAnalysis: is_nac = {is_nac}")
         if is_nac:
             logger.info(f"PostAnalysis: Reading nac_params from file: \"{born_filename}\"")
@@ -371,34 +378,25 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                               force_sets_filename="FORCE_SETS",
                               born_filename=born_filename if is_nac else None)
         
-        write_FORCE_CONSTANTS(phonon.get_force_constants(),
+        # write FORCE_CONSTANTS
+        logger.info("PostAnalysis: Creating FORCE_CONSTANTS")
+        write_FORCE_CONSTANTS(phonon.force_constants,
                               filename="FORCE_CONSTANTS")
         
-        # get born_params from phonopy instance
-        if is_nac:
-            nac_params = phonon.nac_params
-
-        # save phonon dispersion band structure object
+        # evaluate and save phonon dispersion band structure
         logger.info("PostAnalysis: Evaluating phonon dispersion band structure")
-        force_constants = parse_FORCE_CONSTANTS()
-        bs = get_phonon_band_structure_symm_line_from_fc(unitcell, 
-                                                         supercell_matrix_fc2, 
-                                                         force_constants, 
-                                                         primitive_matrix=primitive_matrix,
-                                                         nac_params=nac_params if is_nac else None)
-        if is_nac:
-            bs.has_nac = True # set has_nac param accordingly
+        bs = get_phonon_band_structure_symm_line_ph3pywf(phonon,
+                                                         filename="band.yaml")
+        
         ph3py_dict["band_structure"] = bs.as_dict()
-        with open("band_structure.yaml", "w") as outfile: # FOR TESTING
-            yaml.dump(ph3py_dict["band_structure"], outfile, default_flow_style=False) # FOR TESTING
-#         plotter = PhononBSPlotter(bs)
-#         plotter.save_plot("plot.png","png")
+#         with open("band_structure.yaml", "w") as outfile: # FOR TESTING
+#             yaml.dump(ph3py_dict["band_structure"], outfile, default_flow_style=False) # FOR TESTING
         
         # parse phonon DOS
         logger.info("PostAnalysis: Parsing phonon DOS")
         dos = get_phonon_dos_from_fc(unitcell, 
                                      supercell_matrix_fc2, 
-                                     force_constants, 
+                                     phonon.force_constants, 
                                      primitive_matrix=primitive_matrix)
         
         ph3py_dict["dos"] = dos.as_dict()
