@@ -136,10 +136,12 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         
         # append StaticFW for BORN file generation
         if is_nac:
-            vis_dict["structure"] = struct_unitcell.as_dict() # update vis_static
-            vis_static = vis_static.from_dict(vis_dict) # update vis_static
+            vis_dict_born = vis_dict.copy()
+            vis_dict_born["structure"] = struct_unitcell.as_dict() # update vis_static_born
+            vis_dict_born["lepsilon"] = True # update vis_static_born
+            vis_static_born = vis_static.__class__.from_dict(vis_dict_born) # update vis_static_born
             fw = StaticFW(structure=struct_unitcell,
-                          vasp_input_set=vis_static, 
+                          vasp_input_set=vis_static_born, 
                           name=f"{tag} BORN",
                           prev_calc_loc=None,
                           prev_calc_dir=None,
@@ -154,7 +156,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             disp_id = f"{i:05d}"
 #             logger.info(f"Adder: Before update: vis.structure.num_sites={vis_static.structure.num_sites}")
             vis_dict["structure"] = structure.as_dict() # update vis_static
-            vis_static = vis_static.from_dict(vis_dict) # update vis_static
+            vis_static = vis_static.__class__.from_dict(vis_dict) # update vis_static
 #             logger.info(f"Adder: After update: vis.structure.num_sites={vis_static.structure.num_sites}")
             fw = StaticFW(structure=structure,
                           vasp_input_set=vis_static, 
@@ -172,7 +174,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                     continue # Skip undeformed supercell
                 disp_id = f"{i:05d}"
                 vis_dict["structure"] = structure.as_dict() # update vis_static
-                vis_static = vis_static.from_dict(vis_dict) # update vis_static
+                vis_static = vis_static.__class__.from_dict(vis_dict) # update vis_static
 #                 logger.info(f"Adder: After update: vis.structure.num_sites={vis_static.structure.num_sites}")
                 fw = StaticFW(structure=structure,
                               vasp_input_set=vis_static, 
