@@ -52,6 +52,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         vis_static (VaspInputSet): input set for static VASP jobs.
         user_settings (dict): c
         is_reduced_test (bool): if set to True, there'll be only a few staticFW generated.
+        is_nac (bool): If True, non-analytical term correction is on.
     """
     required_params = ["tag", "db_file"]
     optional_params = ["supercell_size_fc3",
@@ -62,7 +63,8 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                        "vis_static", 
                        "primitive_matrix",
                        "user_settings",
-                       "is_reduced_test"]
+                       "is_reduced_test",
+                       "is_nac"]
         
     def run_task(self, fw_spec):
         tag = self["tag"]
@@ -75,6 +77,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         vis_static = self.get("vis_static", None)
         primitive_matrix = self.get("primitive_matrix", None)
         is_reduced_test = self.get("is_reduced_test", False)
+        is_nac = self.get("is_nac", False)
         
         logger.info("Adder: DEBUG VER 05/27 10:52")
         
@@ -133,6 +136,19 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         
         # update vis_static preparation
         vis_dict = vis_static.as_dict()
+        
+        # append StaticFW for BORN file generation
+        if is_nac:
+            vis_dict["structure"] = struct_unitcell.as_dict() # update vis_static
+            vis_static = vis_static.from_dict(vis_dict) # update vis_static
+            fw = StaticFW(structure=struct_unitcell,
+                          vasp_input_set=vis_static, 
+                          name=f"{tag} BORN",
+                          prev_calc_loc=None,
+                          prev_calc_dir=None,
+                         )
+            logger.info("Adder: adding BORN FW")
+            new_fws.append(fw)
         
         # for each structure in the displaced structures append a StaticFW
         for i, structure in enumerate(struct_displaced_fc3):

@@ -228,10 +228,10 @@ def create_BORN_file_from_tag(tag, db_file):
     mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
     
     # get relaxation task document 
-    print(f"Extracting doc with keyword: {tag} structure optimization")
+    print(f"Extracting doc with keyword: {tag} BORN")
     doc_relaxation = mmdb.collection.find_one(
         {
-            "task_label": {"$regex": f"{tag} structure optimization"},
+            "task_label": {"$regex": f"{tag} BORN"},
         }
     )
     
