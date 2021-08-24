@@ -51,7 +51,6 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         struct_unitcell (Structure): optimized unitcell structure. 
         vis_static (VaspInputSet): input set for static VASP jobs.
         user_settings (dict): c
-        is_reduced_test (bool): if set to True, there'll be only a few staticFW generated.
         is_nac (bool): If True, non-analytical term correction is on.
     """
     required_params = ["tag", "db_file"]
@@ -63,7 +62,6 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                        "vis_static", 
                        "primitive_matrix",
                        "user_settings",
-                       "is_reduced_test",
                        "is_nac"]
         
     def run_task(self, fw_spec):
@@ -76,7 +74,6 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         struct_unitcell = self.get("struct_unitcell", None)
         vis_static = self.get("vis_static", None)
         primitive_matrix = self.get("primitive_matrix", None)
-        is_reduced_test = self.get("is_reduced_test", False)
         is_nac = self.get("is_nac", False)
         
         logger.info("Adder: DEBUG VER 05/27 10:52")
@@ -154,9 +151,6 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         for i, structure in enumerate(struct_displaced_fc3):
             if i==0: 
                 continue # Skip undeformed supercell
-            if is_reduced_test and i==5: # For dynamic wf testing
-                logger.info("Adder: Stop FW generation for dynamic WF testing")
-                break # For dynamic wf testing
             disp_id = f"{i:05d}"
 #             logger.info(f"Adder: Before update: vis.structure.num_sites={vis_static.structure.num_sites}")
             vis_dict["structure"] = structure.as_dict() # update vis_static
