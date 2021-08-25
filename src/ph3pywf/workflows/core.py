@@ -71,10 +71,6 @@ def wf_phono3py(structure,
     print(f"tag: \"{tag}\"")
     print(f"{{task_label: {{$regex:\"{tag}\"}}}}")
     
-    # if non-analytical term correction is on, update user_incar_settings 
-    if is_nac:
-        user_incar_settings["LEPSILON"] = ".TRUE."
-    
     # update vasp_input_set_relax
     vasp_input_set_relax = vasp_input_set_relax or MPRelaxSet(structure,
                                                               user_incar_settings=user_incar_settings,
