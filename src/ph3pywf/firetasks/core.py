@@ -206,6 +206,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         t_step (float): temperature step (in K)
         mesh (list): sampling mesh numbers in reciprocal space.
         born_filename (str): filename corresponding to "BORN", a file contains non-analytical term correction parameters.
+            Specify to use user provided BORN file.
         metadata (dict): meta data.
     
     """
@@ -214,7 +215,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                        "t_max",
                        "t_step",
                        "mesh",
-                       "born_filename"]
+                       "born_filename",
+                       "kappa_properties_to_ignore"]
         
     def run_task(self, fw_spec):
         # initialize doc
@@ -227,6 +229,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         t_step = self.get("t_step", 10)
         mesh = self.get("mesh", [20, 20, 20])
         born_filename = self.get("born_filename", None)
+        kappa_properties_to_ignore = self.get("kappa_properties_to_ignore", [])
+        
         ph3py_dict["task_label"] = tag
         
         # connect to DB
@@ -416,6 +420,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             yaml.dump(ph3py_dict["dos"], outfile, default_flow_style=False) # FOR TESTING
 
         # parse kappa-*.hdf5
+        kappa_properties_to_ignore.append("mode_kappa")
+        logger.info(f"PostAnalysis: Ignore {len(kappa_properties_to_ignore)} properties")
         logger.info("PostAnalysis: Parsing kappa-*.hdf5")
         f = h5py.File("kappa-m{}{}{}.hdf5".format(*mesh))
         for item in list(f):
@@ -423,8 +429,9 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             if item == "kappa_unit_conversion":
                 ph3py_dict[item] = f[item][()]
                 continue
-            if item == "mode_kappa": # skip mode_kappa to reduce size of document
-                logger.info("PostAnalysis: Skipping property: mode_kappa")
+            if item in kappa_properties_to_ignore: # skip specified properties to reduce size of document
+                logger.info(f"PostAnalysis: Ingore property: {item}")
+                ph3py_dict[item] = None
                 continue
             ph3py_dict[item] = f[item][:].tolist()
         

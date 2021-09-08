@@ -65,6 +65,7 @@ def wf_phono3py(structure,
     primitive_matrix = c.get("primitive_matrix", None)
     mesh = c.get("mesh", [20,20,20])
     is_nac = c.get("is_nac", False)
+    kappa_properties_to_ignore = c.get("kappa_properties_to_ignore", None)
     
     # store tag in metadata
     metadata["label"] = tag
@@ -135,6 +136,7 @@ def wf_phono3py(structure,
             t_max=t_max,
             t_step=t_step,
             mesh=mesh,
+            kappa_properties_to_ignore=kappa_properties_to_ignore,
         ),
         name=fw_name, 
         parents=parents,
@@ -163,6 +165,7 @@ def wf_ph3py_post_analysis(tag,
     t_step = c.get("t_step", 10)
     mesh = c.get("mesh", None)
     born_filename = c.get("born_filename", None)
+    kappa_properties_to_ignore = c.get("kappa_properties_to_ignore", None)
     
     # connect to DB
     mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
@@ -190,6 +193,7 @@ def wf_ph3py_post_analysis(tag,
             t_step=t_step,
             mesh=mesh,
             born_filename=born_filename,
+            kappa_properties_to_ignore=kappa_properties_to_ignore,
         ),
         name=fw_name, 
     )
