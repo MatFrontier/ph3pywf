@@ -421,7 +421,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
 
         # parse kappa-*.hdf5
         kappa_properties_to_ignore.append("mode_kappa")
-        logger.info(f"PostAnalysis: Ignore {len(kappa_properties_to_ignore)} properties")
+        logger.info("PostAnalysis: Ignore {} properties".format(len(kappa_properties_to_ignore)))
         logger.info("PostAnalysis: Parsing kappa-*.hdf5")
         f = h5py.File("kappa-m{}{}{}.hdf5".format(*mesh))
         for item in list(f):
@@ -430,7 +430,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                 ph3py_dict[item] = f[item][()]
                 continue
             if item in kappa_properties_to_ignore: # skip specified properties to reduce size of document
-                logger.info(f"PostAnalysis: Ingore property: {item}")
+                logger.info("PostAnalysis: Ingore property: {}".format(item))
                 ph3py_dict[item] = None
                 continue
             ph3py_dict[item] = f[item][:].tolist()
