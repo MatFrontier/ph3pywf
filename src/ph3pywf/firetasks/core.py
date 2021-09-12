@@ -404,6 +404,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # evaluate and save phonon dispersion band structure
         logger.info("PostAnalysis: Evaluating phonon dispersion band structure")
         bs = get_phonon_band_structure_symm_line_ph3pywf(phonon,
+                                                         has_nac=is_nac,
                                                          filename="band.yaml")
         
         ph3py_dict["band_structure"] = bs.as_dict()

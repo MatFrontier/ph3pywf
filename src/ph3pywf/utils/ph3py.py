@@ -252,6 +252,7 @@ from pymatgen.symmetry.bandstructure import HighSymmKpath
 
 def get_phonon_band_structure_symm_line_ph3pywf(
     phonon: Phonopy,
+    has_nac: bool = False,
     filename: str = None, 
     line_density: float = 20.0,
     symprec: float = 0.01,
@@ -261,6 +262,9 @@ def get_phonon_band_structure_symm_line_ph3pywf(
     constants.
     Args:
         phonon: A Phonopy instance.
+        has_nac: specify if the band structure has been produced taking into account
+                non-analytical corrections at Gamma. If True frequenciens at Gamma from
+                diffent directions will be stored in naf. Default False.
         filename : str, optional
             File name used to write ``band.yaml`` like file.
         line_density: The density along the high symmetry path.
@@ -285,4 +289,4 @@ def get_phonon_band_structure_symm_line_ph3pywf(
     
     labels_dict = {a: k for a, k in zip(labels, kpoints) if a != ""}
     
-    return PhononBandStructureSymmLine(kpoints, frequencies, structure.lattice, labels_dict=labels_dict)
+    return PhononBandStructureSymmLine(kpoints, frequencies, structure.lattice, has_nac=has_nac, labels_dict=labels_dict)
