@@ -371,12 +371,14 @@ class Phono3pyAnalysisToDb(FiretaskBase):
 #         ph3py_dict["fc2"] = phono3py.fc2.tolist()
 
         # create phonopy FORCE_SETS
-        if supercell_size_fc2 is not None: # create FORCE_SETS from fc2
+        if supercell_size_fc2 is not None: 
+            # create FORCE_SETS from fc2
             logger.info("PostAnalysis: Creating FORCE_SETS from FORCES_FC2")
             create_FORCE_SETS_from_FORCES_FCx(forces_filename="FORCES_FC2", 
                                               disp_filename="disp_fc2.yaml",
                                              )
-        else: # create FORCE_SETS from fc3
+        else: 
+            # create FORCE_SETS from fc3
             logger.info("PostAnalysis: Creating FORCE_SETS from FORCES_FC3")
             create_FORCE_SETS_from_FORCES_FCx(forces_filename="FORCES_FC3", 
                                               disp_filename="disp_fc3.yaml",
@@ -429,7 +431,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             if item == "kappa_unit_conversion":
                 ph3py_dict[item] = f[item][()]
                 continue
-            if item in kappa_properties_to_ignore: # skip specified properties to reduce size of document
+            if item in kappa_properties_to_ignore: 
+                # skip specified properties to reduce size of document
                 logger.info("PostAnalysis: Ingore property: {}".format(item))
                 ph3py_dict[item] = None
                 continue
