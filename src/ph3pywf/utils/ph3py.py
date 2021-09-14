@@ -290,3 +290,13 @@ def get_phonon_band_structure_symm_line_ph3pywf(
     labels_dict = {a: k for a, k in zip(labels, kpoints) if a != ""}
     
     return PhononBandStructureSymmLine(kpoints, frequencies, structure.lattice, has_nac=has_nac, labels_dict=labels_dict)
+
+import yaml
+def write_yaml_from_dict(d, filename):
+    """
+    Write dict to .yaml file.
+    d (dict)
+    filename (str)
+    """
+    with open(filename, "w") as outfile:
+        yaml.dump(d, outfile, default_flow_style=False)
