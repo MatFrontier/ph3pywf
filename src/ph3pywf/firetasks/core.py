@@ -426,7 +426,6 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         f = h5py.File("kappa-m{}{}{}.hdf5".format(*mesh))
         for item in list(f):
             logger.info("PostAnalysis: Reading property: {}".format(item))
-            write_yaml_from_dict(f[item], "kappa."+item+".yaml")
             if item == "kappa_unit_conversion":
                 ph3py_dict[item] = f[item][()]
                 continue
@@ -436,6 +435,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                 ph3py_dict[item] = None
                 continue
             ph3py_dict[item] = f[item][:].tolist()
+            write_yaml_from_dict(ph3py_dict[item], "kappa."+item+".yaml")
         
         
         # add more informations in ph3py_dict
