@@ -331,6 +331,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # get optimized unitcell structure
         unitcell = Structure.from_dict(doc_relaxation["calcs_reversed"][0]["output"]["structure"])
         ph_unitcell = get_phonopy_structure(unitcell)
+        unitcell.to(fmt="poscar", filename="POSCAR-unitcell") # FOR TESTING
         
         # if non-analytical term correction is on, generate BORN file
         if is_nac and born_filename is None:
