@@ -13,6 +13,7 @@ from ph3pywf.utils.ph3py import (
     create_FORCE_SETS_from_FORCES_FCx, 
     create_BORN_file_from_tag, 
     get_phonon_band_structure_symm_line_ph3pywf,
+    write_yaml_from_dict,
 )
 from fireworks import explicit_serialize
 from atomate.utils.utils import env_chk
@@ -300,8 +301,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # get disp_fc3.yaml from DB
         # and get disp_dataset_fc3 from disp_fc3.yaml
         logger.info("PostAnalysis: Writing disp_fc3.yaml")
-        with open("disp_fc3.yaml", "w") as outfile:
-            yaml.dump(addertask_dict["yaml_fc3"], outfile, default_flow_style=False)
+        write_yaml_from_dict(addertask_dict["yaml_fc3"], "disp_fc3.yaml")
 
         disp_dataset_fc3 = parse_disp_fc3_yaml(filename="disp_fc3.yaml")
 
@@ -313,8 +313,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # and get disp_dataset_fc2 from disp_fc2.yaml
         if supercell_size_fc2 is not None:
             logger.info("PostAnalysis: Writing disp_fc2.yaml")
-            with open("disp_fc2.yaml", "w") as outfile:
-                yaml.dump(addertask_dict["yaml_fc2"], outfile, default_flow_style=False)
+            write_yaml_from_dict(addertask_dict["yaml_fc2"], "disp_fc2.yaml")
             
             disp_dataset_fc2 = parse_disp_fc2_yaml(filename="disp_fc2.yaml")
             
@@ -408,8 +407,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                                                          filename="band.yaml")
         
         ph3py_dict["band_structure"] = bs.as_dict()
-#         with open("band_structure.yaml", "w") as outfile: # FOR TESTING
-#             yaml.dump(ph3py_dict["band_structure"], outfile, default_flow_style=False) # FOR TESTING
+        write_yaml_from_dict(ph3py_dict["band_structure"], "band_structure.yaml") # FOR TESTING
         
         # parse phonon DOS
         logger.info("PostAnalysis: Parsing phonon DOS")
@@ -419,8 +417,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                                      primitive_matrix=primitive_matrix)
         
         ph3py_dict["dos"] = dos.as_dict()
-        with open("dos.yaml", "w") as outfile: # FOR TESTING
-            yaml.dump(ph3py_dict["dos"], outfile, default_flow_style=False) # FOR TESTING
+        write_yaml_from_dict(ph3py_dict["dos"], "dos.yaml") # FOR TESTING
 
         # parse kappa-*.hdf5
         kappa_properties_to_ignore.append("mode_kappa")
@@ -429,6 +426,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         f = h5py.File("kappa-m{}{}{}.hdf5".format(*mesh))
         for item in list(f):
             logger.info("PostAnalysis: Reading property: {}".format(item))
+            write_yaml_from_dict(f[item], "kappa."+item+".yaml")
             if item == "kappa_unit_conversion":
                 ph3py_dict[item] = f[item][()]
                 continue
@@ -456,8 +454,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # if coll.find_one({"task_label": {"$regex": f"{tag}"}}) is not None:
         ph3py_dict["last_updated"] = datetime.utcnow()
         
-        with open("ph3py_dict.yaml", "w") as outfile: # FOR TESTING
-            yaml.dump(ph3py_dict, outfile, default_flow_style=False) # FOR TESTING
+        write_yaml_from_dict(ph3py_dict, "ph3py_dict.yaml") # FOR TESTING
             
         coll.update_one(
             {"task_label": {"$regex": f"{tag}"}}, {"$set": ph3py_dict}, upsert=True
