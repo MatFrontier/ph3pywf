@@ -256,6 +256,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         ph3py_dict["user_settings"]["t_max"] = t_max
         ph3py_dict["user_settings"]["t_step"] = t_step
         ph3py_dict["user_settings"]["mesh"] = mesh
+        ph3py_dict["user_settings"]["born_filename"] = born_filename
+        ph3py_dict["user_settings"]["kappa_properties_to_ignore"] = kappa_properties_to_ignore
         
         # get force_sets from the disp_fc3-* runs in DB
         force_sets_fc3 = []
