@@ -14,6 +14,8 @@ from ph3pywf.utils.ph3py import (
     create_BORN_file_from_tag, 
     get_phonon_band_structure_symm_line_ph3pywf,
     write_yaml_from_dict,
+    insert_gridfs_file,
+    insert_gridfs_dict,
 )
 from fireworks import explicit_serialize
 from atomate.utils.utils import env_chk
@@ -195,7 +197,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
 @explicit_serialize
 class Phono3pyAnalysisToDb(FiretaskBase):
     """
-    Compute thermal conductivity?
+    Compute thermal conductivity and store in db.
     
     Required params: 
         tag (str): unique label to identify contents related to this WF.
@@ -216,8 +218,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                        "t_max",
                        "t_step",
                        "mesh",
-                       "born_filename",
-                       "kappa_properties_to_ignore"]
+                       "born_filename"]
         
     def run_task(self, fw_spec):
         # initialize doc
@@ -230,7 +231,6 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         t_step = self.get("t_step", 10)
         mesh = self.get("mesh", [20, 20, 20])
         born_filename = self.get("born_filename", None)
-        kappa_properties_to_ignore = self.get("kappa_properties_to_ignore", [])
         
         ph3py_dict["task_label"] = tag
         
@@ -257,7 +257,6 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         ph3py_dict["user_settings"]["t_step"] = t_step
         ph3py_dict["user_settings"]["mesh"] = mesh
         ph3py_dict["user_settings"]["born_filename"] = born_filename
-        ph3py_dict["user_settings"]["kappa_properties_to_ignore"] = kappa_properties_to_ignore
         
         # get force_sets from the disp_fc3-* runs in DB
         force_sets_fc3 = []
@@ -423,23 +422,30 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         write_yaml_from_dict(ph3py_dict["dos"], "dos.yaml") # FOR TESTING
 
         # parse kappa-*.hdf5
-        kappa_properties_to_ignore.append("mode_kappa")
-        logger.info("PostAnalysis: Ignore {} properties".format(len(kappa_properties_to_ignore)))
         logger.info("PostAnalysis: Parsing kappa-*.hdf5")
         f = h5py.File("kappa-m{}{}{}.hdf5".format(*mesh))
+        kappa_dict = {}
         for item in list(f):
             logger.info("PostAnalysis: Reading property: {}".format(item))
             if item == "kappa_unit_conversion":
                 ph3py_dict[item] = f[item][()]
+                kappa_dict[item] = f[item][()]
                 continue
-            if item in kappa_properties_to_ignore: 
-                # skip specified properties to reduce size of document
-                logger.info("PostAnalysis: Ingore property: {}".format(item))
-                ph3py_dict[item] = None
-                continue
-            ph3py_dict[item] = f[item][:].tolist()
-            write_yaml_from_dict(ph3py_dict[item], "kappa."+item+".yaml")
+            if item in ["temperature", "kappa", "mesh"]:
+                ph3py_dict[item] = f[item][:].tolist()
+            kappa_dict[item] = f[item][:].tolist()
+#             write_yaml_from_dict(ph3py_dict[item], "kappa."+item+".yaml") # FOR TESTING
         
+        # insert kappa information to gridfs
+        ph3py_dict["kappa_hdf5"] = insert_gridfs_dict(kappa_dict, mmdb.db, "ph3py_tasks_fs")
+        
+        # insert designated files to gridfs
+        filenames = ["fc2.hdf5",
+                     "fc3.hdf5",
+                     "FORCE_CONSTANTS", 
+                    ]
+        for filename in filenames:
+            ph3py_dict[filename] = insert_gridfs_file(filename, mmdb.db, "ph3py_tasks_fs")
         
         # add more informations in ph3py_dict
         ph3py_dict["structure"] = unitcell.as_dict()
@@ -463,7 +469,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             {"task_label": {"$regex": f"{tag}"}}, {"$set": ph3py_dict}, upsert=True
         )
         
-        
+        return FWAction()
         
         
     
