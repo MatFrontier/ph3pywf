@@ -15,6 +15,12 @@ from pymatgen.phonon.bandstructure import (
 from pymatgen.phonon.dos import CompletePhononDos, PhononDos
 from pymatgen.symmetry.bandstructure import HighSymmKpath
 
+import gridfs
+import zlib
+import json
+import os
+from monty.json import MontyEncoder
+
 # try:
 #     from phonopy import Phonopy
 #     from phonopy.file_IO import write_disp_yaml
@@ -300,3 +306,112 @@ def write_yaml_from_dict(d, filename):
     """
     with open(filename, "w") as outfile:
         yaml.dump(d, outfile, default_flow_style=False)
+        
+#####################
+# DATABASE FUCTIONS #
+#####################
+
+def insert_gridfs_file(filename, db, collection):
+    """
+    Insert the file with given filename into GridFS.
+    Args:
+        filename (str): the path to file
+        db (pymongo.database.Database): usually mmdb.db
+        collection (str): the GridFS collection name
+    Returns:
+        dictionary of gridfs info for retrieval
+    """
+    # standard gridfs preparation
+    fs = gridfs.GridFS(db, collection=collection)
+    
+    # read file
+    with open(filename, "rb") as fh:
+        contents = fh.read()
+
+    # upload
+    fs_id = fs.put(contents)
+    
+    # prepare dict to return
+    fs_info = {"fs_id": fs_id,
+               "type": "file",
+               "filename": os.path.basename(filename),
+               "collection": collection,
+              }
+    
+    return fs_info
+
+def insert_gridfs_dict(d, db, collection):
+    """
+    Insert the given document into GridFS.
+    Args:
+        d (dict): the document
+        db (pymongo.database.Database): usually mmdb.db
+        collection (str): the GridFS collection name
+    Returns:
+        dictionary of gridfs info for retrieval
+    """
+    # standard gridfs preparation
+    fs = gridfs.GridFS(db, collection=collection)
+    
+    # always perform the string conversion when inserting directly to gridfs
+    d = json.dumps(d, cls=MontyEncoder)
+    d = zlib.compress(d.encode(), True)
+    
+    # upload
+    fs_id = fs.put(d)
+    
+    # prepare dict to return
+    fs_info = {"fs_id": fs_id,
+               "type": "dict",
+               "collection": collection,
+              }
+    
+    return fs_info
+
+def get_file_from_gridfs(fs_id, db, collection, filename):
+    # standard gridfs preparation
+    fs = gridfs.GridFS(db, collection=collection)
+    
+    # retrieve file contents from gridfs
+    contents = fs.get(fs_id).read()
+
+    # write file
+    with open(filename, "wb") as fh:
+        fh.write(contents)
+    return
+
+def get_dict_from_gridfs(fs_id, db, collection):
+    # standard gridfs preparation
+    fs = gridfs.GridFS(db, collection=collection)
+    
+    # retrieve dict, and decompress
+    bs_json = zlib.decompress(fs.get(fs_id).read())
+    obj_dict = json.loads(bs_json.decode())
+    
+    return obj_dict
+
+def get_from_gridfs(db, task_doc, key, filename=None):
+    """
+    Retrieve the object (or write the file) of type key associated with given task document. 
+    Args:
+        db (pymongo.database.Database): usually mmdb.db
+        task_doc (dict): document in db collection
+        key (str): key to find gridfs info from task_doc
+        filename (str): if specified, override the original filename when write, 
+            otherwise the original filename is used
+    Returns:
+        The dictionary stored or nothing for file object
+    """
+    # get gridfs info for retrieval 
+    fs_info = task_doc[key]
+    collection = fs_info["collection"]
+    fs_id = fs_info["fs_id"]
+    
+    # retrieve file
+    if fs_info["type"] == "file":
+        filename = filename or fs_info["filename"]
+        return get_file_from_gridfs(fs_id, db, collection, filename)
+    
+    # retrieve dict
+    if fs_info["type"] == "dict":
+        return get_dict_from_gridfs(fs_id, db, collection)
