@@ -48,7 +48,7 @@ def wf_phono3py(structure,
     supercell_size_fc3 = c.get("supercell_size_fc3", (2,2,2))
     supercell_size_fc2 = c.get("supercell_size_fc2", None)
     cutoff_pair_distance = c.get("cutoff_pair_distance", None)
-    atom_disp = c.get("atom_disp", None)
+    atom_disp = c.get("atom_disp", 0.03)
     vasp_input_set_relax = c.get("vasp_input_set_relax", None)
     vasp_input_set_static = c.get("vasp_input_set_static", None)
     db_file = c.get("db_file", DB_FILE)
