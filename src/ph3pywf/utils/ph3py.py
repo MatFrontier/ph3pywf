@@ -255,6 +255,7 @@ def create_BORN_file_from_tag(tag, db_file):
 from pymatgen.phonon.bandstructure import PhononBandStructureSymmLine
 from phonopy import Phonopy
 from pymatgen.symmetry.bandstructure import HighSymmKpath
+from pymatgen.phonon.dos import CompletePhononDos, PhononDos
 
 def get_phonon_band_structure_symm_line_ph3pywf(
     phonon: Phonopy,
@@ -264,8 +265,8 @@ def get_phonon_band_structure_symm_line_ph3pywf(
     symprec: float = 0.01,
 ) -> PhononBandStructureSymmLine:
     """
-    Get a phonon band structure along a high symmetry path from phonopy force
-    constants.
+    Get a phonon band structure along a high symmetry path from an initialized phonopy
+    instance.
     Args:
         phonon: A Phonopy instance.
         has_nac: specify if the band structure has been produced taking into account
@@ -296,6 +297,43 @@ def get_phonon_band_structure_symm_line_ph3pywf(
     labels_dict = {a: k for a, k in zip(labels, kpoints) if a != ""}
     
     return PhononBandStructureSymmLine(kpoints, frequencies, structure.lattice, has_nac=has_nac, labels_dict=labels_dict)
+
+def get_phonon_dos_ph3pywf(
+    phonon: Phonopy,
+    mesh_density: float = 100.0,
+    num_dos_steps: int = 200,
+) -> CompletePhononDos:
+    """
+    Get a projected phonon density of states from an initialized phonopy instance.
+    Args:
+        phonon: A Phonopy instance.
+        mesh_density: The density of the q-point mesh. See the docstring
+            for the ``mesh`` argument in Phonopy.init_mesh() for more details.
+        num_dos_steps: Number of frequency steps in the energy grid.
+    Returns:
+        The density of states.
+    """
+    structure_phonopy = phonon.unitcell
+    phonon.run_mesh(
+        mesh_density,
+        is_mesh_symmetry=False,
+        with_eigenvectors=True,
+        is_gamma_center=True,
+    )
+
+    # get min, max, step frequency
+    frequencies = phonon.get_mesh_dict()["frequencies"]
+    freq_min = frequencies.min()
+    freq_max = frequencies.max()
+    freq_pitch = (freq_max - freq_min) / num_dos_steps
+
+    phonon.run_projected_dos(freq_min=freq_min, freq_max=freq_max, freq_pitch=freq_pitch)
+
+    dos_raw = phonon.projected_dos.get_partial_dos()
+    pdoss = dict(zip(structure, dos_raw[1]))
+
+    total_dos = PhononDos(dos_raw[0], dos_raw[1].sum(axis=0))
+    return CompletePhononDos(structure, total_dos, pdoss)
 
 import yaml
 def write_yaml_from_dict(d, filename):

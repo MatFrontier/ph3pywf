@@ -13,6 +13,7 @@ from ph3pywf.utils.ph3py import (
     create_FORCE_SETS_from_FORCES_FCx, 
     create_BORN_file_from_tag, 
     get_phonon_band_structure_symm_line_ph3pywf,
+    get_phonon_dos_ph3pywf,
     write_yaml_from_dict,
     insert_gridfs_file,
     insert_gridfs_dict,
@@ -413,7 +414,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         
         # parse phonon DOS
         logger.info("PostAnalysis: Parsing phonon DOS")
-        dos = get_phonon_dos_from_fc(unitcell, 
+        dos = get_phonon_dos_ph3pywf(unitcell, 
                                      supercell_matrix_fc2, 
                                      phonon.force_constants, 
                                      primitive_matrix=primitive_matrix)
