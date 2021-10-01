@@ -414,10 +414,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         
         # parse phonon DOS
         logger.info("PostAnalysis: Parsing phonon DOS")
-        dos = get_phonon_dos_ph3pywf(unitcell, 
-                                     supercell_matrix_fc2, 
-                                     phonon.force_constants, 
-                                     primitive_matrix=primitive_matrix)
+        dos = get_phonon_dos_ph3pywf(phonon)
         
         ph3py_dict["dos"] = dos.as_dict()
         write_yaml_from_dict(ph3py_dict["dos"], "dos.yaml") # FOR TESTING
