@@ -314,6 +314,7 @@ def get_phonon_dos_ph3pywf(
         The density of states.
     """
     structure_phonopy = phonon.unitcell
+    structure = get_pmg_structure(structure_phonopy)
     phonon.run_mesh(
         mesh_density,
         is_mesh_symmetry=False,
