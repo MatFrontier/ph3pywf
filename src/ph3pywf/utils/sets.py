@@ -1,8 +1,22 @@
-from pymatgen.io.vasp.sets import _load_yaml_config, DictSet
+from pymatgen.io.vasp.sets import DictSet
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Poscar, Potcar, VaspInput
 from pathlib import Path
 
 MODULE_DIR = Path(__file__).resolve().parent
+
+def _load_yaml_config(fname):
+    config = loadfn(str(MODULE_DIR / ("%s.yaml" % fname)))
+    if "PARENT" in config:
+        parent_config = _load_yaml_config(config["PARENT"])
+        for k, v in parent_config.items():
+            if k not in config:
+                config[k] = v
+            elif isinstance(v, dict):
+                v_new = config.get(k, {})
+                v_new.update(v)
+                config[k] = v_new
+    return config
+
 
 class Ph3pyRelaxSet(DictSet):
     """
