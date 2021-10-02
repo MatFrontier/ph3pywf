@@ -23,6 +23,7 @@ from atomate.utils.utils import env_chk
 import numpy as np
 from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
+from ph3py.utils.sets import Ph3pyRelaxSet, Ph3pyStaticSet
 import yaml
 import os
 import sys
