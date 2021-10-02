@@ -1,5 +1,6 @@
 from pymatgen.io.vasp.sets import _load_yaml_config, DictSet
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Poscar, Potcar, VaspInput
+from pathlib import Path
 
 MODULE_DIR = Path(__file__).resolve().parent
 
