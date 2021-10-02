@@ -11,7 +11,7 @@ from ph3pywf.firetasks.core import DisplacedStructuresAdderTask, Phono3pyAnalysi
 from atomate.vasp.config import DB_FILE
 from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
-from ph3py.utils.sets import Ph3pyRelaxSet, Ph3pyStaticSet
+from ph3pywf.utils.sets import Ph3pyRelaxSet, Ph3pyStaticSet
 
 def wf_phono3py(structure, 
                 name="phono3py wf",
