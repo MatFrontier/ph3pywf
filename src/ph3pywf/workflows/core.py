@@ -11,6 +11,7 @@ from ph3pywf.firetasks.core import DisplacedStructuresAdderTask, Phono3pyAnalysi
 from atomate.vasp.config import DB_FILE
 from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
+from ph3py.utils.sets import Ph3pyRelaxSet, Ph3pyStaticSet
 
 def wf_phono3py(structure, 
                 name="phono3py wf",
@@ -72,12 +73,12 @@ def wf_phono3py(structure,
     print(f"{{task_label: {{$regex:\"{tag}\"}}}}")
     
     # update vasp_input_set_relax
-    vasp_input_set_relax = vasp_input_set_relax or MPRelaxSet(structure,
-                                                              user_incar_settings=user_incar_settings,
-                                                              user_potcar_settings=user_potcar_settings,
-                                                              user_potcar_functional=user_potcar_functional,
-                                                              user_kpoints_settings=user_kpoints_settings,
-                                                             )
+    vasp_input_set_relax = vasp_input_set_relax or Ph3pyRelaxSet(structure,
+                                                                user_incar_settings=user_incar_settings,
+                                                                user_potcar_settings=user_potcar_settings,
+                                                                user_potcar_functional=user_potcar_functional,
+                                                                user_kpoints_settings=user_kpoints_settings,
+                                                               )
     
 
     # structure optimization firework
@@ -87,12 +88,12 @@ def wf_phono3py(structure,
                      )]
     
     # update vasp_input_set_static
-    vasp_input_set_static = vasp_input_set_static or MPStaticSet(structure,
-                                                                 user_incar_settings=user_incar_settings_static,
-                                                                 user_potcar_settings=user_potcar_settings,
-                                                                 user_potcar_functional=user_potcar_functional,
-                                                                 user_kpoints_settings=user_kpoints_settings,
-                                                                )
+    vasp_input_set_static = vasp_input_set_static or Ph3pyStaticSet(structure,
+                                                                    user_incar_settings=user_incar_settings_static,
+                                                                    user_potcar_settings=user_potcar_settings,
+                                                                    user_potcar_functional=user_potcar_functional,
+                                                                    user_kpoints_settings=user_kpoints_settings,
+                                                                   )
     
     # convert GetDisplacedStructuresFWs to FW and add to FW list
     parents = fws[0]
