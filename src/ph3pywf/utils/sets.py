@@ -1,6 +1,7 @@
 from pymatgen.io.vasp.sets import DictSet
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Poscar, Potcar, VaspInput
 from pathlib import Path
+from monty.serialization import loadfn
 
 MODULE_DIR = Path(__file__).resolve().parent
 
