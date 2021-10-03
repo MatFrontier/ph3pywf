@@ -67,6 +67,7 @@ class Ph3pyStaticSet(DictSet):
         :return: Incar
         """
         parent_incar = super().incar
+        incar = Incar(parent_incar)
 
         if self.lepsilon:
             incar["IBRION"] = 8
