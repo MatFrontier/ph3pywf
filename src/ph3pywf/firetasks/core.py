@@ -554,6 +554,8 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         supercell_size_fc3 = addertask_dict["user_settings"].get("supercell_size_fc3", None)
         supercell_size_fc2 = addertask_dict["user_settings"].get("supercell_size_fc2", None)
         primitive_matrix = addertask_dict["user_settings"].get("primitive_matrix", None)
+        # copy user settings
+        ph3py_dict["user_settings"] = addertask_dict["user_settings"]
         # update user settings
         ph3py_dict["user_settings"]["t_min"] = t_min
         ph3py_dict["user_settings"]["t_max"] = t_max
