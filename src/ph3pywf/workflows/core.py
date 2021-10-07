@@ -375,7 +375,7 @@ def wf_ph3py_convergence_test(tag,
             t_min=t_min,
             t_max=t_max,
             t_step=t_step,
-            mesh=mesh,
+            mesh_densities=mesh_densities,
         ),
         name=fw_name, 
     )
