@@ -657,7 +657,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         
         # initialize list for kappa storage
         ph3py_dict["convergence_test"] = []
-        ph3py_dict["temperature"] = range(t_min, t_max, t_step)
+        ph3py_dict["temperature"] = list(range(t_min, t_max, t_step))
         
         # run thermal conductivity using different mesh numbers
         for mesh in mesh_list:
