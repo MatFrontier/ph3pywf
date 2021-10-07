@@ -663,7 +663,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         for mesh in mesh_list:
             # update mesh number
             logger.info(f"PostAnalysis: {mesh = }")
-            phono3py.mesh = mesh
+            phono3py.mesh_numbers = mesh
             
             # use run_thermal_conductivity()
             # which will read disp_fc3.yaml and FORCES_FC3
