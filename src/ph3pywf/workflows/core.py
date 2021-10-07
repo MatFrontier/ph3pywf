@@ -7,7 +7,11 @@ from datetime import datetime
 from fireworks.core.firework import FWAction, Firework, FiretaskBase, Workflow
 from atomate.vasp.database import VaspCalcDb
 from pymatgen.core import Structure
-from ph3pywf.firetasks.core import DisplacedStructuresAdderTask, Phono3pyAnalysisToDb
+from ph3pywf.firetasks.core import (
+    DisplacedStructuresAdderTask, 
+    Phono3pyAnalysisToDb, 
+    Phono3pyMeshConvergenceToDb,
+)
 from atomate.vasp.config import DB_FILE
 from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
@@ -160,7 +164,7 @@ def wf_ph3py_post_analysis(tag,
     c = c or {}
     db_file = c.get("db_file", DB_FILE)
     t_min = c.get("t_min", 10)
-    t_max = c.get("t_max", 1001)
+    t_max = c.get("t_max", 1301)
     t_step = c.get("t_step", 10)
     mesh = c.get("mesh", None)
     born_filename = c.get("born_filename", None)
@@ -329,3 +333,53 @@ def wf_disp_from_dynatest(structure,
                              "phono3py calculation using pseudo struct opt")
     
     return wf
+
+
+def wf_ph3py_convergence_test(tag,
+                              db_file_local,
+                              name="phono3py post analysis only wf",
+                              c=None,
+                             ):
+    """
+    Rerun Phono3pyMeshConvergenceToDb task
+    store doc to ph3py_tasks_convergence_test collection
+    """
+    c = c or {}
+    db_file = c.get("db_file", DB_FILE)
+    t_min = c.get("t_min", 10)
+    t_max = c.get("t_max", 1301)
+    t_step = c.get("t_step", 10)
+    mesh_densities = c.get("mesh_densities", [5,7,9,11,13])
+    
+    # connect to DB
+    mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
+    
+    # read addertask_dict from DB
+    opt_dict = mmdb.collection.find_one(
+        {
+            "task_label": {"$regex": f"{tag} structure optimization"},
+        }
+    )
+    formula_pretty = opt_dict["formula_pretty"]
+    
+    # prepare FW
+    fw_name = "{}-{} Phono3pyMeshConvergenceToDb".format(
+        formula_pretty, 
+        tag, 
+    )
+    
+    fw = Firework(
+        Phono3pyMeshConvergenceToDb(
+            tag=tag, 
+            db_file=db_file,
+            t_min=t_min,
+            t_max=t_max,
+            t_step=t_step,
+            mesh=mesh,
+        ),
+        name=fw_name, 
+    )
+    
+    wfname = "{}-{}".format(formula_pretty, name)
+
+    return Workflow([fw], name=wfname)

@@ -320,7 +320,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             
             disp_dataset_fc2 = parse_disp_fc2_yaml(filename="disp_fc2.yaml")
             
-            # generate FORCES_FC3
+            # generate FORCES_FC2
             logger.info("PostAnalysis: Writing FORCES_FC2")
             write_FORCES_FC2(disp_dataset_fc2, force_sets_fc2, filename="FORCES_FC2")
             
@@ -503,4 +503,156 @@ class StoreStructureTask(FiretaskBase):
         # terminate FW dependently
         if terminate:
             return FWAction()
+
+@explicit_serialize
+class Phono3pyMeshConvergenceToDb(FiretaskBase):
+    """
+    Compute thermal conductivity using different mesh density and store in db.
+    
+    Required params: 
+        tag (str): unique label to identify contents related to this WF.
+        db_file (str): path to file containing the database credentials. Supports env_chk.
         
+    Optional params: 
+        t_min (float): min temperature (in K)
+        t_max (float): max temperature (in K)
+        t_step (float): temperature step (in K)
+        mesh_densities (list): list of sampling mesh number along any axis in reciprocal space.
+    
+    """
+    required_params = ["tag", "db_file"]
+    optional_params = ["t_min",
+                       "t_max",
+                       "t_step",
+                       "mesh_densities"]
+        
+    def run_task(self, fw_spec):
+        # initialize doc
+        ph3py_dict = {}
+        
+        tag = self["tag"]
+        db_file = env_chk(self.get("db_file"), fw_spec)
+        t_min = self.get("t_min", 10)
+        t_max = self.get("t_max", 1001)
+        t_step = self.get("t_step", 10)
+        mesh_densities = self.get("mesh_densities", [5,7,9,11,13])
+        
+        mesh_list = [[q,q,q] for q in mesh_densities]
+        ph3py_dict["task_label"] = tag
+        
+        # connect to DB
+        mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
+        
+        # read addertask_dict from DB
+        addertask_dict = mmdb.collection.find_one(
+            {
+                "task_label": {"$regex": f"{tag} DisplacedStructuresAdderTask"},
+            }
+        )
+        
+        # get user settings from the adder task
+        supercell_size_fc3 = addertask_dict["user_settings"].get("supercell_size_fc3", None)
+        supercell_size_fc2 = addertask_dict["user_settings"].get("supercell_size_fc2", None)
+        primitive_matrix = addertask_dict["user_settings"].get("primitive_matrix", None)
+        # update user settings
+        ph3py_dict["user_settings"]["t_min"] = t_min
+        ph3py_dict["user_settings"]["t_max"] = t_max
+        ph3py_dict["user_settings"]["t_step"] = t_step
+        ph3py_dict["user_settings"]["mesh_densities"] = mesh_densities
+ 
+        # get force_sets from the disp_fc3-* runs in DB
+        force_sets_fc3 = []
+        logger.info("PostAnalysis: Extracting fc3 docs from DB")
+        docs_p_fc3 = mmdb.collection.find(
+            {
+                "task_label": {"$regex": f"{tag} disp_fc3-*"},
+            }
+        )
+        docs_disp_fc3 = []
+        for p in docs_p_fc3:
+            docs_disp_fc3.append(p)
+        
+        docs_disp_fc3 = sorted(docs_disp_fc3, key = lambda i: i["task_label"])
+        logger.info("PostAnalysis: Read {} docs".format(len(docs_disp_fc3)))
+        logger.info("PostAnalysis: Generating fc3 force sets")
+        for d in docs_disp_fc3:
+            logger.info("PostAnalysis: Reading doc: {}".format(d["task_label"]))
+            forces = np.array(d["output"]["forces"])
+            force_sets_fc3.append(forces)
+            
+        # get disp_fc3.yaml from DB
+        # and get disp_dataset_fc3 from disp_fc3.yaml
+        logger.info("PostAnalysis: Writing disp_fc3.yaml")
+        write_yaml_from_dict(addertask_dict["yaml_fc3"], "disp_fc3.yaml")
+
+        disp_dataset_fc3 = parse_disp_fc3_yaml(filename="disp_fc3.yaml")
+
+        # generate FORCES_FC3
+        logger.info("PostAnalysis: Writing FORCES_FC3")
+        write_FORCES_FC3(disp_dataset_fc3, force_sets_fc3, filename="FORCES_FC3")
+
+        # get relaxation task document 
+        doc_relaxation = mmdb.collection.find_one(
+            {
+                "task_label": {"$regex": f"{tag} structure optimization"},
+            }
+        )
+        
+        # get optimized unitcell structure
+        unitcell = Structure.from_dict(doc_relaxation["calcs_reversed"][0]["output"]["structure"])
+        ph_unitcell = get_phonopy_structure(unitcell)
+        unitcell.to(fmt="poscar", filename="POSCAR-unitcell") # FOR TESTING
+        
+        # get supercell_matrices
+        supercell_matrix_fc3 = np.eye(3) * np.array(supercell_size_fc3)
+        
+        # prepare Phono3py instance
+        logger.info("PostAnalysis: Preparing Phono3py instance")
+        phono3py = Phono3py(unitcell=ph_unitcell,
+                            supercell_matrix=supercell_matrix_fc3,
+                            phonon_supercell_matrix=supercell_matrix_fc2,
+                            primitive_matrix=primitive_matrix,
+                            mesh_numbers=[3,3,3],
+                            log_level=1, # log_level=0 make phono3py quiet
+                           )
+        
+        # initialize list for kappa storage
+        ph3py_dict["convergence_test"] = []
+        ph3py_dict["temperature"] = range(t_min, t_max, t_step)
+        
+        # run thermal conductivity using different mesh numbers
+        for mesh in mesh_list:
+            # update mesh number
+            logger.info(f"PostAnalysis: {mesh = }")
+            phono3py.mesh_number = mesh
+            
+            # use run_thermal_conductivity()
+            # which will read disp_fc3.yaml and FORCES_FC3
+            # this operation will generate file kappa-*.hdf5
+            logger.info("PostAnalysis: Evaluating thermal conductivity")
+            if "kappa-m{}{}{}.hdf5".format(*mesh) in os.listdir(os.getcwd()):
+                logger.info("PostAnalysis: Deleting previous kappa-m{}{}{}.hdf5 file".format(*mesh))
+                os.remove("kappa-m{}{}{}.hdf5".format(*mesh))
+            run_thermal_conductivity(phono3py, t_min, t_max, t_step)
+            
+            # parse kappa-*.hdf5
+            logger.info("PostAnalysis: Parsing kappa-m{}{}{}.hdf5".format(*mesh))
+            f = h5py.File("kappa-m{}{}{}.hdf5".format(*mesh))
+            kappa_dict = {"mesh_number": mesh, "kappa": f["kappa"][:].tolist()}
+            ph3py_dict["convergence_test"].append(kappa_dict)
+            
+        # add more informations in ph3py_dict        
+        calc_dir = os.getcwd()
+        fullpath = os.path.abspath(calc_dir)
+        ph3py_dict["dir_name"] = fullpath
+
+        # store results in ph3py_tasks collection
+        coll = mmdb.db["ph3py_tasks_convergence_test"]
+        # if coll.find_one({"task_label": {"$regex": f"{tag}"}}) is not None:
+        ph3py_dict["last_updated"] = datetime.utcnow()
+            
+        coll.update_one(
+            {"task_label": {"$regex": f"{tag}"}}, {"$set": ph3py_dict}, upsert=True
+        )
+        
+        return FWAction()
