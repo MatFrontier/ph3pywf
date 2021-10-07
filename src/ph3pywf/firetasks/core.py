@@ -618,7 +618,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
                             supercell_matrix=supercell_matrix_fc3,
                             phonon_supercell_matrix=supercell_matrix_fc2,
                             primitive_matrix=primitive_matrix,
-                            mesh_numbers=[3,3,3],
+                            mesh=[3,3,3],
                             log_level=1, # log_level=0 make phono3py quiet
                            )
         
@@ -630,7 +630,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         for mesh in mesh_list:
             # update mesh number
             logger.info(f"PostAnalysis: {mesh = }")
-            phono3py.mesh_number = mesh
+            phono3py.mesh = mesh
             
             # use run_thermal_conductivity()
             # which will read disp_fc3.yaml and FORCES_FC3
@@ -644,7 +644,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
             # parse kappa-*.hdf5
             logger.info("PostAnalysis: Parsing kappa-m{}{}{}.hdf5".format(*mesh))
             f = h5py.File("kappa-m{}{}{}.hdf5".format(*mesh))
-            kappa_dict = {"mesh_number": mesh, "kappa": f["kappa"][:].tolist()}
+            kappa_dict = {"mesh": mesh, "kappa": f["kappa"][:].tolist()}
             ph3py_dict["convergence_test"].append(kappa_dict)
             
         # add more informations in ph3py_dict        
