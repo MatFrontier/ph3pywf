@@ -607,6 +607,10 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         
         # get supercell_matrices
         supercell_matrix_fc3 = np.eye(3) * np.array(supercell_size_fc3)
+        if supercell_size_fc2 is not None:
+            supercell_matrix_fc2 = np.eye(3) * np.array(supercell_size_fc2)
+        else:
+            supercell_matrix_fc2 = supercell_matrix_fc3
         
         # prepare Phono3py instance
         logger.info("PostAnalysis: Preparing Phono3py instance")
