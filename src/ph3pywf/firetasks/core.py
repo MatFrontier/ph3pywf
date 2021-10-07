@@ -581,6 +581,27 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
             logger.info("PostAnalysis: Reading doc: {}".format(d["task_label"]))
             forces = np.array(d["output"]["forces"])
             force_sets_fc3.append(forces)
+        
+        # get force_sets_fc2 from the disp_fc2-* runs in DB
+        if supercell_size_fc2 is not None:
+            force_sets_fc2 = []
+            logger.info("PostAnalysis: Extracting fc2 docs from DB")
+            docs_p_fc2 = mmdb.collection.find(
+                {
+                    "task_label": {"$regex": f"{tag} disp_fc2-*"},
+                }
+            )
+            docs_disp_fc2 = []
+            for p in docs_p_fc2:
+                docs_disp_fc2.append(p)
+
+            docs_disp_fc2 = sorted(docs_disp_fc2, key = lambda i: i["task_label"])
+            logger.info("PostAnalysis: Read {} docs".format(len(docs_disp_fc2)))
+            logger.info("PostAnalysis: Generating fc2 force sets")
+            for d in docs_disp_fc2:
+                logger.info("PostAnalysis: Reading doc: {}".format(d["task_label"]))
+                forces = np.array(d["output"]["forces"])
+                force_sets_fc2.append(forces)
             
         # get disp_fc3.yaml from DB
         # and get disp_dataset_fc3 from disp_fc3.yaml
@@ -592,6 +613,18 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         # generate FORCES_FC3
         logger.info("PostAnalysis: Writing FORCES_FC3")
         write_FORCES_FC3(disp_dataset_fc3, force_sets_fc3, filename="FORCES_FC3")
+        
+        # get disp_fc2.yaml from DB
+        # and get disp_dataset_fc2 from disp_fc2.yaml
+        if supercell_size_fc2 is not None:
+            logger.info("PostAnalysis: Writing disp_fc2.yaml")
+            write_yaml_from_dict(addertask_dict["yaml_fc2"], "disp_fc2.yaml")
+            
+            disp_dataset_fc2 = parse_disp_fc2_yaml(filename="disp_fc2.yaml")
+            
+            # generate FORCES_FC2
+            logger.info("PostAnalysis: Writing FORCES_FC2")
+            write_FORCES_FC2(disp_dataset_fc2, force_sets_fc2, filename="FORCES_FC2")
 
         # get relaxation task document 
         doc_relaxation = mmdb.collection.find_one(
