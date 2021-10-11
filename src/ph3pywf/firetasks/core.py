@@ -535,7 +535,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         t_min = self.get("t_min", 10)
         t_max = self.get("t_max", 1001)
         t_step = self.get("t_step", 10)
-        mesh_densities = self.get("mesh_densities", [5,7,9,11,13])
+        mesh_densities = self.get("mesh_densities", [3,5,7,9,11,13,15])
         
         mesh_list = [[q,q,q] for q in mesh_densities]
         ph3py_dict["task_label"] = tag
@@ -689,6 +689,78 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         coll = mmdb.db["ph3py_tasks_convergence_test"]
         # if coll.find_one({"task_label": {"$regex": f"{tag}"}}) is not None:
         ph3py_dict["last_updated"] = datetime.utcnow()
+            
+        coll.update_one(
+            {"task_label": {"$regex": f"{tag}"}}, {"$set": ph3py_dict}, upsert=True
+        )
+        
+        return FWAction()
+
+@explicit_serialize
+class Phono3pyEvaluateKappaFromConvTest(FiretaskBase):
+    """
+    Compute thermal conductivity using different mesh density and store in db.
+    
+    Required params: 
+        tag (str): unique label to identify contents related to this WF.
+        db_file (str): path to file containing the database credentials. Supports env_chk.
+    
+    """
+    required_params = ["tag", "db_file"]
+    optional_params = []
+    
+    def run_task(self, fw_spec):
+        tag = self["tag"]
+        db_file = env_chk(self.get("db_file"), fw_spec)
+        
+        # define fitting exp function
+        def _exp_func(x, a, b, c):
+            # c is the key, as the value at inf x
+            y = (-a) * np.exp(-b * x) + c
+            return y
+        
+        # connect to DB
+        mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
+
+        # read conv_test_doc from DB
+        conv_test_doc = mmdb.db["ph3py_tasks_convergence_test"].find_one(
+            {
+                "task_label": {"$regex": f"{tag}"},
+            }
+        )
+
+        # get calculation result
+        temperature = np.array(conv_test_doc["temperature"])
+        mesh_densities = conv_test_doc["user_settings"]["mesh_densities"]
+        kappa_list = []
+        for each_mesh in conv_test_doc["convergence_test"]:
+            kappa_list.append(np.array(each_mesh["kappa"])[:,:])
+
+        # curve fitting
+        from scipy.optimize import curve_fit
+        bounds = (0, np.inf)
+        xdata = np.array(mesh_densities)
+        kappa_fitted = np.zeros((len(temperature), 6))
+        for direction in range(6):
+            for t in range(len(temperature)):
+                ydata = np.array([kappa_list[mesh][t,direction] for mesh in range(len(mesh_densities))])
+                popt, _ = curve_fit(func, xdata, ydata, bounds=bounds)
+                print(f"c = {popt[-1]}") # FOR TESTING
+                kappa_fitted[t, direction] = popt[-1]
+        
+        # initialize doc
+        ph3py_dict = {}
+        
+        # store evaluated kappa
+        ph3py_dict["temperature_fitted"] = temperature.tolist()
+        ph3py_dict["kappa_fitted"] = kappa_fitted.tolist()
+        
+        # store results in ph3py_tasks collection
+        coll = mmdb.db["ph3py_tasks"]
+        # if coll.find_one({"task_label": {"$regex": f"{tag}"}}) is not None:
+        ph3py_dict["last_updated"] = datetime.utcnow()
+        
+#         write_yaml_from_dict(ph3py_dict, "ph3py_dict.yaml") # FOR TESTING
             
         coll.update_one(
             {"task_label": {"$regex": f"{tag}"}}, {"$set": ph3py_dict}, upsert=True
