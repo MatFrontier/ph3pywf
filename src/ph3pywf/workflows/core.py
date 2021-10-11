@@ -400,7 +400,7 @@ def wf_ph3py_get_kappa_convergence(tag,
     t_min = c.get("t_min", 10)
     t_max = c.get("t_max", 1301)
     t_step = c.get("t_step", 10)
-    mesh_densities = c.get("mesh_densities", [5,7,9,11,13])
+    mesh_densities = c.get("mesh_densities", [3,5,7,9,11,13,15])
     
     # connect to DB
     mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
