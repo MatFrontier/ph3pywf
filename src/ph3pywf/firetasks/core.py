@@ -23,6 +23,7 @@ from atomate.utils.utils import env_chk
 import numpy as np
 from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
+from pymatgen.io.vasp import Kpoints
 from ph3pywf.utils.sets import Ph3pyRelaxSet, Ph3pyStaticSet
 import yaml
 import os
@@ -517,7 +518,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         t_min (float): min temperature (in K)
         t_max (float): max temperature (in K)
         t_step (float): temperature step (in K)
-        mesh_densities (list): list of sampling mesh number along any axis in reciprocal space.
+        mesh_densities (list): list of reciprocal densities for q-points.
     
     """
     required_params = ["tag", "db_file"]
@@ -535,11 +536,10 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         t_min = self.get("t_min", 10)
         t_max = self.get("t_max", 1301)
         t_step = self.get("t_step", 10)
-        mesh_densities = self.get("mesh_densities", [3,5,7,9,11,13,15])
+        mesh_densities = self.get("mesh_densities", [128 * k for k in range(1,25)])
         
-        mesh_list = [[q,q,q] for q in mesh_densities]
         ph3py_dict["task_label"] = tag
-        
+                
         # connect to DB
         mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
         
@@ -560,6 +560,30 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         ph3py_dict["user_settings"]["t_min"] = t_min
         ph3py_dict["user_settings"]["t_max"] = t_max
         ph3py_dict["user_settings"]["t_step"] = t_step
+        
+        # read fc3 doc from DB for structure
+        doc_fc3 = mmdb.collection.find_one(
+            {
+                "task_label": {"$regex": f"{tag} disp_fc3"},
+            }
+        )
+        
+        # get supercell structure for fc3
+        structure = Structure.from_dict(doc_fc3["input"]["structure"])
+        
+        # set q-point mesh using Kpoints class method
+        mesh_list = []
+        for mesh_density in mesh_densities:
+            kpoints = Kpoints.automatic_density_by_vol(
+                structure, mesh_density
+            )
+
+            if len(mesh_list) and kpoints.kpts[0] == mesh_list[-1]:
+                mesh_densities.remove(mesh_density)
+                continue
+
+            mesh_list.append(kpoints.kpts[0])
+
         ph3py_dict["user_settings"]["mesh_densities"] = mesh_densities
  
         # get force_sets from the disp_fc3-* runs in DB
