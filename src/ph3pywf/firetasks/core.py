@@ -533,7 +533,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
         t_min = self.get("t_min", 10)
-        t_max = self.get("t_max", 1001)
+        t_max = self.get("t_max", 1301)
         t_step = self.get("t_step", 10)
         mesh_densities = self.get("mesh_densities", [3,5,7,9,11,13,15])
         
