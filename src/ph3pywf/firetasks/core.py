@@ -573,16 +573,22 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         
         # set q-point mesh using Kpoints class method
         mesh_list = []
+        _tmp = []
         for mesh_density in mesh_densities:
             kpoints = Kpoints.automatic_density_by_vol(
                 structure, mesh_density
             )
-
+            print(f"{mesh_density = }") # FOR TESTING
+            print(f"{kpoints.kpts[0] = }") # FOR TESTING
             if len(mesh_list) and kpoints.kpts[0] == mesh_list[-1]:
-                mesh_densities.remove(mesh_density)
+                print("\tignore") # FOR TESTING
+                _tmp.append(mesh_density)
                 continue
 
             mesh_list.append(kpoints.kpts[0])
+
+        for m in _tmp:
+            mesh_densities.remove(m)
 
         ph3py_dict["user_settings"]["mesh_densities"] = mesh_densities
  
