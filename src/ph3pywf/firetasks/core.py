@@ -575,17 +575,17 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         mesh_list = []
         _tmp = []
         for mesh_density in mesh_densities:
-            kpoints = Kpoints.automatic_density_by_vol(
+            qpoints = Kpoints.automatic_density_by_vol(
                 structure, mesh_density
             )
             print(f"{mesh_density = }") # FOR TESTING
-            print(f"{kpoints.kpts[0] = }") # FOR TESTING
-            if len(mesh_list) and kpoints.kpts[0] == mesh_list[-1]:
+            print(f"{qpoints.kpts[0] = }") # FOR TESTING
+            if len(mesh_list) and qpoints.kpts[0] == mesh_list[-1]:
                 print("\tignore") # FOR TESTING
                 _tmp.append(mesh_density)
                 continue
 
-            mesh_list.append(kpoints.kpts[0])
+            mesh_list.append(qpoints.kpts[0])
         
         print("Generated mesh list:") # FOR TESTING
         for mesh in mesh_list: # FOR TESTING
