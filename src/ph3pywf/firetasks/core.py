@@ -580,12 +580,17 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
             )
             print(f"{mesh_density = }") # FOR TESTING
             print(f"{qpoints.kpts[0] = }") # FOR TESTING
+            if any(qpt%2==0 for qpt in qpoints.kpts[0]):
+                print("\tignore even") # FOR TESTING
+                _tmp.append(mesh_density)
+                continue
             if len(mesh_list) and qpoints.kpts[0] == mesh_list[-1]:
-                print("\tignore") # FOR TESTING
+                print("\tignore repeated") # FOR TESTING
                 _tmp.append(mesh_density)
                 continue
 
             mesh_list.append(qpoints.kpts[0])
+            
         
         print("Generated mesh list:") # FOR TESTING
         for mesh in mesh_list: # FOR TESTING
@@ -595,6 +600,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
             mesh_densities.remove(m)
 
         ph3py_dict["user_settings"]["mesh_densities"] = mesh_densities
+        ph3py_dict["mesh_list"] = mesh_list
  
         # get force_sets from the disp_fc3-* runs in DB
         force_sets_fc3 = []
