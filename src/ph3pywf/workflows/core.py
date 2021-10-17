@@ -351,6 +351,7 @@ def wf_ph3py_convergence_test(tag,
     t_max = c.get("t_max", 1301)
     t_step = c.get("t_step", 10)
     mesh_densities = c.get("mesh_densities", [128 * k for k in range(1,25)])
+    mesh_list = c.get("mesh_list", None)
 #     print(mesh_densities) # FOR TESTING
     
     # connect to DB
@@ -378,6 +379,7 @@ def wf_ph3py_convergence_test(tag,
             t_max=t_max,
             t_step=t_step,
             mesh_densities=mesh_densities,
+            mesh_list=mesh_list,
         ),
         name=fw_name, 
     )

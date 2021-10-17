@@ -519,13 +519,16 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         t_max (float): max temperature (in K)
         t_step (float): temperature step (in K)
         mesh_densities (list): list of reciprocal densities for q-points.
+        mesh_list (list): list of q-points meshes. 
+            if provided, will skip automatic generation of meshes using mesh_densities.
     
     """
     required_params = ["tag", "db_file"]
     optional_params = ["t_min",
                        "t_max",
                        "t_step",
-                       "mesh_densities"]
+                       "mesh_densities",
+                       "mesh_list"]
         
     def run_task(self, fw_spec):
         # initialize doc
@@ -537,6 +540,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         t_max = self.get("t_max", 1301)
         t_step = self.get("t_step", 10)
         mesh_densities = self.get("mesh_densities", [128 * k for k in range(1,25)])
+        mesh_list = self.get("mesh_list", None)
         
         ph3py_dict["task_label"] = tag
                 
@@ -571,25 +575,27 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         # get supercell structure for fc3
         structure = Structure.from_dict(doc_fc3["input"]["structure"])
         
+        # if mesh_list is not provided
         # set q-point mesh using Kpoints class method
-        mesh_list = []
-        _tmp = []
-        for mesh_density in mesh_densities:
-            qpoints = Kpoints.automatic_density_by_vol(
-                structure, mesh_density
-            )
-            print(f"{mesh_density = }") # FOR TESTING
-            print(f"{qpoints.kpts[0] = }") # FOR TESTING
-            if any(qpt%2==0 for qpt in qpoints.kpts[0]):
-                print("\tignore even") # FOR TESTING
-                _tmp.append(mesh_density)
-                continue
-            if len(mesh_list) and qpoints.kpts[0] == mesh_list[-1]:
-                print("\tignore repeated") # FOR TESTING
-                _tmp.append(mesh_density)
-                continue
+        if not mesh_list:
+            mesh_list = []
+            _tmp = []
+            for mesh_density in mesh_densities:
+                qpoints = Kpoints.automatic_density_by_vol(
+                    structure, mesh_density
+                )
+                print(f"{mesh_density = }") # FOR TESTING
+                print(f"{qpoints.kpts[0] = }") # FOR TESTING
+                if any(qpt%2==0 for qpt in qpoints.kpts[0]):
+                    print("\tignore even") # FOR TESTING
+                    _tmp.append(mesh_density)
+                    continue
+                if len(mesh_list) and qpoints.kpts[0] == mesh_list[-1]:
+                    print("\tignore repeated") # FOR TESTING
+                    _tmp.append(mesh_density)
+                    continue
 
-            mesh_list.append(qpoints.kpts[0])
+                mesh_list.append(qpoints.kpts[0])
             
         
         print("Generated mesh list:") # FOR TESTING
