@@ -596,14 +596,14 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
                     continue
 
                 mesh_list.append(qpoints.kpts[0])
-            
         
-        print("Generated mesh list:") # FOR TESTING
-        for mesh in mesh_list: # FOR TESTING
-            print(f"\t{mesh}") # FOR TESTING
+            print("Generated mesh list:") # FOR TESTING
+            for mesh in mesh_list: # FOR TESTING
+                print(f"\t{mesh}") # FOR TESTING
 
-        for m in _tmp:
-            mesh_densities.remove(m)
+            for m in _tmp:
+                mesh_densities.remove(m)
+                
 
         ph3py_dict["user_settings"]["mesh_densities"] = mesh_densities
         ph3py_dict["mesh_list"] = mesh_list
