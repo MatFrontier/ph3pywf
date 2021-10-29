@@ -81,7 +81,7 @@ INCAR:
   PREC: Accurate
   SIGMA: 0.01
 KPOINTS:
-  reciprocal_density: 128
+  reciprocal_density: 64
 POTCAR_FUNCTIONAL: PBE_54
 POTCAR:
   Ac: Ac

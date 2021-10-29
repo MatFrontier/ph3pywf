@@ -65,6 +65,7 @@ def wf_phono3py(structure,
     user_potcar_settings = c.get("USER_POTCAR_SETTINGS", {})
     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
     user_kpoints_settings = c.get("USER_KPOINTS_SETTINGS", None)
+    user_kpoints_settings_static = c.get("USER_KPOINTS_SETTINGS_STATIC", None)
     t_min = c.get("t_min", 10)
     t_max = c.get("t_max", 1301)
     t_step = c.get("t_step", 10)
@@ -97,7 +98,7 @@ def wf_phono3py(structure,
                                                                     user_incar_settings=user_incar_settings_static,
                                                                     user_potcar_settings=user_potcar_settings,
                                                                     user_potcar_functional=user_potcar_functional,
-                                                                    user_kpoints_settings=user_kpoints_settings,
+                                                                    user_kpoints_settings=user_kpoints_settings_static,
                                                                    )
     
     # convert GetDisplacedStructuresFWs to FW and add to FW list
