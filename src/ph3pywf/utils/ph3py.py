@@ -504,5 +504,5 @@ def convtest_preview_mesh(db_file_local, tag, mesh_densities=None):
         mesh_densities.remove(m)
     
     print("Reduced mesh densities:") # FOR TESTING
-    for mesh_d in mesh_densities:
-        print(f"\t{mesh_d}")
+    for mesh_d in mesh_densities: # FOR TESTING
+        print(f"\t{mesh_d}") # FOR TESTING
