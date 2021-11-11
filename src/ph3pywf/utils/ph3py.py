@@ -454,3 +454,55 @@ def get_from_gridfs(db, task_doc, key, filename=None):
     # retrieve dict
     if fs_info["type"] == "dict":
         return get_dict_from_gridfs(fs_id, db, collection)
+
+########################
+# POST ANALYSIS HELPER #
+########################
+
+def convtest_preview_mesh(db_file_local, tag, mesh_densities=None):
+    mesh_densities = mesh_densities or [256 * k for k in range(1,150)]
+
+    # connect to DB
+    mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
+
+    # read fc3 doc from DB for structure
+    doc_fc3 = mmdb.collection.find_one(
+        {
+            "task_label": {"$regex": f"{tag} disp_fc3"},
+        }
+    )
+
+    # get supercell structure for fc3
+    structure = Structure.from_dict(doc_fc3["input"]["structure"])
+
+    # if mesh_list is not provided
+    # set q-point mesh using Kpoints class method
+    mesh_list = []
+    _tmp = []
+    for mesh_density in mesh_densities:
+        qpoints = Kpoints.automatic_density_by_vol(
+            structure, mesh_density
+        )
+    #     print(f"{mesh_density = }") # FOR TESTING
+    #     print(f"{qpoints.kpts[0] = }") # FOR TESTING
+        if any(qpt%2==0 for qpt in qpoints.kpts[0]):
+    #         print("\tignore even") # FOR TESTING
+            _tmp.append(mesh_density)
+            continue
+        if len(mesh_list) and qpoints.kpts[0] == mesh_list[-1]:
+    #         print("\tignore repeated") # FOR TESTING
+            _tmp.append(mesh_density)
+            continue
+
+        mesh_list.append(qpoints.kpts[0])
+
+    print("Generated mesh list:") # FOR TESTING
+    for mesh in mesh_list: # FOR TESTING
+        print(f"\t{mesh}") # FOR TESTING
+
+    for m in _tmp:
+        mesh_densities.remove(m)
+    
+    print("Reduced mesh densities:") # FOR TESTING
+    for mesh_d in mesh_densities:
+        print(f"\t{mesh_d}")
