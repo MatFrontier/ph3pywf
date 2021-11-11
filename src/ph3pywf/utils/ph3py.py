@@ -459,6 +459,8 @@ def get_from_gridfs(db, task_doc, key, filename=None):
 # POST ANALYSIS HELPER #
 ########################
 
+from pymatgen.io.vasp import Kpoints
+
 def convtest_preview_mesh(db_file_local, tag, mesh_densities=None):
     mesh_densities = mesh_densities or [256 * k for k in range(1,150)]
 
