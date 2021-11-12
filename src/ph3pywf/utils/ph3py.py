@@ -146,7 +146,7 @@ def run_thermal_conductivity(phono3py, t_min=0, t_max=1001, t_step=10):
     """
     
     # create fc3 and fc2
-    if phono3py.phonon_supercell_matrix is not None:
+    if phono3py.phonon_supercell_matrix != phono3py.supercell_matrix:
         # if fc2 supercell size is specified, 
         # prepare dataset of fc3 from disp_fc3.yaml and FORCES_FC3
         # and fc2 from disp_fc2.yaml and FORCES_FC2
