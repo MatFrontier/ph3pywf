@@ -565,6 +565,11 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         ph3py_dict["user_settings"]["t_max"] = t_max
         ph3py_dict["user_settings"]["t_step"] = t_step
         
+        # add more informations in ph3py_dict
+        calc_dir = os.getcwd()
+        fullpath = os.path.abspath(calc_dir)
+        ph3py_dict["dir_name"] = fullpath
+        
         # read fc3 doc from DB for structure
         doc_fc3 = mmdb.collection.find_one(
             {
@@ -726,18 +731,24 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
             kappa_dict = {"mesh": mesh, "kappa": f["kappa"][:].tolist()}
             ph3py_dict["convergence_test"].append(kappa_dict)
             
-        # add more informations in ph3py_dict        
-        calc_dir = os.getcwd()
-        fullpath = os.path.abspath(calc_dir)
-        ph3py_dict["dir_name"] = fullpath
+            # store result of progress so far (possible to optimize but not critical)
+            ph3py_dict["last_updated"] = datetime.utcnow()
+            coll.update_one(
+                {"task_label": {"$regex": f"{tag}"}},
+                {"$set": ph3py_dict},
+                upsert=True,
+            )
+        
 
         # store results in ph3py_tasks collection
         coll = mmdb.db["ph3py_tasks_convergence_test"]
-        # if coll.find_one({"task_label": {"$regex": f"{tag}"}}) is not None:
         ph3py_dict["last_updated"] = datetime.utcnow()
+        ph3py_dict["success"] = True
             
         coll.update_one(
-            {"task_label": {"$regex": f"{tag}"}}, {"$set": ph3py_dict}, upsert=True
+            {"task_label": {"$regex": f"{tag}"}},
+            {"$set": ph3py_dict},
+            upsert=True,
         )
         
         return FWAction()
