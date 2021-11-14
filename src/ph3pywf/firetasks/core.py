@@ -710,6 +710,9 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         ph3py_dict["convergence_test"] = []
         ph3py_dict["temperature"] = list(range(t_min, t_max, t_step))
         
+        # change to ph3py_tasks_convergence_test collection
+        coll = mmdb.db["ph3py_tasks_convergence_test"]
+        
         # run thermal conductivity using different mesh numbers
         for mesh in mesh_list:
             # update mesh number
@@ -740,8 +743,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
             )
         
 
-        # store results in ph3py_tasks collection
-        coll = mmdb.db["ph3py_tasks_convergence_test"]
+        # store results in collection
         ph3py_dict["last_updated"] = datetime.utcnow()
         ph3py_dict["success"] = True
             
