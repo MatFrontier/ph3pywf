@@ -5,11 +5,9 @@ __email__ = "kerui.lai@mail.mcgill.ca"
 
 import numpy as np
 from monty.dev import requires
-from monty.serialization import loadfn
 
-from pymatgen.core import Lattice, Structure
+from pymatgen.core import Structure
 from pymatgen.phonon.bandstructure import (
-    PhononBandStructure,
     PhononBandStructureSymmLine,
 )
 from pymatgen.phonon.dos import CompletePhononDos, PhononDos

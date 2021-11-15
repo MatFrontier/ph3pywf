@@ -4,7 +4,7 @@ __author__ = "Kerui Lai"
 __email__ = "kerui.lai@mail.mcgill.ca"
 
 from datetime import datetime
-from fireworks.core.firework import FWAction, Firework, FiretaskBase, Workflow
+from fireworks.core.firework import FWAction, FiretaskBase
 from atomate.vasp.database import VaspCalcDb
 from pymatgen.core import Structure
 from ph3pywf.utils.ph3py import (
@@ -21,19 +21,17 @@ from ph3pywf.utils.ph3py import (
 from fireworks import explicit_serialize
 from atomate.utils.utils import env_chk
 import numpy as np
-from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
-from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
+from atomate.vasp.fireworks.core import StaticFW
 from pymatgen.io.vasp import Kpoints
-from ph3pywf.utils.sets import Ph3pyRelaxSet, Ph3pyStaticSet
 import yaml
 import os
 import sys
 from atomate.utils.utils import get_logger
 from phono3py import Phono3py
-from pymatgen.io.phonopy import get_phonopy_structure, get_phonon_band_structure_symm_line_from_fc, get_phonon_dos_from_fc
+from pymatgen.io.phonopy import get_phonopy_structure
 import h5py
 from phono3py.file_IO import parse_disp_fc2_yaml, parse_disp_fc3_yaml, write_FORCES_FC2, write_FORCES_FC3
-from phonopy.file_IO import parse_FORCE_CONSTANTS, write_FORCE_CONSTANTS
+from phonopy.file_IO import write_FORCE_CONSTANTS
 import phonopy
 
 logger = get_logger(__name__)
