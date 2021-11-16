@@ -63,11 +63,11 @@ def wf_phono3py(structure,
     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
     user_kpoints_settings = c.get("USER_KPOINTS_SETTINGS", None)
     user_kpoints_settings_static = c.get("USER_KPOINTS_SETTINGS_STATIC", None)
-    t_min = c.get("t_min", 10)
+    t_min = c.get("t_min", 100)
     t_max = c.get("t_max", 1301)
-    t_step = c.get("t_step", 10)
+    t_step = c.get("t_step", 50)
     primitive_matrix = c.get("primitive_matrix", None)
-    mesh = c.get("mesh", [20,20,20])
+    mesh = c.get("mesh", [11,11,11])
     is_nac = c.get("is_nac", False)
     
     # store tag in metadata
@@ -77,11 +77,11 @@ def wf_phono3py(structure,
     
     # update vasp_input_set_relax
     vasp_input_set_relax = vasp_input_set_relax or Ph3pyRelaxSet(structure,
-                                                                user_incar_settings=user_incar_settings,
-                                                                user_potcar_settings=user_potcar_settings,
-                                                                user_potcar_functional=user_potcar_functional,
-                                                                user_kpoints_settings=user_kpoints_settings,
-                                                               )
+                                                                 user_incar_settings=user_incar_settings,
+                                                                 user_potcar_settings=user_potcar_settings,
+                                                                 user_potcar_functional=user_potcar_functional,
+                                                                 user_kpoints_settings=user_kpoints_settings,
+                                                                )
     
 
     # structure optimization firework
@@ -115,6 +115,7 @@ def wf_phono3py(structure,
             cutoff_pair_distance=cutoff_pair_distance, 
             atom_disp=atom_disp, 
             vis_static=vasp_input_set_static,
+            primitive_matrix=primitive_matrix,
             user_settings=c,
             is_nac=is_nac,
         ), 

@@ -120,21 +120,14 @@ def get_displaced_structures(structure,
     return structure_list_fc3, structure_list_fc2
 
 
-from phonopy.interface.vasp import read_vasp
-from phonopy.file_IO import parse_BORN
-from phonopy.units import Bohr, Hartree
 from phonopy.harmonic.force_constants import show_drift_force_constants
 from phono3py.phonon3.fc3 import show_drift_fc3
 from phono3py import Phono3py
 from phono3py.cui.create_force_constants import parse_forces
-from phono3py.file_IO import (parse_disp_fc3_yaml,
-                              parse_disp_fc2_yaml,
+from phono3py.file_IO import (parse_disp_fc2_yaml,
                               parse_FORCES_FC2,
-                              parse_FORCES_FC3,
                               write_fc3_to_hdf5,
-                              write_fc2_to_hdf5,
-                              read_fc3_from_hdf5,
-                              read_fc2_from_hdf5)
+                              write_fc2_to_hdf5)
 
 def run_thermal_conductivity(phono3py, t_min=0, t_max=1001, t_step=10):
     """
