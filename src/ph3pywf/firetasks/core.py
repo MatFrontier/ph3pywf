@@ -567,6 +567,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         calc_dir = os.getcwd()
         fullpath = os.path.abspath(calc_dir)
         ph3py_dict["dir_name"] = fullpath
+        ph3py_dict["success"] = False
         
         # read fc3 doc from DB for structure
         doc_fc3 = mmdb.collection.find_one(
