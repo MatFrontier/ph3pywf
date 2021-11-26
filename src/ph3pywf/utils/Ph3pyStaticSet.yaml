@@ -3,7 +3,7 @@ PARENT: VASPIncarBase
 INCAR:
   ALGO: Normal
 #   EDIFF: 1.0e-4
-  EDIFF_PER_ATOM: 5.0e-06
+  EDIFF_PER_ATOM: 1.0e-09
   ENCUT: 520
   IBRION: -1
   ISIF: 3
