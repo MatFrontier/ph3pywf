@@ -88,6 +88,7 @@ def wf_phono3py(structure,
     fws = [OptimizeFW(structure=structure, 
                       vasp_input_set=vasp_input_set_relax, 
                       name=f"{tag} structure optimization", 
+                      job_type="normal",
                      )]
     
     # update vasp_input_set_static
