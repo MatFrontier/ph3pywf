@@ -26,7 +26,8 @@ def check_progress_and_rerun(tag):
         launchpad.rerun_fw(fw_id)
 
     # Rerun lost runs
-    LOST_ids = launchpad.detect_lostruns(expiration_secs=1*60*60)[1]
+    LOST_ids = launchpad.detect_lostruns(expiration_secs=1*60*60,
+                                         query={"name": {"$regex": tag}})[1]
     for fw_id in LOST_ids:
         print(f"INFO: rerunning lost run: {fw_id}")
         launchpad.rerun_fw(fw_id)
