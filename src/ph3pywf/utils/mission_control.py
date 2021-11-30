@@ -4,6 +4,9 @@ __author__ = "Kerui Lai"
 __email__ = "kerui.lai@mail.mcgill.ca"
 
 from fireworks import LaunchPad
+from fireworks.fw_config import LAUNCHPAD_LOC
+from atomate.vasp.database import VaspCalcDb
+import os
 
 def check_progress_and_rerun(tag):
     
@@ -33,3 +36,29 @@ def check_progress_and_rerun(tag):
         launchpad.rerun_fw(fw_id)
 
     print("DONE")
+
+def check_time_of_each_run(tag):
+    db_file = os.path.join(os.path.dirname(LAUNCHPAD_LOC), "db.json")
+    
+    mmdb = VaspCalcDb.from_db_file(db_file)
+    docs_p = mmdb.collection.find(
+        {
+            "task_label": {"$regex": f"{tag}"},
+        }
+    )
+
+    docs = []
+    for p in docs_p:
+        docs.append(p)
+    # print(type(docs[0]))
+    for d in docs:
+        print("{{task_label:\"{}\"}}".format(d["task_label"]))
+        if "nsites" in d:
+            print("nsites = {}".format(d["nsites"]))
+        if "input" in d:
+            print("EDIFF = {}".format(d["input"]["incar"]["EDIFF"]))
+        if "run_stats" in d:
+            if "standard" in d["run_stats"]:
+                print("Maximum memory used (kb) = {}".format(d["run_stats"]["standard"]["Maximum memory used (kb)"]))
+            print("Elapsed time (sec) = {}".format(d["run_stats"]["overall"]["Elapsed time (sec)"]))
+        print("")
