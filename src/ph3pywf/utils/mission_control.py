@@ -25,6 +25,13 @@ def check_progress_and_rerun(tag):
 
     # Rerun FIZZLED
     for fw_id in FIZZLED_ids:
+        d = launchpad.get_fw_dict_by_id(fw_id)
+        n_archived_launches = len(d["archived_launches"])
+        
+        # print a warning if a FW has failed more than 1 time
+        if n_archived_launches > 1:
+            print(f"WARNING: fw: {fw_id}, has FIZZLED {n_archived_launches} times")
+        
         print(f"INFO: rerunning FIZZLED fw: {fw_id}")
         launchpad.rerun_fw(fw_id)
 
