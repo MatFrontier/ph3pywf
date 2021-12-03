@@ -5,7 +5,7 @@ __email__ = "kerui.lai@mail.mcgill.ca"
 
 import sys
 import time
-import datetime
+from datetime import datetime
 import subprocess
 from ph3pywf.utils.mission_control import check_progress_and_rerun
 
