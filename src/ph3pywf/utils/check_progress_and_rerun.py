@@ -5,6 +5,7 @@ __email__ = "kerui.lai@mail.mcgill.ca"
 
 import sys
 import time
+import datetime
 import subprocess
 from ph3pywf.utils.mission_control import check_progress_and_rerun
 
@@ -14,9 +15,11 @@ def main():
     # if len(sys.argv) == 3:
     #     user = sys.argv[2]
     
-    sleep_time = 3600
+    sleep_time = 1200
     
     while True:
+        print(datetime.utcnow())
+        
         sq = subprocess.run(["squeue","-u",user], capture_output=True, text=True).stdout
         n_jobs = sq.count("\n") - 1
         print(f"{n_jobs} jobs running")
