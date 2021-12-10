@@ -503,6 +503,9 @@ class StoreStructureTask(FiretaskBase):
         if terminate:
             return FWAction()
 
+# TODO: add a bool parameter so that only the calculated meshes are updated
+# TODO:     instead of overwrite the entirity of mesh_list, temperature, and convergence_test
+# TODO: maybe necessary to rewrite the entire structure
 @explicit_serialize
 class Phono3pyMeshConvergenceToDb(FiretaskBase):
     """
