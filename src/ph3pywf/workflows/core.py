@@ -210,7 +210,7 @@ def wf_ph3py_post_analysis(tag,
 
 def wf_ph3py_convergence_test(tag,
                               db_file_local,
-                              name="phono3py post analysis only wf",
+                              name="phono3py convergence test wf",
                               c=None,
                              ):
     """
@@ -219,10 +219,10 @@ def wf_ph3py_convergence_test(tag,
     """
     c = c or {}
     db_file = c.get("db_file", DB_FILE)
-    t_min = c.get("t_min", 10)
+    t_min = c.get("t_min", 100)
     t_max = c.get("t_max", 1301)
-    t_step = c.get("t_step", 10)
-    mesh_densities = c.get("mesh_densities", [128 * k for k in range(1,25)])
+    t_step = c.get("t_step", 50)
+    mesh_densities = c.get("mesh_densities", [256 * k for k in range(1,100)])
     mesh_list = c.get("mesh_list", None)
 #     print(mesh_densities) # FOR TESTING
     
@@ -262,7 +262,7 @@ def wf_ph3py_convergence_test(tag,
 
 def wf_ph3py_get_kappa_convergence(tag,
                                    db_file_local,
-                                   name="phono3py post analysis only wf",
+                                   name="phono3py get kappa from convergence test wf",
                                    c=None,
                                   ):
     """
@@ -272,10 +272,10 @@ def wf_ph3py_get_kappa_convergence(tag,
     """
     c = c or {}
     db_file = c.get("db_file", DB_FILE)
-    t_min = c.get("t_min", 10)
+    t_min = c.get("t_min", 100)
     t_max = c.get("t_max", 1301)
-    t_step = c.get("t_step", 10)
-    mesh_densities = c.get("mesh_densities", [128 * k for k in range(1,25)])
+    t_step = c.get("t_step", 50)
+    mesh_densities = c.get("mesh_densities", [256 * k for k in range(1,100)])
     
     # connect to DB
     mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)

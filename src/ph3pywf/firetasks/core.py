@@ -227,10 +227,10 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
-        t_min = self.get("t_min", 10)
-        t_max = self.get("t_max", 1001)
-        t_step = self.get("t_step", 10)
-        mesh = self.get("mesh", [20, 20, 20])
+        t_min = self.get("t_min", 100)
+        t_max = self.get("t_max", 1301)
+        t_step = self.get("t_step", 50)
+        mesh = self.get("mesh", [11, 11, 11])
         born_filename = self.get("born_filename", None)
         
         ph3py_dict["task_label"] = tag
@@ -534,10 +534,10 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
-        t_min = self.get("t_min", 10)
+        t_min = self.get("t_min", 100)
         t_max = self.get("t_max", 1301)
-        t_step = self.get("t_step", 10)
-        mesh_densities = self.get("mesh_densities", [128 * k for k in range(1,25)])
+        t_step = self.get("t_step", 50)
+        mesh_densities = self.get("mesh_densities", [256 * k for k in range(1,100)])
         mesh_list = self.get("mesh_list", None)
         
         ph3py_dict["task_label"] = tag
@@ -601,9 +601,9 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
 
                 mesh_list.append(qpoints.kpts[0])
         
-            print("Generated mesh list:") # FOR TESTING
-            for mesh in mesh_list: # FOR TESTING
-                print(f"\t{mesh}") # FOR TESTING
+            logger.info("Generated mesh list:")
+            for mesh in mesh_list:
+                print(f"\t{mesh}")
 
             for m in _tmp:
                 mesh_densities.remove(m)
@@ -772,9 +772,9 @@ class Phono3pyEvaluateKappaFromConvTest(FiretaskBase):
         db_file = env_chk(self.get("db_file"), fw_spec)
         
         # define fitting exp function
-        def _exp_func(x, a, b, c):
-            # c is the key, as the value at inf x
-            y = (-a) * np.exp(-b * x) + c
+        def _exp_func(x, kappa_inf, epsilon):
+            # kappa_inf is the key, as the value at inf x
+            y = kappa_inf * (1 - np.exp(-x / epsilon))
             return y
         
         # connect to DB
@@ -790,35 +790,43 @@ class Phono3pyEvaluateKappaFromConvTest(FiretaskBase):
         # get calculation result
         temperature = np.array(conv_test_doc["temperature"])
         mesh_densities = conv_test_doc["user_settings"]["mesh_densities"]
+        mesh_list = []
         kappa_list = []
         for each_mesh in conv_test_doc["convergence_test"]:
+            mesh_list.append(each_mesh["mesh"])
             kappa_list.append(np.array(each_mesh["kappa"])[:,:])
 
         # curve fitting
         from scipy.optimize import curve_fit
         bounds = (0, np.inf)
-        xdata = np.array(mesh_densities)
         kappa_fitted = np.zeros((len(temperature), 6))
         for direction in range(6):
             for t in range(len(temperature)):
-                ydata = np.array([kappa_list[mesh][t,direction] for mesh in range(len(mesh_densities))])
+                logger.info(f"Now fitting direction = {direction}, temperature = {temperature[t]}")
+                xdata = np.array(
+                    [conv_test_doc["convergence_test"][i]["mesh"][direction] for i in range(0,len(mesh_list))]
+                )
+                ydata = np.array(
+                    [kappa_list[mesh][temperature, direction] for mesh in range(0,len(mesh_list))]
+                )
                 popt, _ = curve_fit(_exp_func, xdata, ydata, bounds=bounds)
-                print(f"c = {popt[-1]}") # FOR TESTING
-                kappa_fitted[t, direction] = popt[-1]
+                print(f"kappa_inf = {popt[0]}") # FOR TESTING
+                kappa_fitted[t, direction] = popt[0]
         
         # initialize doc
         ph3py_dict = {}
         
-        # store evaluated kappa
+        # update evaluated kappa
         ph3py_dict["temperature_fitted"] = temperature.tolist()
         ph3py_dict["kappa_fitted"] = kappa_fitted.tolist()
+        ph3py_dict["mesh_list"] = mesh_list
         
         # store results in ph3py_tasks collection
         coll = mmdb.db["ph3py_tasks"]
         # if coll.find_one({"task_label": {"$regex": f"{tag}"}}) is not None:
         ph3py_dict["last_updated"] = datetime.utcnow()
         
-#         write_yaml_from_dict(ph3py_dict, "ph3py_dict.yaml") # FOR TESTING
+        # write_yaml_from_dict(ph3py_dict, "ph3py_dict.yaml") # FOR TESTING
             
         coll.update_one(
             {"task_label": {"$regex": f"{tag}"}}, {"$set": ph3py_dict}, upsert=True
