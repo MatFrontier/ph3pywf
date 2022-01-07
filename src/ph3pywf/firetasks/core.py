@@ -807,7 +807,7 @@ class Phono3pyEvaluateKappaFromConvTest(FiretaskBase):
                     [conv_test_doc["convergence_test"][i]["mesh"][direction] for i in range(0,len(mesh_list))]
                 )
                 ydata = np.array(
-                    [kappa_list[mesh][temperature, direction] for mesh in range(0,len(mesh_list))]
+                    [kappa_list[mesh][t, direction] for mesh in range(0,len(mesh_list))]
                 )
                 popt, _ = curve_fit(_exp_func, xdata, ydata, bounds=bounds)
                 print(f"kappa_inf = {popt[0]}") # FOR TESTING
