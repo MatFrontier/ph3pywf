@@ -800,19 +800,24 @@ class Phono3pyEvaluateKappaFromConvTest(FiretaskBase):
         from scipy.optimize import curve_fit
         bounds = (0, np.inf)
         kappa_fitted = np.zeros((len(temperature), 6))
-        for direction in range(6):
+        for direction in range(3):
             for t in range(len(temperature)):
                 logger.info(f"Now fitting direction = {direction}, temperature = {temperature[t]}")
                 xdata = np.array(
-                    [conv_test_doc["convergence_test"][i]["mesh"][direction] for i in range(0,len(mesh_list))]
+                    [conv_test_doc["convergence_test"][i]["mesh"][direction] for i in range(len(mesh_list))]
                 )
                 ydata = np.array(
-                    [kappa_list[mesh][t, direction] for mesh in range(0,len(mesh_list))]
+                    [kappa_list[mesh][t, direction] for mesh in range(len(mesh_list))]
                 )
                 popt, _ = curve_fit(_exp_func, xdata, ydata, bounds=bounds)
                 print(f"kappa_inf = {popt[0]}") # FOR TESTING
                 kappa_fitted[t, direction] = popt[0]
         
+        for direction in range(3,6):
+            for t in range(len(temperature)):
+                # directly use the value from max mesh
+                kappa_fitted[t, direction] = kappa_list[-1][t, direction]
+
         # initialize doc
         ph3py_dict = {}
         
