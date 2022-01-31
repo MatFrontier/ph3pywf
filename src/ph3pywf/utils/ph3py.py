@@ -500,3 +500,33 @@ def convtest_preview_mesh(db_file_local, tag, mesh_densities=None):
     print("Reduced mesh densities:") # FOR TESTING
     for mesh_d in mesh_densities: # FOR TESTING
         print(f"\t{mesh_d}") # FOR TESTING
+
+##########################
+# OTHER HELPER FUNCTIONS #
+
+def check_time_of_tasks(db_file_local, tag):
+    
+    # connect to DB
+    mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
+
+    docs_p = mmdb.collection.find(
+        {
+            "task_label": {"$regex": f"{tag}"},
+        }
+    )
+
+    docs = []
+    for p in docs_p:
+        docs.append(p)
+    # print(type(docs[0]))
+    for d in docs:
+        print("{{task_label:\"{}\"}}".format(d["task_label"]))
+        if "nsites" in d:
+            print("nsites = {}".format(d["nsites"]))
+        if "input" in d:
+            print("EDIFF = {}".format(d["input"]["incar"]["EDIFF"]))
+        if "run_stats" in d:
+            if "standard" in d["run_stats"]:
+                print("Maximum memory used (kb) = {}".format(d["run_stats"]["standard"]["Maximum memory used (kb)"]))
+            print("Elapsed time (sec) = {}".format(d["run_stats"]["overall"]["Elapsed time (sec)"]))
+        print("")
