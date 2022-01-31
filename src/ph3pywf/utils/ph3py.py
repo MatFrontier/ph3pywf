@@ -64,6 +64,7 @@ def get_displaced_structures(structure,
         unitcell=ph_structure, 
         supercell_matrix=supercell_matrix_fc3,
         phonon_supercell_matrix=supercell_matrix_fc2,
+        primitive_matrix=primitive_matrix,
     )
     
     phonon.generate_displacements(
