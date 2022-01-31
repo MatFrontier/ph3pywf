@@ -26,9 +26,11 @@ def wf_phono3py(structure,
         structure (Structure): input structure.
         c (dict): workflow config dict:
             tag (str): unique label to identify contents related to this WF.
-            supercell_size_fc3 (tuple): Supercell dimension for 3rd order force constants. (2, 2, 2) by default. 
+            supercell_size_fc3 (tuple): Supercell dimension for 3rd order force constants. 
+                (2, 2, 2) by default. 
             supercell_size_fc2 (tuple): Optional supercell dimension for 2nd order force constants. 
-            cutoff_pair_distance (float): set to reduce the number of supercells with displacements to be calculated.
+            cutoff_pair_distance (float): set to reduce the number of supercells 
+                with displacements to be calculated.
             atom_disp (float): atomic displacement. Default is 0.03 Angstrom.
             vasp_input_set_relax (VaspInputSet): input set for optimization VASP job. 
             vasp_input_set_static (VaspInputSet): input set for static VASP jobs.
@@ -76,28 +78,33 @@ def wf_phono3py(structure,
     print(f"{{task_label: {{$regex:\"{tag}\"}}}}")
     
     # update vasp_input_set_relax
-    vasp_input_set_relax = vasp_input_set_relax or Ph3pyRelaxSet(structure,
-                                                                 user_incar_settings=user_incar_settings,
-                                                                 user_potcar_settings=user_potcar_settings,
-                                                                 user_potcar_functional=user_potcar_functional,
-                                                                 user_kpoints_settings=user_kpoints_settings,
-                                                                )
+    vasp_input_set_relax = vasp_input_set_relax or \
+        Ph3pyRelaxSet(
+            structure,
+            user_incar_settings=user_incar_settings,
+            user_potcar_settings=user_potcar_settings,
+            user_potcar_functional=user_potcar_functional,
+            user_kpoints_settings=user_kpoints_settings
+        )
     
 
     # structure optimization firework
-    fws = [OptimizeFW(structure=structure, 
-                      vasp_input_set=vasp_input_set_relax, 
-                      name=f"{tag} structure optimization", 
-                      job_type="normal",
-                     )]
+    fws = [OptimizeFW(
+        structure=structure,
+        vasp_input_set=vasp_input_set_relax,
+        name=f"{tag} structure optimization",
+        job_type="normal"
+    )]
     
     # update vasp_input_set_static
-    vasp_input_set_static = vasp_input_set_static or Ph3pyStaticSet(structure,
-                                                                    user_incar_settings=user_incar_settings_static,
-                                                                    user_potcar_settings=user_potcar_settings,
-                                                                    user_potcar_functional=user_potcar_functional,
-                                                                    user_kpoints_settings=user_kpoints_settings_static,
-                                                                   )
+    vasp_input_set_static = vasp_input_set_static or \
+        Ph3pyStaticSet(
+            structure,
+            user_incar_settings=user_incar_settings_static,
+            user_potcar_settings=user_potcar_settings,
+            user_potcar_functional=user_potcar_functional,
+            user_kpoints_settings=user_kpoints_settings_static
+        )
     
     # convert GetDisplacedStructuresFWs to FW and add to FW list
     parents = fws[0]
@@ -204,62 +211,6 @@ def wf_ph3py_post_analysis(tag,
 
     return Workflow([fw], name=wfname)
 
-#########################
-# TESTING MODULES BELOW #
-#########################
-
-def wf_ph3py_convergence_test(tag,
-                              db_file_local,
-                              name="phono3py convergence test wf",
-                              c=None,
-                             ):
-    """
-    Rerun Phono3pyMeshConvergenceToDb task
-    store doc to ph3py_tasks_convergence_test collection
-    """
-    c = c or {}
-    db_file = c.get("db_file", DB_FILE)
-    t_min = c.get("t_min", 100)
-    t_max = c.get("t_max", 1301)
-    t_step = c.get("t_step", 50)
-    mesh_densities = c.get("mesh_densities", [256 * k for k in range(1,100)])
-    mesh_list = c.get("mesh_list", None)
-#     print(mesh_densities) # FOR TESTING
-    
-    # connect to DB
-    mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
-    
-    # read addertask_dict from DB
-    opt_dict = mmdb.collection.find_one(
-        {
-            "task_label": {"$regex": f"{tag} structure optimization"},
-        }
-    )
-    formula_pretty = opt_dict["formula_pretty"]
-    
-    # prepare FW
-    fw_name = "{}-{} Phono3pyMeshConvergenceToDb".format(
-        formula_pretty, 
-        tag, 
-    )
-    
-    fw = Firework(
-        Phono3pyMeshConvergenceToDb(
-            tag=tag, 
-            db_file=db_file,
-            t_min=t_min,
-            t_max=t_max,
-            t_step=t_step,
-            mesh_densities=mesh_densities,
-            mesh_list=mesh_list,
-        ),
-        name=fw_name, 
-    )
-    
-    wfname = "{}-{}".format(formula_pretty, name)
-
-    return Workflow([fw], name=wfname)
-
 def wf_ph3py_get_kappa_convergence(tag,
                                    db_file_local,
                                    name="phono3py get kappa from convergence test wf",
@@ -330,3 +281,61 @@ def wf_ph3py_get_kappa_convergence(tag,
     wfname = "{}-{}".format(formula_pretty, name)
 
     return Workflow(fws, name=wfname)
+
+
+#########################
+# TESTING MODULES BELOW #
+#########################
+
+def wf_ph3py_convergence_test(tag,
+                              db_file_local,
+                              name="phono3py convergence test wf",
+                              c=None,
+                             ):
+    """
+    Rerun Phono3pyMeshConvergenceToDb task
+    store doc to ph3py_tasks_convergence_test collection
+    """
+    c = c or {}
+    db_file = c.get("db_file", DB_FILE)
+    t_min = c.get("t_min", 100)
+    t_max = c.get("t_max", 1301)
+    t_step = c.get("t_step", 50)
+    mesh_densities = c.get("mesh_densities", [256 * k for k in range(1,100)])
+    mesh_list = c.get("mesh_list", None)
+#     print(mesh_densities) # FOR TESTING
+    
+    # connect to DB
+    mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
+    
+    # read addertask_dict from DB
+    opt_dict = mmdb.collection.find_one(
+        {
+            "task_label": {"$regex": f"{tag} structure optimization"},
+        }
+    )
+    formula_pretty = opt_dict["formula_pretty"]
+    
+    # prepare FW
+    fw_name = "{}-{} Phono3pyMeshConvergenceToDb".format(
+        formula_pretty, 
+        tag, 
+    )
+    
+    fw = Firework(
+        Phono3pyMeshConvergenceToDb(
+            tag=tag, 
+            db_file=db_file,
+            t_min=t_min,
+            t_max=t_max,
+            t_step=t_step,
+            mesh_densities=mesh_densities,
+            mesh_list=mesh_list,
+        ),
+        name=fw_name, 
+    )
+    
+    wfname = "{}-{}".format(formula_pretty, name)
+
+    return Workflow([fw], name=wfname)
+
