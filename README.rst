@@ -3,13 +3,13 @@ ph3pywf
 =======
 
 
-Add a short description here!
+Customized Atomate workflow for thermal conductivity calculation using VASP and Phono3py.
 
 
 Description
 ===========
 
-A longer description of your project goes here...
+WIP
 
 
 .. _pyscaffold-notes:

@@ -3,6 +3,8 @@
 __author__ = "Kerui Lai"
 __email__ = "kerui.lai@mail.mcgill.ca"
 
+# TODO: keep only the phono3py auxilary functions here, and rename as "ph3py_aux" perhaps
+
 import numpy as np
 from monty.dev import requires
 
@@ -342,6 +344,7 @@ def write_yaml_from_dict(d, filename):
 # DATABASE FUCTIONS #
 #####################
 
+# TODO: move these to "db"
 def insert_gridfs_file(filename, db, collection):
     """
     Insert the file with given filename into GridFS.
@@ -453,6 +456,7 @@ def get_from_gridfs(db, task_doc, key, filename=None):
 
 from pymatgen.io.vasp import Kpoints
 
+# TODO: move these to "post_analysis"
 def convtest_preview_mesh(db_file_local, tag, mesh_densities=None):
     mesh_densities = mesh_densities or [256 * k for k in range(1,150)]
 
@@ -503,7 +507,9 @@ def convtest_preview_mesh(db_file_local, tag, mesh_densities=None):
 
 ##########################
 # OTHER HELPER FUNCTIONS #
+##########################
 
+# TODO: move this to "mission_control"?
 def check_time_of_tasks(db_file_local, tag):
     
     # connect to DB
