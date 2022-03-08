@@ -513,8 +513,6 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
     Required params: 
         tag (str): unique label to identify contents related to this WF.
         db_file (str): path to file containing the database credentials. Supports env_chk.
-        tag_for_copy (str): different label for a copy, if provided, will create a copy in 
-            ph3py_tasks_convergence_test instead of overwriting the existing document.
 
     Optional params: 
         t_min (float): min temperature (in K)
@@ -523,14 +521,17 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         mesh_densities (list): list of reciprocal densities for q-points.
         mesh_list (list): list of q-points meshes. 
             if provided, will skip automatic generation of meshes using mesh_densities.
+        tag_for_copy (str): different label for a copy, if provided, will create a copy in 
+            ph3py_tasks_convergence_test instead of overwriting the existing document.
     
     """
-    required_params = ["tag", "db_file", "tag_for_copy"]
+    required_params = ["tag", "db_file"]
     optional_params = ["t_min",
                        "t_max",
                        "t_step",
                        "mesh_densities",
-                       "mesh_list"]
+                       "mesh_list",
+                       "tag_for_copy"]
         
     def run_task(self, fw_spec):
         # initialize doc
@@ -781,12 +782,14 @@ class Phono3pyEvaluateKappaFromConvTest(FiretaskBase):
     Required params: 
         tag (str): unique label to identify contents related to this WF.
         db_file (str): path to file containing the database credentials. Supports env_chk.
+    
+    Optional params: 
         tag_for_copy (str): different label for a copy, if provided, will create a copy in 
             ph3py_tasks_convergence_test instead of overwriting the existing document.
     
     """
-    required_params = ["tag", "db_file", "tag_for_copy"]
-    optional_params = []
+    required_params = ["tag", "db_file"]
+    optional_params = ["tag_for_copy"]
     
     def run_task(self, fw_spec):
         tag = self["tag"]
