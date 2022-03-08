@@ -214,6 +214,7 @@ def wf_ph3py_post_analysis(tag,
 def wf_ph3py_get_kappa_convergence(tag,
                                    db_file_local,
                                    name="phono3py get kappa from convergence test wf",
+                                   tag_for_copy=None,
                                    c=None,
                                   ):
     """
@@ -253,6 +254,7 @@ def wf_ph3py_get_kappa_convergence(tag,
             t_max=t_max,
             t_step=t_step,
             mesh_densities=mesh_densities,
+            tag_for_copy=tag_for_copy,
         ),
         name=fw_name, 
     )
@@ -271,6 +273,7 @@ def wf_ph3py_get_kappa_convergence(tag,
         Phono3pyEvaluateKappaFromConvTest(
             tag=tag, 
             db_file=db_file,
+            tag_for_copy=tag_for_copy,
         ),
         name=fw_name, 
         parents=parents,

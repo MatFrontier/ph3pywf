@@ -464,7 +464,9 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         write_yaml_from_dict(ph3py_dict, "ph3py_dict.yaml") # FOR TESTING
             
         coll.update_one(
-            {"task_label": {"$regex": f"{tag}"}}, {"$set": ph3py_dict}, upsert=True
+            {"task_label": {"$regex": tag}}, 
+            {"$set": ph3py_dict}, 
+            upsert=True,
         )
         
         return FWAction()
@@ -511,7 +513,9 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
     Required params: 
         tag (str): unique label to identify contents related to this WF.
         db_file (str): path to file containing the database credentials. Supports env_chk.
-        
+        tag_for_copy (str): different label for a copy, if provided, will create a copy in 
+            ph3py_tasks_convergence_test instead of overwriting the existing document.
+
     Optional params: 
         t_min (float): min temperature (in K)
         t_max (float): max temperature (in K)
@@ -521,7 +525,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
             if provided, will skip automatic generation of meshes using mesh_densities.
     
     """
-    required_params = ["tag", "db_file"]
+    required_params = ["tag", "db_file", "tag_for_copy"]
     optional_params = ["t_min",
                        "t_max",
                        "t_step",
@@ -534,13 +538,14 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
+        tag_for_copy = self.get("tag_for_copy", None)
         t_min = self.get("t_min", 100)
         t_max = self.get("t_max", 1301)
         t_step = self.get("t_step", 50)
         mesh_densities = self.get("mesh_densities", [256 * k for k in range(1,100)])
         mesh_list = self.get("mesh_list", None)
         
-        ph3py_dict["task_label"] = tag
+        ph3py_dict["task_label"] = tag_for_copy if tag_for_copy else tag
                 
         # connect to DB
         mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
@@ -735,22 +740,36 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
             
             # store result of progress so far (possible to optimize but not critical)
             ph3py_dict["last_updated"] = datetime.utcnow()
-            coll.update_one(
-                {"task_label": {"$regex": f"{tag}"}},
-                {"$set": ph3py_dict},
-                upsert=True,
-            )
+            if tag_for_copy:
+                coll.update_one(
+                    {"task_label": tag_for_copy},
+                    {"$set": ph3py_dict},
+                    upsert=True,
+                )
+            else:
+                coll.update_one(
+                    {"task_label": tag},
+                    {"$set": ph3py_dict},
+                    upsert=True,
+                )
         
 
         # store results in collection
         ph3py_dict["last_updated"] = datetime.utcnow()
         ph3py_dict["success"] = True
-            
-        coll.update_one(
-            {"task_label": {"$regex": f"{tag}"}},
-            {"$set": ph3py_dict},
-            upsert=True,
-        )
+        
+        if tag_for_copy:
+            coll.update_one(
+                {"task_label": tag_for_copy},
+                {"$set": ph3py_dict},
+                upsert=True,
+            )
+        else:
+            coll.update_one(
+                {"task_label": tag},
+                {"$set": ph3py_dict},
+                upsert=True,
+            )
         
         return FWAction()
 
@@ -762,14 +781,17 @@ class Phono3pyEvaluateKappaFromConvTest(FiretaskBase):
     Required params: 
         tag (str): unique label to identify contents related to this WF.
         db_file (str): path to file containing the database credentials. Supports env_chk.
+        tag_for_copy (str): different label for a copy, if provided, will create a copy in 
+            ph3py_tasks_convergence_test instead of overwriting the existing document.
     
     """
-    required_params = ["tag", "db_file"]
+    required_params = ["tag", "db_file", "tag_for_copy"]
     optional_params = []
     
     def run_task(self, fw_spec):
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
+        tag_for_copy = self.get("tag_for_copy", None)
         
         # define fitting exp function
         def _exp_func(x, kappa_inf, epsilon):
@@ -781,12 +803,15 @@ class Phono3pyEvaluateKappaFromConvTest(FiretaskBase):
         mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
 
         # read conv_test_doc from DB
-        conv_test_doc = mmdb.db["ph3py_tasks_convergence_test"].find_one(
-            {
-                "task_label": {"$regex": f"{tag}"},
-            }
-        )
-
+        if tag_for_copy:
+            conv_test_doc = mmdb.db["ph3py_tasks_convergence_test"].find_one(
+                {"task_label": tag_for_copy}
+            )
+        else:
+            conv_test_doc = mmdb.db["ph3py_tasks_convergence_test"].find_one(
+                {"task_label": tag}
+            )
+        
         # get calculation result
         temperature = np.array(conv_test_doc["temperature"])
         mesh_densities = conv_test_doc["user_settings"]["mesh_densities"]
@@ -828,13 +853,21 @@ class Phono3pyEvaluateKappaFromConvTest(FiretaskBase):
         
         # store results in ph3py_tasks collection
         coll = mmdb.db["ph3py_tasks"]
-        # if coll.find_one({"task_label": {"$regex": f"{tag}"}}) is not None:
         ph3py_dict["last_updated"] = datetime.utcnow()
         
         # write_yaml_from_dict(ph3py_dict, "ph3py_dict.yaml") # FOR TESTING
-            
-        coll.update_one(
-            {"task_label": {"$regex": f"{tag}"}}, {"$set": ph3py_dict}, upsert=True
-        )
+        
+        if tag_for_copy:
+            coll.update_one(
+                {"task_label": tag_for_copy},
+                {"$set": ph3py_dict},
+                upsert=True,
+            )
+        else:
+            coll.update_one(
+                {"task_label": tag},
+                {"$set": ph3py_dict},
+                upsert=True,
+            )
         
         return FWAction()
