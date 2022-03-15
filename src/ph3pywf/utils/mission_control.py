@@ -69,3 +69,39 @@ def check_time_of_each_run(tag):
                 print("Maximum memory used (kb) = {}".format(d["run_stats"]["standard"]["Maximum memory used (kb)"]))
             print("Elapsed time (sec) = {}".format(d["run_stats"]["overall"]["Elapsed time (sec)"]))
         print("")
+
+def get_resource_report(tag):
+    db_file = os.path.join(os.path.dirname(LAUNCHPAD_LOC), "db.json")
+    
+    mmdb = VaspCalcDb.from_db_file(db_file)
+    docs_p = mmdb.collection.find(
+        {
+            "task_label": {"$regex": f"{tag}"},
+        }
+    )
+    
+    docs = []
+    print("Fetching tasks...")
+    for p in docs_p:
+        docs.append(p)
+    # print(type(docs[0]))
+    
+    n_tasks = 0
+    total_time = 0
+    total_mem_used = 0
+    cores_used = {}
+    for d in docs:
+        if "run_stats" in d:
+            if "standard" in d["run_stats"]:
+                total_mem_used += d["run_stats"]["standard"]["Maximum memory used (kb)"]
+                cores = d["run_stats"]["standard"]["cores"]
+                cores_used[cores] = cores_used[cores]+1 if cores in cores_used else 0
+            total_time += d["run_stats"]["overall"]["Elapsed time (sec)"]
+        n_tasks += 1
+    
+    print("Total number of tasks = {}".format(n_tasks))
+    print("Total computation time (h) = {}".format(total_time/3600))
+    print("Average time per task (s) = {}".format(total_time/n_tasks))
+    print("Average memory used (kb) = {}".format(total_mem_used/n_tasks))
+    for cores, count in cores_used.items():
+        print(f"{count} tasks used {cores} cores")

@@ -543,7 +543,7 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         t_min = self.get("t_min", 100)
         t_max = self.get("t_max", 1301)
         t_step = self.get("t_step", 50)
-        mesh_densities = self.get("mesh_densities", [256 * k for k in range(1,100)])
+        mesh_densities = self.get("mesh_densities", [256 * k for k in range(1,40)])
         mesh_list = self.get("mesh_list", None)
         
         ph3py_dict["task_label"] = tag_for_copy if tag_for_copy else tag
