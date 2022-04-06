@@ -66,7 +66,9 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                        "vis_static", 
                        "primitive_matrix",
                        "user_settings",
-                       "is_nac"]
+                       "is_nac",
+                       "is_symmetry",
+                       "symprec"]
         
     def run_task(self, fw_spec):
         tag = self["tag"]
@@ -79,6 +81,8 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         vis_static = self.get("vis_static", None)
         primitive_matrix = self.get("primitive_matrix", None)
         is_nac = self.get("is_nac", False)
+        is_symmetry = self.get("is_symmetry", True)
+        symprec = self.get("symprec", 1e-5)
         
         logger.info("Adder: DEBUG VER 05/27 10:52")
         
@@ -114,6 +118,8 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             yaml_fname_fc2="disp_fc2.yaml",
             cutoff_pair_distance=cutoff_pair_distance,
             primitive_matrix=primitive_matrix,
+            is_symmetry=is_symmetry,
+            symprec=symprec,
         )
         
         # save disp_fc3.yaml in DB collection

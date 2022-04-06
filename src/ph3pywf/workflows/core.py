@@ -71,6 +71,8 @@ def wf_phono3py(structure,
     primitive_matrix = c.get("primitive_matrix", None)
     mesh = c.get("mesh", [11,11,11])
     is_nac = c.get("is_nac", False)
+    is_symmetry = c.get("is_symmetry", True)
+    symprec = c.get("symprec", 1e-5)
     
     # store tag in metadata
     metadata["label"] = tag
@@ -126,6 +128,8 @@ def wf_phono3py(structure,
             primitive_matrix=primitive_matrix,
             user_settings=c,
             is_nac=is_nac,
+            is_symmetry=is_symmetry,
+            symprec=symprec,
         ), 
         name=fw_name, 
         parents=parents, 
