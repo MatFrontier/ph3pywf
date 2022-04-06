@@ -72,6 +72,9 @@ def get_displaced_structures(structure,
         is_symmetry=is_symmetry,
         symprec=symprec,
     )
+
+    print("get_displaced_structures: symprec = {}".format(phonon.symmetry.tolerance))
+    print("get_displaced_structures: is_symmetry = {}".format(phonon._is_symmetry))
     
     phonon.generate_displacements(
         distance=atom_disp,
