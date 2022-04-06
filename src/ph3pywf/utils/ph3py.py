@@ -69,6 +69,8 @@ def get_displaced_structures(structure,
         supercell_matrix=supercell_matrix_fc3,
         phonon_supercell_matrix=supercell_matrix_fc2,
         primitive_matrix=primitive_matrix,
+        is_symmetry=is_symmetry,
+        symprec=symprec,
     )
     
     phonon.generate_displacements(
@@ -76,8 +78,6 @@ def get_displaced_structures(structure,
         cutoff_pair_distance=cutoff_pair_distance,
         is_plusminus=is_plusminus,
         is_diagonal=is_diagonal,
-        is_symmetry=is_symmetry,
-        symprec=symprec,
     )
     
     if yaml_fname_fc3 is not None:
