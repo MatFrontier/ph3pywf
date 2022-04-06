@@ -56,6 +56,8 @@ def get_displaced_structures(structure,
     is_plusminus = kwargs.get("is_plusminus", "auto")
     is_diagonal = kwargs.get("is_diagonal", True)
     primitive_matrix = kwargs.get("primitive_matrix", None)
+    is_symmetry = kwargs.get("is_symmetry", None)
+    symprec = kwargs.get("symprec", None)
 
     ph_structure = get_phonopy_structure(structure)
 
@@ -74,6 +76,8 @@ def get_displaced_structures(structure,
         cutoff_pair_distance=cutoff_pair_distance,
         is_plusminus=is_plusminus,
         is_diagonal=is_diagonal,
+        is_symmetry=is_symmetry,
+        symprec=symprec,
     )
     
     if yaml_fname_fc3 is not None:
