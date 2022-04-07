@@ -256,6 +256,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         supercell_size_fc2 = addertask_dict["user_settings"].get("supercell_size_fc2", None)
         primitive_matrix = addertask_dict["user_settings"].get("primitive_matrix", None)
         is_nac = addertask_dict["user_settings"].get("is_nac", False)
+        is_symmetry = addertask_dict["user_settings"].get("is_symmetry", True)
+        symprec = addertask_dict["user_settings"].get("symprec", 1e-5)
         # copy user settings
         ph3py_dict["user_settings"] = addertask_dict["user_settings"]
         # update user settings
@@ -360,6 +362,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                             supercell_matrix=supercell_matrix_fc3,
                             phonon_supercell_matrix=supercell_matrix_fc2,
                             primitive_matrix=primitive_matrix,
+                            is_symmetry=is_symmetry,
+                            symprec=symprec,
                             mesh=mesh,
                             log_level=1, # log_level=0 make phono3py quiet
                            )
@@ -568,6 +572,8 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         supercell_size_fc3 = addertask_dict["user_settings"].get("supercell_size_fc3", None)
         supercell_size_fc2 = addertask_dict["user_settings"].get("supercell_size_fc2", None)
         primitive_matrix = addertask_dict["user_settings"].get("primitive_matrix", None)
+        is_symmetry = addertask_dict["user_settings"].get("is_symmetry", True)
+        symprec = addertask_dict["user_settings"].get("symprec", 1e-5)
         # copy user settings
         ph3py_dict["user_settings"] = addertask_dict["user_settings"]
         # update user settings
@@ -713,6 +719,8 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
                             supercell_matrix=supercell_matrix_fc3,
                             phonon_supercell_matrix=supercell_matrix_fc2,
                             primitive_matrix=primitive_matrix,
+                            is_symmetry=is_symmetry,
+                            symprec=symprec,
                             mesh=[3,3,3],
                             log_level=1, # log_level=0 make phono3py quiet
                            )
