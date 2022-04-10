@@ -79,6 +79,12 @@ def wf_phono3py(structure,
     print(f"tag = \"{tag}\"")
     print(f"{{task_label: {{$regex:\"{tag}\"}}}}")
     
+    # update symprec in vis user settings
+    if not "symprec" in user_incar_settings:
+        user_incar_settings["symprec"] = symprec
+    if not "symprec" in user_incar_settings_static:
+        user_incar_settings_static["symprec"] = symprec
+
     # update vasp_input_set_relax
     vasp_input_set_relax = vasp_input_set_relax or \
         Ph3pyRelaxSet(

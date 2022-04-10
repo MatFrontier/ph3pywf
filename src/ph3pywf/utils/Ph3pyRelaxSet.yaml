@@ -77,6 +77,7 @@ INCAR:
   NSW: 300
   PREC: Accurate
   SIGMA: 0.01
+  SYMPREC: 1.0e-5
 KPOINTS:
   reciprocal_density: 128
 POTCAR_FUNCTIONAL: PBE_54
