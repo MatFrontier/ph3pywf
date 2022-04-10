@@ -70,6 +70,13 @@ def check_time_of_each_run(tag):
             print("Elapsed time (sec) = {}".format(d["run_stats"]["overall"]["Elapsed time (sec)"]))
         print("")
 
+def get_tag_from_fw_id(fw_id):
+    launchpad = LaunchPad.auto_load()
+    wf_dict = launchpad.workflows.find_one({"nodes": fw_id})
+
+    return wf_dict["metadata"]["label"]
+
+
 def get_resource_report(tag):
     db_file = os.path.join(os.path.dirname(LAUNCHPAD_LOC), "db.json")
     
