@@ -81,9 +81,9 @@ def wf_phono3py(structure,
     
     # update symprec in vis user settings
     if not "symprec" in user_incar_settings:
-        user_incar_settings["symprec"] = symprec
+        user_incar_settings["SYMPREC"] = symprec
     if not "symprec" in user_incar_settings_static:
-        user_incar_settings_static["symprec"] = symprec
+        user_incar_settings_static["SYMPREC"] = symprec
 
     # update vasp_input_set_relax
     vasp_input_set_relax = vasp_input_set_relax or \
