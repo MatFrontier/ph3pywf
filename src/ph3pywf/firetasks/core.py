@@ -33,6 +33,7 @@ import h5py
 from phono3py.file_IO import parse_disp_fc2_yaml, parse_disp_fc3_yaml, write_FORCES_FC2, write_FORCES_FC3
 from phonopy.file_IO import write_FORCE_CONSTANTS
 import phonopy
+from phonopy import Phonopy
 
 logger = get_logger(__name__)
 
@@ -401,14 +402,24 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         logger.info(f"PostAnalysis: is_nac = {is_nac}")
         if is_nac:
             logger.info(f"PostAnalysis: Reading nac_params from file: \"{born_filename}\"")
-        phonon = phonopy.load(supercell_matrix=supercell_matrix_fc2,
-                              primitive_matrix=primitive_matrix,
-                              is_nac=is_nac,
-                              unitcell=ph_unitcell,
-                              is_symmetry=is_symmetry,
-                              symprec=symprec,
-                              force_sets_filename="FORCE_SETS",
-                              born_filename=born_filename if is_nac else None)
+        # phonon = phonopy.load(supercell_matrix=supercell_matrix_fc2,
+        #                       primitive_matrix=primitive_matrix,
+        #                       is_nac=is_nac,
+        #                       unitcell=ph_unitcell,
+        #                       is_symmetry=is_symmetry,
+        #                       symprec=symprec,
+        #                       force_sets_filename="FORCE_SETS",
+        #                       born_filename=born_filename if is_nac else None)
+        
+        phonon = Phonopy(
+            supercell_matrix=supercell_matrix_fc2,
+            primitive_matrix=primitive_matrix,
+            is_nac=is_nac,
+            unitcell=ph_unitcell,
+            is_symmetry=is_symmetry,
+            symprec=symprec,
+            force_sets_filename="FORCE_SETS",
+            born_filename=born_filename if is_nac else None)
         
         # write FORCE_CONSTANTS
         logger.info("PostAnalysis: Creating FORCE_CONSTANTS")
