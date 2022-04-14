@@ -405,6 +405,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                               primitive_matrix=primitive_matrix,
                               is_nac=is_nac,
                               unitcell=ph_unitcell,
+                              is_symmetry=is_symmetry,
+                              symprec=symprec,
                               force_sets_filename="FORCE_SETS",
                               born_filename=born_filename if is_nac else None)
         
