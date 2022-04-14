@@ -402,6 +402,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         logger.info(f"PostAnalysis: is_nac = {is_nac}")
         if is_nac:
             logger.info(f"PostAnalysis: Reading nac_params from file: \"{born_filename}\"")
+        logger.info(f"PostAnalysis: symprec = {symprec}")
         phonon = phonopy.load(supercell_matrix=supercell_matrix_fc2,
                               primitive_matrix=primitive_matrix,
                               is_nac=is_nac,
