@@ -16,7 +16,8 @@ from atomate.vasp.config import DB_FILE
 from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from ph3pywf.utils.sets import Ph3pyRelaxSet, Ph3pyStaticSet
 
-def wf_phono3py(structure, 
+def wf_phono3py(structure,
+                skip_relax=False,
                 name="phono3py wf",
                 c=None,
                ):
@@ -24,6 +25,7 @@ def wf_phono3py(structure,
     Returns Phono3py calculation workflow.
     Args:
         structure (Structure): input structure.
+        skip_relax (bool): if True, skip relaxation and directly feed structure to Adder task.
         c (dict): workflow config dict:
             tag (str): unique label to identify contents related to this WF.
             supercell_size_fc3 (tuple): Supercell dimension for 3rd order force constants. 
@@ -95,14 +97,16 @@ def wf_phono3py(structure,
             user_kpoints_settings=user_kpoints_settings
         )
     
+    fws = []
 
     # structure optimization firework
-    fws = [OptimizeFW(
-        structure=structure,
-        vasp_input_set=vasp_input_set_relax,
-        name=f"{tag} structure optimization",
-        job_type="normal"
-    )]
+    if not skip_relax:
+        fws.append(OptimizeFW(
+            structure=structure,
+            vasp_input_set=vasp_input_set_relax,
+            name=f"{tag} structure optimization",
+            job_type="normal"
+        ))
     
     # update vasp_input_set_static
     vasp_input_set_static = vasp_input_set_static or \
@@ -115,7 +119,7 @@ def wf_phono3py(structure,
         )
     
     # convert GetDisplacedStructuresFWs to FW and add to FW list
-    parents = fws[0]
+    parents = fws[0] if not skip_relax else None
     
     fw_name = "{}-{} DisplacedStructuresAdderTask".format(
         structure.composition.reduced_formula if structure else "unknown", 
@@ -126,6 +130,7 @@ def wf_phono3py(structure,
         DisplacedStructuresAdderTask(
             tag=tag, 
             db_file=db_file, 
+            struct_unitcell=structure if skip_relax else None,
             supercell_size_fc3=supercell_size_fc3, 
             supercell_size_fc2=supercell_size_fc2, 
             cutoff_pair_distance=cutoff_pair_distance, 
