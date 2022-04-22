@@ -339,8 +339,18 @@ class Phono3pyAnalysisToDb(FiretaskBase):
             }
         )
         
-        # get optimized unitcell structure
-        unitcell = Structure.from_dict(doc_relaxation["calcs_reversed"][0]["output"]["structure"])
+        # get optimized unitcell structure from relaxation output
+        # if relaxation doc not found, get structure from Addertask input
+        if doc_relaxation is None:
+            doc_adderfw = mmdb.db["fireworks"].find_one(
+                {
+                    "name": {"$regex": f"{tag} DisplacedStructuresAdderTask"},
+                }
+            )
+            unitcell = Structure.from_dict(doc_adderfw["spec"]["_tasks"][0]["struct_unitcell"])
+        else:
+            unitcell = Structure.from_dict(doc_relaxation["calcs_reversed"][0]["output"]["structure"])
+        
         ph_unitcell = get_phonopy_structure(unitcell)
         unitcell.to(fmt="poscar", filename="POSCAR-unitcell") # FOR TESTING
         
