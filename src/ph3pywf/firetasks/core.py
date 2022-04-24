@@ -22,6 +22,7 @@ from fireworks import explicit_serialize
 from atomate.utils.utils import env_chk
 import numpy as np
 from atomate.vasp.fireworks.core import StaticFW
+from ph3pywf.fireworks.core import ForceSymmOptimizeFW, ForceSymmStaticFW
 from pymatgen.io.vasp import Kpoints
 import yaml
 import os
@@ -151,12 +152,13 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             vis_dict_born["structure"] = struct_unitcell.as_dict() # update vis_static_born
             vis_dict_born["lepsilon"] = True # update vis_static_born
             vis_static_born = vis_static.__class__.from_dict(vis_dict_born) # update vis_static_born
-            fw = StaticFW(structure=struct_unitcell,
-                          vasp_input_set=vis_static_born, 
-                          name=f"{tag} BORN",
-                          prev_calc_loc=None,
-                          prev_calc_dir=None,
-                         )
+            fw = ForceSymmStaticFW(
+                structure=struct_unitcell,
+                vasp_input_set=vis_static_born,
+                name=f"{tag} BORN",
+                prev_calc_loc=None,
+                prev_calc_dir=None,
+            )
             logger.info("Adder: adding BORN FW")
             new_fws.append(fw)
         
@@ -169,12 +171,13 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             vis_dict["structure"] = structure.as_dict() # update vis_static
             vis_static = vis_static.__class__.from_dict(vis_dict) # update vis_static
 #             logger.info(f"Adder: After update: vis.structure.num_sites={vis_static.structure.num_sites}")
-            fw = StaticFW(structure=structure,
-                          vasp_input_set=vis_static, 
-                          name=f"{tag} disp_fc3-{disp_id}",
-                          prev_calc_loc=None,
-                          prev_calc_dir=None,
-                         )
+            fw = ForceSymmStaticFW(
+                structure=structure,
+                vasp_input_set=vis_static,
+                name=f"{tag} disp_fc3-{disp_id}",
+                prev_calc_loc=None,
+                prev_calc_dir=None,
+            )
             logger.info(f"Adder: adding fc3 FW {disp_id}")
             new_fws.append(fw)
         
@@ -187,12 +190,13 @@ class DisplacedStructuresAdderTask(FiretaskBase):
                 vis_dict["structure"] = structure.as_dict() # update vis_static
                 vis_static = vis_static.__class__.from_dict(vis_dict) # update vis_static
 #                 logger.info(f"Adder: After update: vis.structure.num_sites={vis_static.structure.num_sites}")
-                fw = StaticFW(structure=structure,
-                              vasp_input_set=vis_static, 
-                              name=f"{tag} disp_fc2-{disp_id}",
-                              prev_calc_loc=None,
-                              prev_calc_dir=None,
-                             )
+                fw = ForceSymmStaticFW(
+                    structure=structure,
+                    vasp_input_set=vis_static,
+                    name=f"{tag} disp_fc2-{disp_id}",
+                    prev_calc_loc=None,
+                    prev_calc_dir=None,
+                )
                 logger.info(f"Adder: adding fc2 FW {disp_id}")
                 new_fws.append(fw)
         

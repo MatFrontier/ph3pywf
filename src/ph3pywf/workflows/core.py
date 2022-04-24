@@ -15,6 +15,7 @@ from ph3pywf.firetasks.core import (
 from atomate.vasp.config import DB_FILE
 from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
 from ph3pywf.utils.sets import Ph3pyRelaxSet, Ph3pyStaticSet
+from ph3pywf.fireworks.core import ForceSymmOptimizeFW, ForceSymmStaticFW
 
 def wf_phono3py(structure,
                 skip_relax=False,
@@ -101,7 +102,7 @@ def wf_phono3py(structure,
 
     # structure optimization firework
     if not skip_relax:
-        fws.append(OptimizeFW(
+        fws.append(ForceSymmOptimizeFW(
             structure=structure,
             vasp_input_set=vasp_input_set_relax,
             name=f"{tag} structure optimization",
