@@ -126,7 +126,10 @@ class ForceSymmOptimizeFW(Firework):
         # modify handler_group
         # remove "symprec_noise" from errors_subset_to_catch
         subset = list(VaspErrorHandler.error_msgs.keys())
-        subset.pop("symprec_noise")
+        if "symprec_noise" in subset:
+            subset.remove("symprec_noise")
+        else:
+            print("\"symprec_noise\" not in VaspErrorHandler")
         handler_group = [
             VaspErrorHandler(errors_subset_to_catch=subset),
             MeshSymmetryErrorHandler(),
@@ -241,7 +244,10 @@ class ForceSymmStaticFW(Firework):
         # modify handler_group
         # remove "symprec_noise" from errors_subset_to_catch
         subset = list(VaspErrorHandler.error_msgs.keys())
-        subset.pop("symprec_noise")
+        if "symprec_noise" in subset:
+            subset.remove("symprec_noise")
+        else:
+            print("\"symprec_noise\" not in VaspErrorHandler")
         handler_group = [
             VaspErrorHandler(errors_subset_to_catch=subset),
             MeshSymmetryErrorHandler(),
