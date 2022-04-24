@@ -49,6 +49,23 @@ from atomate.vasp.firetasks.write_inputs import (
     WriteVaspSOCFromPrev,
     WriteVaspStaticFromPrev,
 )
+from custodian.vasp.handlers import (
+    VaspErrorHandler,
+    AliasingErrorHandler,
+    MeshSymmetryErrorHandler,
+    UnconvergedErrorHandler,
+    MaxForceErrorHandler,
+    PotimErrorHandler,
+    FrozenJobErrorHandler,
+    NonConvergingErrorHandler,
+    PositiveEnergyErrorHandler,
+    WalltimeHandler,
+    StdErrHandler,
+    DriftErrorHandler,
+    LargeSigmaHandler,
+    IncorrectSmearingHandler,
+    ScanMetalHandler,
+)
 
 class ForceSymmOptimizeFW(Firework):
     def __init__(
