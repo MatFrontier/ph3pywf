@@ -10,7 +10,14 @@ from setuptools import setup
 
 if __name__ == "__main__":
     try:
-        setup(use_scm_version={"version_scheme": "no-guess-dev"})
+        setup(
+            use_scm_version={"version_scheme": "no-guess-dev"},
+            entry_points={
+                "console_scripts": [
+                    "guard_ph3pywf = ph3pywf.utils.guard_ph3pywf:main",
+                ]
+            },
+        )
     except:  # noqa
         print(
             "\n\nAn error occurred while building the project, "
