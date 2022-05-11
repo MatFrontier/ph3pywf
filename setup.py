@@ -15,6 +15,7 @@ if __name__ == "__main__":
             entry_points={
                 "console_scripts": [
                     "guard_ph3pywf = ph3pywf.utils.guard_ph3pywf:main",
+                    "guard_once = ph3pywf.utils.guard_once:main",
                 ]
             },
         )
