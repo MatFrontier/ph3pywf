@@ -11,7 +11,7 @@ from datetime import datetime
 # import subprocess
 from ph3pywf.utils.mission_control import check_progress_and_rerun, get_tag_from_fw_id
 
-SLEEP_TIME = 600
+SLEEP_TIME = 600 # TODO: allow user to specify this via argv
 
 def main():
     if len(sys.argv) == 1:
