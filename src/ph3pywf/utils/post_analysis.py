@@ -20,6 +20,7 @@ class Ph3py_Result:
         path_to_db_json,
     ):
         self.has_fitted = False
+        self.task_label = task_label
 
         # connect to DB
         atomate_db = VaspCalcDb.from_db_file(path_to_db_json)
