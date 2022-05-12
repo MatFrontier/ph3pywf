@@ -29,7 +29,7 @@ class Ph3py_Result:
 
         # get our task
         self.ph3py_entry = ph3py_coll.find_one({"task_label": task_label})
-        if bool(self.ph3py_entry):
+        if not bool(self.ph3py_entry):
             print(f"Unable to find doc from DB using {task_label = }")
             raise
 
