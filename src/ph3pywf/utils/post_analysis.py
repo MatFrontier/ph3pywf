@@ -66,10 +66,14 @@ class Ph3py_Result:
         plot_dircs=False,
         plot_fitted=True,
         save_file=True,
+        fig_size=(8, 6),
     ):
         # plot params
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["font.size"] = 12
+
+        # initialize figure
+        plt.figure(figsize=fig_size, facecolor="#FFFFFF")
 
         # get reference results
         T_ref = []
@@ -123,6 +127,7 @@ class Ph3py_Result:
         # plt.xlim(left=200)
         plt.ylim(bottom=0, top=None)
         plt.legend()
+        plt.grid(visible=True, linestyle=":")
 
         # save the figure
         if save_file:
