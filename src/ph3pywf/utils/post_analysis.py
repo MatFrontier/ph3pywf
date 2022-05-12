@@ -71,16 +71,16 @@ class Ph3py_Result:
         plt.rcParams["font.size"] = 12
 
         # get reference results
-        T_exp = []
-        kappa_exp = []
+        T_ref = []
+        kappa_ref = []
         for filename in ref_filenames:
-            T_exp.append([])
-            kappa_exp.append([])
+            T_ref.append([])
+            kappa_ref.append([])
             with open(filename, newline="") as f:
                 reader = csv.reader(f)
                 for row in reader:
-                    T_exp[-1].append(float(row[0]))
-                    kappa_exp[-1].append(float(row[1]))
+                    T_ref[-1].append(float(row[0]))
+                    kappa_ref[-1].append(float(row[1]))
 
         # plot directional calculated kappa (anisotropic)
         if plot_dircs:
@@ -110,8 +110,8 @@ class Ph3py_Result:
             )
 
         # plot experiment results
-        for i in range(len(self.T_exp)):
-            plt.scatter(self.T_exp[i], self.kappa_exp[i], label=ref_labels[i])
+        for i in range(len(T_ref)):
+            plt.scatter(T_ref[i], kappa_ref[i], label=ref_labels[i])
 
         # figure settings
         plt.title("Thermal conductivity of {}".format(self.formula_pretty))
