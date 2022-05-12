@@ -13,10 +13,6 @@ from pymatgen.phonon.plotter import PhononBSPlotter, PhononDosPlotter
 import csv
 
 
-class DocNotFoundError(Exception):
-    pass
-
-
 class Ph3py_Result:
     def __init__(
         self,
@@ -34,7 +30,8 @@ class Ph3py_Result:
         # get our task
         self.ph3py_entry = ph3py_coll.find_one({"task_label": task_label})
         if bool(self.ph3py_entry):
-            raise DocNotFoundError(f"Unable to find doc from DB using {task_label = }")
+            print(f"Unable to find doc from DB using {task_label = }")
+            raise
 
         self.formula_pretty = self.ph3py_entry["formula_pretty"]
 
@@ -145,7 +142,10 @@ class Ph3py_Result:
         plotter.show()
         if save_file:
             plotter.save_plot(
-                "{}-phonon-dispersion-{}.png".format(self.formula_pretty, self.task_label), "png"
+                "{}-phonon-dispersion-{}.png".format(
+                    self.formula_pretty, self.task_label
+                ),
+                "png",
             )
 
     def plot_dos(
@@ -157,4 +157,8 @@ class Ph3py_Result:
         plotter.add_dos_dict(self.dos.get_element_dos())
         plotter.show(units="cm-1")
         if save_file:
-            plotter.save_plot("{}-phonon-DOS-{}.png".format(self.formula_pretty, self.task_label),"png",units="cm-1")
+            plotter.save_plot(
+                "{}-phonon-DOS-{}.png".format(self.formula_pretty, self.task_label),
+                "png",
+                units="cm-1",
+            )
