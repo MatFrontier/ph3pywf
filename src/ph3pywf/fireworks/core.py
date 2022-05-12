@@ -67,6 +67,7 @@ from custodian.vasp.handlers import (
     ScanMetalHandler,
 )
 
+
 class ForceSymmOptimizeFW(Firework):
     def __init__(
         self,
@@ -129,7 +130,7 @@ class ForceSymmOptimizeFW(Firework):
         if "symprec_noise" in subset:
             subset.remove("symprec_noise")
         else:
-            print("\"symprec_noise\" not in VaspErrorHandler")
+            print('"symprec_noise" not in VaspErrorHandler')
         handler_group = [
             VaspErrorHandler(errors_subset_to_catch=subset),
             MeshSymmetryErrorHandler(),
@@ -162,6 +163,7 @@ class ForceSymmOptimizeFW(Firework):
             name=f"{structure.composition.reduced_formula}-{name}",
             **kwargs,
         )
+
 
 class ForceSymmStaticFW(Firework):
     def __init__(
@@ -247,7 +249,7 @@ class ForceSymmStaticFW(Firework):
         if "symprec_noise" in subset:
             subset.remove("symprec_noise")
         else:
-            print("\"symprec_noise\" not in VaspErrorHandler")
+            print('"symprec_noise" not in VaspErrorHandler')
         handler_group = [
             VaspErrorHandler(errors_subset_to_catch=subset),
             MeshSymmetryErrorHandler(),
