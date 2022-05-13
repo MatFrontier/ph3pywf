@@ -13,6 +13,7 @@ import argparse
 # import subprocess
 from ph3pywf.utils.mission_control import check_progress_and_rerun, get_tag_from_fw_id
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -29,24 +30,17 @@ def main():
         default=[],
     )
     parser.add_argument(
+        "-s",
         "--sleep",
-        nargs=1,
+        nargs="?",
         type=int,
         default=600,
     )
 
-    # if len(sys.argv) == 1:
-    #     print("tag or fw_id not specified")
-    #     raise
-    # elif sys.argv[1].isnumeric():
-    #     tag = get_tag_from_fw_id(int(sys.argv[1]))
-    # else:
-    #     tag = sys.argv[1]
-
     args = parser.parse_args()
     SLEEP_TIME = args.sleep
     tags = args.tags
-    
+
     for fw_id in args.fw_ids:
         tag = get_tag_from_fw_id(fw_id)
         if tag not in tags:
