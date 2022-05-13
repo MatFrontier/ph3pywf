@@ -20,12 +20,14 @@ def main():
         "-i",
         "--fw_ids",
         nargs="*",
+        help="fw_id(s) of any FW in workflow(s)",
         type=int,
         default=[],
     )
     parser.add_argument(
         "--tags",
         nargs="*",
+        help="tag(s) or task_label(s) of workflow(s)",
         type=str,
         default=[],
     )
@@ -33,6 +35,7 @@ def main():
         "-s",
         "--sleep",
         nargs="?",
+        help="sleep time in seconds",
         type=int,
         default=600,
     )
