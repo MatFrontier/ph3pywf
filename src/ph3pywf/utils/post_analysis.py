@@ -11,6 +11,7 @@ from pymatgen.phonon.bandstructure import PhononBandStructureSymmLine
 from pymatgen.phonon.dos import CompletePhononDos
 from pymatgen.phonon.plotter import PhononBSPlotter, PhononDosPlotter
 import csv
+import itertools
 
 
 class Ph3py_Result:
@@ -63,14 +64,23 @@ class Ph3py_Result:
         self,
         ref_filenames=[],
         ref_labels=[],
+        plot_initial=True,
         plot_dircs=False,
         plot_fitted=True,
         save_file=True,
         fig_size=(8, 6),
+        title=None,
+        ymax=None,
     ):
         # plot params
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["font.size"] = 12
+        colors = itertools.cycle(
+            ["r", "g", "b", "c", "y", "m"]
+        )  # color sequence for exp
+        markers = itertools.cycle(
+            ["o", "s", "v", "^", "D", "P"]
+        )  # marker sequence for exp
 
         # initialize figure
         plt.figure(figsize=fig_size, facecolor="#FFFFFF")
@@ -93,39 +103,50 @@ class Ph3py_Result:
                 plt.plot(
                     self.T_calc,
                     self.kappa_calc[:, dirc],
-                    "b:",
+                    "k:",
                     label=f"Calculated dir{dirc} (initial)",
                 )
 
         # plot calculated kappa (initial)
-        plt.plot(
-            self.T_calc,
-            self.kappa_calc_iso,
-            "b--",
-            label="Calculated isotropic thermal conductivity (initial)",
-        )
+        if plot_initial:
+            plt.plot(
+                self.T_calc,
+                self.kappa_calc_iso,
+                "k-",
+                # label="Calculated isotropic thermal conductivity (initial)",
+                label="This work",
+            )
 
-        # plot fitted
+        # plot calculated kappa (fitted)
         if plot_fitted and self.has_fitted:
             plt.plot(
                 self.T_calc_fitted,
                 self.kappa_calc_iso_fitted,
-                "b-",
-                label="Calculated isotropic thermal conductivity (fitted) (monoclinic)",
+                "k-",
+                # label="Calculated isotropic thermal conductivity (fitted)",
+                label="This work",
             )
 
         # plot experiment results
         for i in range(len(T_ref)):
-            plt.scatter(T_ref[i], kappa_ref[i], label=ref_labels[i])
+            plt.scatter(
+                T_ref[i],
+                kappa_ref[i],
+                c=next(colors),
+                marker=next(markers),
+                label=ref_labels[i],
+            )
 
         # figure settings
-        plt.title("Thermal conductivity of {}".format(self.formula_pretty))
+        if title:
+            plt.title(title)
+        # plt.title("Thermal conductivity of {}".format(self.formula_pretty))
         # plt.xscale("log") # LOG SCALE
         # plt.yscale("log") # LOG SCALE
-        plt.xlabel("T (K)")
-        plt.ylabel("Thermal conductivity (W/m-K)")
-        # plt.xlim(left=200)
-        plt.ylim(bottom=0, top=None)
+        plt.xlabel("Temperature (K)")
+        plt.ylabel(r"$\kappa$ (W.$m^{-1}.K^{-1}$)")
+        plt.xlim(left=200)
+        plt.ylim(bottom=0, top=ymax)
         plt.legend()
         plt.grid(visible=True, linestyle=":")
 
@@ -145,13 +166,12 @@ class Ph3py_Result:
         save_file=True,
     ):
         plotter = PhononBSPlotter(self.bs)
-        plotter.show()
+        plotter.show(units="THz")
         if save_file:
             plotter.save_plot(
-                "{}-phonon-dispersion-{}.png".format(
-                    self.formula_pretty, self.task_label
-                ),
+                "{}-phonon-bs-{}.png".format(self.formula_pretty, self.task_label),
                 "png",
+                units="THz",
             )
 
     def plot_dos(
@@ -161,10 +181,10 @@ class Ph3py_Result:
         plotter = PhononDosPlotter()
         plotter.add_dos("Total DOS", self.dos)
         plotter.add_dos_dict(self.dos.get_element_dos())
-        plotter.show(units="cm-1")
+        plotter.show(units="THz")
         if save_file:
             plotter.save_plot(
                 "{}-phonon-DOS-{}.png".format(self.formula_pretty, self.task_label),
                 "png",
-                units="cm-1",
+                units="THz",
             )
