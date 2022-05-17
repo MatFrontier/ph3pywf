@@ -41,7 +41,6 @@ def wf_phono3py(
             vasp_input_set_static (VaspInputSet): input set for static VASP jobs.
             db_file (str): path to the db file.
             metadata (dict): meta data.
-            is_reduced_test (bool): if set to True, there'll be only a few staticFW generated.
             USER_*_SETTINGS (dict): VASP input parameters to override default VaspInputSet settings.
             t_min (float): min temperature (in K)
             t_max (float): max temperature (in K)
@@ -49,7 +48,11 @@ def wf_phono3py(
             primitive_matrix (ndarray): transformation matrix to primitive cell from unit cell.
                 Primitive matrix with respect to unit cell.
                 shape=(3, 3), dtype='double', order='C'
-            is_nac (bool): If True, non-analytical term correction is on.
+            mesh (list): sampling mesh numbers in reciprocal space.
+            is_nac (bool): if True, non-analytical term correction is on.
+            is_symmetry (bool): parameter for phono3py instance.
+            symprec (float): structural symmetry tolerance.
+                If specified, will override symprec parameter for phono3py instance and VASP setting.
     Returns:
         Workflow
     """
