@@ -73,8 +73,8 @@ def wf_phono3py(
     user_potcar_functional = c.get("USER_POTCAR_FUNCTIONAL", None)
     user_kpoints_settings = c.get("USER_KPOINTS_SETTINGS", None)
     user_kpoints_settings_static = c.get("USER_KPOINTS_SETTINGS_STATIC", None)
-    t_min = c.get("t_min", 100)
-    t_max = c.get("t_max", 1301)
+    t_min = c.get("t_min", 200)
+    t_max = c.get("t_max", 1401)
     t_step = c.get("t_step", 50)
     primitive_matrix = c.get("primitive_matrix", None)
     mesh = c.get("mesh", [11, 11, 11])
@@ -194,9 +194,9 @@ def wf_ph3py_post_analysis(
     """
     c = c or {}
     db_file = c.get("db_file", DB_FILE)
-    t_min = c.get("t_min", 10)
-    t_max = c.get("t_max", 1301)
-    t_step = c.get("t_step", 10)
+    t_min = c.get("t_min", 200)
+    t_max = c.get("t_max", 1401)
+    t_step = c.get("t_step", 50)
     mesh = c.get("mesh", None)
     born_filename = c.get("born_filename", None)
 
@@ -249,8 +249,8 @@ def wf_ph3py_get_kappa_convergence(
     """
     c = c or {}
     db_file = c.get("db_file", DB_FILE)
-    t_min = c.get("t_min", 100)
-    t_max = c.get("t_max", 1301)
+    t_min = c.get("t_min", 200)
+    t_max = c.get("t_max", 1401)
     t_step = c.get("t_step", 50)
     mesh_densities = c.get("mesh_densities", [256 * k for k in range(1, 100)])
 
@@ -328,8 +328,8 @@ def wf_ph3py_convergence_test(
     """
     c = c or {}
     db_file = c.get("db_file", DB_FILE)
-    t_min = c.get("t_min", 100)
-    t_max = c.get("t_max", 1301)
+    t_min = c.get("t_min", 200)
+    t_max = c.get("t_max", 1401)
     t_step = c.get("t_step", 50)
     mesh_densities = c.get("mesh_densities", [256 * k for k in range(1, 100)])
     mesh_list = c.get("mesh_list", None)
