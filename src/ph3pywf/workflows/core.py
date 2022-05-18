@@ -200,6 +200,9 @@ def wf_ph3py_post_analysis(
     mesh = c.get("mesh", None)
     born_filename = c.get("born_filename", None)
 
+    metadata = c.get("metadata", {})
+    metadata["label"] = tag
+
     # connect to DB
     mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
 
@@ -232,7 +235,7 @@ def wf_ph3py_post_analysis(
 
     wfname = "{}-{}".format(formula_pretty, name)
 
-    return Workflow([fw], name=wfname)
+    return Workflow([fw], name=wfname, metadata=metadata)
 
 
 def wf_ph3py_get_kappa_convergence(
@@ -253,6 +256,9 @@ def wf_ph3py_get_kappa_convergence(
     t_max = c.get("t_max", 1401)
     t_step = c.get("t_step", 50)
     mesh_densities = c.get("mesh_densities", [256 * k for k in range(1, 100)])
+
+    metadata = c.get("metadata", {})
+    metadata["label"] = tag
 
     # connect to DB
     mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
@@ -308,7 +314,7 @@ def wf_ph3py_get_kappa_convergence(
 
     wfname = "{}-{}".format(formula_pretty, name)
 
-    return Workflow(fws, name=wfname)
+    return Workflow(fws, name=wfname, metadata=metadata)
 
 
 #########################
