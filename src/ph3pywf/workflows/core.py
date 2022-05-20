@@ -51,8 +51,9 @@ def wf_phono3py(
             mesh (list): sampling mesh numbers in reciprocal space.
             is_nac (bool): if True, non-analytical term correction is on.
             is_symmetry (bool): parameter for phono3py instance.
-            symprec (float): structural symmetry tolerance.
-                If specified, will override symprec parameter for phono3py instance and VASP setting.
+            symprec (float): structural symmetry tolerance for Phono3py.
+                If specified, will override symprec parameter for Phono3py instance.
+                For VASP INCAR SYMPREC, use USER_INCAR_SETTINGS and USER_INCAR_SETTINGS_STATIC.
     Returns:
         Workflow
     """
@@ -86,12 +87,6 @@ def wf_phono3py(
     metadata["label"] = tag
     print(f'tag = "{tag}"')
     print(f'{{task_label: {{$regex:"{tag}"}}}}')
-
-    # update symprec in vis user settings
-    if not "SYMPREC" in user_incar_settings:
-        user_incar_settings["SYMPREC"] = symprec
-    if not "SYMPREC" in user_incar_settings_static:
-        user_incar_settings_static["SYMPREC"] = symprec
 
     # update vasp_input_set_relax
     vasp_input_set_relax = vasp_input_set_relax or Ph3pyRelaxSet(
