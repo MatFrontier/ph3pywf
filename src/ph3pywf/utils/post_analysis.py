@@ -155,7 +155,8 @@ class Ph3py_Result:
             plt.savefig(
                 "{}-heat-conductivity-{}.png".format(
                     self.formula_pretty, self.task_label
-                )
+                ),
+                bbox_inches="tight",
             )
 
         # show plot
