@@ -76,7 +76,7 @@ class Ph3py_Result:
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["font.size"] = 12
         colors = itertools.cycle(
-            ["r", "g", "b", "c", "y", "m"]
+            ["r", "c", "b", "g", "y", "m"]
         )  # color sequence for exp
         markers = itertools.cycle(
             ["o", "s", "v", "^", "D", "P"]

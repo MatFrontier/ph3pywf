@@ -312,6 +312,48 @@ def wf_ph3py_get_kappa_convergence(
     return Workflow(fws, name=wfname, metadata=metadata)
 
 
+def wf_ph3py_kappa_fit_only(
+    tag,
+    db_file_local,
+    name="kappa conv fitting only wf",
+    tag_for_copy=None,
+    db_file=DB_FILE,
+):
+    """
+    Run only Phono3pyEvaluateKappaFromConvTest task
+    update kappa in ph3py_task
+    """
+    # connect to DB
+    mmdb = VaspCalcDb.from_db_file(db_file_local, admin=True)
+
+    # read addertask_dict from DB
+    opt_dict = mmdb.collection.find_one(
+        {
+            "task_label": {"$regex": f"{tag} structure optimization"},
+        }
+    )
+    formula_pretty = opt_dict["formula_pretty"]
+
+    # prepare evaluate kappa FW
+    fw_name = "{}-{} Phono3pyEvaluateKappaFromConvTest".format(
+        formula_pretty,
+        tag,
+    )
+
+    fw = Firework(
+        Phono3pyEvaluateKappaFromConvTest(
+            tag=tag,
+            db_file=db_file,
+            tag_for_copy=tag_for_copy,
+        ),
+        name=fw_name,
+    )
+
+    wfname = "{}-{}".format(formula_pretty, name)
+
+    return Workflow([fw], name=wfname)
+
+
 #########################
 # TESTING MODULES BELOW #
 #########################
