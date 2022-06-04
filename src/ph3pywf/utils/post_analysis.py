@@ -70,6 +70,7 @@ class Ph3py_Result:
         save_file=True,
         fig_size=(8, 6),
         title=None,
+        xmax=None,
         ymax=None,
     ):
         # plot params
@@ -145,7 +146,7 @@ class Ph3py_Result:
         # plt.yscale("log") # LOG SCALE
         plt.xlabel("Temperature (K)")
         plt.ylabel(r"$\kappa$ (W.$m^{-1}.K^{-1}$)")
-        plt.xlim(left=200)
+        plt.xlim(left=200, right=xmax if xmax else max(self.T_calc))
         plt.ylim(bottom=0, top=ymax)
         plt.legend()
         plt.grid(visible=True, linestyle=":")
