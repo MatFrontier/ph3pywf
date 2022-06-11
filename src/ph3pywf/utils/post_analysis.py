@@ -113,9 +113,11 @@ class Ph3py_Result:
             plt.plot(
                 self.T_calc,
                 self.kappa_calc_iso,
-                "k-",
+                "k--" if plot_fitted and plot_initial else "k-",
                 # label="Calculated isotropic thermal conductivity (initial)",
-                label="This work (initial)" if plot_fitted and plot_initial else "This work",
+                label="This work (initial)"
+                if plot_fitted and plot_initial
+                else "This work",
             )
 
         # plot calculated kappa (fitted)
@@ -125,7 +127,9 @@ class Ph3py_Result:
                 self.kappa_calc_iso_fitted,
                 "k-",
                 # label="Calculated isotropic thermal conductivity (fitted)",
-                label="This work (fitted)" if plot_fitted and plot_initial else "This work",
+                label="This work (fitted)"
+                if plot_fitted and plot_initial
+                else "This work",
             )
 
         # plot experiment results
