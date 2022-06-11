@@ -68,7 +68,7 @@ class Ph3py_Result:
         plot_dircs=False,
         plot_fitted=True,
         save_file=True,
-        fig_size=(8, 6),
+        fig_size=(12, 9),
         title=None,
         xmax=None,
         ymax=None,
@@ -170,27 +170,62 @@ class Ph3py_Result:
     def plot_bs(
         self,
         save_file=True,
+        font_size=12,
+        fig_size=(12, 9),
     ):
         plotter = PhononBSPlotter(self.bs)
-        plotter.show(units="THz")
+        plter = plotter.get_plot(units="thz")
+        ax = plter.gca()
+        ax.xaxis.label.set_math_fontfamily("dejavuserif")
+        ax.xaxis.label.set_fontsize(font_size)
+        ax.yaxis.label.set_math_fontfamily("dejavuserif")
+        ax.yaxis.label.set_fontsize(font_size)
+        ax.set_xticklabels(
+            plter.gca().get_xticklabels(),
+            fontdict={"fontfamily": "Times New Roman", "fontsize": font_size},
+        )
+        ax.set_yticklabels(
+            plter.gca().get_yticklabels(),
+            fontdict={"fontfamily": "Times New Roman", "fontsize": font_size},
+        )
+        fig = plter.gcf()
+        fig.set_size_inches(fig_size)
+        fig.show()
         if save_file:
-            plotter.save_plot(
+            plter.savefig(
                 "{}-phonon-bs-{}.png".format(self.formula_pretty, self.task_label),
-                "png",
-                units="THz",
+                bbox_inches="tight",
             )
 
     def plot_dos(
         self,
         save_file=True,
+        font_size=12,
+        fig_size=(12, 9),
     ):
         plotter = PhononDosPlotter()
         plotter.add_dos("Total DOS", self.dos)
         plotter.add_dos_dict(self.dos.get_element_dos())
-        plotter.show(units="THz")
+        plter = plotter.get_plot(units="thz")
+        ax = plter.gca()
+        ax.xaxis.label.set_math_fontfamily("dejavuserif")
+        ax.xaxis.label.set_fontsize(font_size)
+        ax.yaxis.label.set_math_fontfamily("dejavuserif")
+        ax.yaxis.label.set_fontsize(font_size)
+        ax.legend(prop={"family": "Times New Roman", "size": font_size})
+        ax.set_xticklabels(
+            plter.gca().get_xticklabels(),
+            fontdict={"fontfamily": "Times New Roman", "fontsize": font_size},
+        )
+        ax.set_yticklabels(
+            plter.gca().get_yticklabels(),
+            fontdict={"fontfamily": "Times New Roman", "fontsize": font_size},
+        )
+        fig = plter.gcf()
+        fig.set_size_inches(fig_size)
+        fig.show()
         if save_file:
-            plotter.save_plot(
-                "{}-phonon-DOS-{}.png".format(self.formula_pretty, self.task_label),
-                "png",
-                units="THz",
+            plter.savefig(
+                "{}-phonon-dos-{}.png".format(self.formula_pretty, self.task_label),
+                bbox_inches="tight",
             )
