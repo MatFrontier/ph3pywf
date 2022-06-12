@@ -95,7 +95,10 @@ def update_bs(tag, db_file):
     phonon.set_force_constants(parse_FORCE_CONSTANTS())
 
     bs = get_phonon_band_structure_symm_line_ph3pywf(
-        phonon, has_nac=is_nac, filename="band.yaml"
+        phonon,
+        has_nac=is_nac,
+        filename="band.yaml",
+        line_density=50,
     )
 
     mmdb.db["ph3py_tasks"].update_one(
