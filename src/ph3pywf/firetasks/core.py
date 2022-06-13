@@ -247,7 +247,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
     """
 
     required_params = ["tag", "db_file"]
-    optional_params = ["t_min", "t_max", "t_step", "mesh", "born_filename"]
+    optional_params = ["t_min", "t_max", "t_step", "mesh", "born_filename", "tag_for_copy"]
 
     def run_task(self, fw_spec):
         # initialize doc
@@ -255,13 +255,14 @@ class Phono3pyAnalysisToDb(FiretaskBase):
 
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
+        tag_for_copy = self.get("tag_for_copy", None)
         t_min = self.get("t_min", 200)
         t_max = self.get("t_max", 1401)
         t_step = self.get("t_step", 50)
         mesh = self.get("mesh", [11, 11, 11])
         born_filename = self.get("born_filename", None)
 
-        ph3py_dict["task_label"] = tag
+        ph3py_dict["task_label"] = tag_for_copy if tag_for_copy else tag
 
         # connect to DB
         mmdb = VaspCalcDb.from_db_file(db_file, admin=True)
@@ -544,11 +545,18 @@ class Phono3pyAnalysisToDb(FiretaskBase):
 
         write_yaml_from_dict(ph3py_dict, "ph3py_dict.yaml")  # FOR TESTING
 
-        coll.update_one(
-            {"task_label": {"$regex": tag}},
-            {"$set": ph3py_dict},
-            upsert=True,
-        )
+        if tag_for_copy:
+            coll.update_one(
+                {"task_label": tag_for_copy},
+                {"$set": ph3py_dict},
+                upsert=True,
+            )
+        else:
+            coll.update_one(
+                {"task_label": tag},
+                {"$set": ph3py_dict},
+                upsert=True,
+            )
 
         return FWAction()
 

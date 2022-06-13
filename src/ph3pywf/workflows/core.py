@@ -181,6 +181,7 @@ def wf_ph3py_post_analysis(
     tag,
     db_file_local,
     name="phono3py post analysis only wf",
+    tag_for_copy=None,
     c=None,
 ):
     """
@@ -224,6 +225,7 @@ def wf_ph3py_post_analysis(
             t_step=t_step,
             mesh=mesh,
             born_filename=born_filename,
+            tag_for_copy=tag_for_copy,
         ),
         name=fw_name,
     )
