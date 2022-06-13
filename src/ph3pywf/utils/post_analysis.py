@@ -3,6 +3,7 @@
 __author__ = "Kerui Lai"
 __email__ = "kerui.lai@mail.mcgill.ca"
 
+from logging import raiseExceptions
 from atomate.vasp.database import VaspCalcDb
 from pymatgen.core import Structure
 import numpy as np
@@ -229,3 +230,56 @@ class Ph3py_Result:
                 "{}-phonon-dos-{}.png".format(self.formula_pretty, self.task_label),
                 bbox_inches="tight",
             )
+
+
+def compare_results_at_temp(
+    results: list, temperature: float, fig_size=(12, 9), ymax=None
+):
+    # plot params
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["font.size"] = 16
+    colors = itertools.cycle(["r", "c", "b", "g", "y", "m"])  # color sequence for exp
+    markers = itertools.cycle(["o", "s", "v", "^", "D", "P"])  # marker sequence for exp
+
+    # initialize figure
+    plt.figure(figsize=fig_size, facecolor="#FFFFFF")
+
+    kappa_vals = []
+    x_labels = []
+    for result in results:
+        if result.has_fitted:
+            temp_idx = np.argmin(np.abs(result.T_calc_fitted - temperature))
+            print(result.T_calc_fitted[temp_idx])
+            if abs(result.T_calc_fitted[temp_idx] - temperature) > 40:
+                raise Exception("unable to find specified temperature")
+            kappa_vals.append(result.kappa_calc_iso_fitted[temp_idx])
+        else:
+            temp_idx = np.argmin(np.abs(result.T_calc - temperature))
+            print(result.T_calc[temp_idx])
+            if abs(result.T_calc[temp_idx] - temperature) > 40:
+                raise Exception("unable to find specified temperature")
+            kappa_vals.append(result.kappa_calc_iso[temp_idx])
+        x_labels.append(result.formula_pretty)
+
+    # for i in range(len(results)):
+    #     plt.scatter(
+    #         i,
+    #         kappa_vals[i],
+    #         c=next(colors),
+    #         marker=next(markers),
+    #     )
+    plt.scatter(
+        [i for i in range(len(results))],
+        kappa_vals,
+        s=60,
+    )
+    plt.xticks(ticks=[i for i in range(len(results))], labels=x_labels)
+
+    # figure settings
+    plt.xlabel("Chemical composition")
+    plt.ylabel(r"$\kappa$ (W.$m^{-1}.K^{-1}$)")
+    plt.ylim(bottom=0, top=ymax)
+    # plt.legend()
+    # plt.grid(visible=True, linestyle=":")
+
+    plt.show()
