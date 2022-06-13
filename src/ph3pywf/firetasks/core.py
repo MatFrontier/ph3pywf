@@ -252,8 +252,8 @@ class Phono3pyAnalysisToDb(FiretaskBase):
 
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
-        t_min = self.get("t_min", 100)
-        t_max = self.get("t_max", 1301)
+        t_min = self.get("t_min", 200)
+        t_max = self.get("t_max", 1401)
         t_step = self.get("t_step", 50)
         mesh = self.get("mesh", [11, 11, 11])
         born_filename = self.get("born_filename", None)
@@ -474,7 +474,10 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         # evaluate and save phonon dispersion band structure
         logger.info("PostAnalysis: Evaluating phonon dispersion band structure")
         bs = get_phonon_band_structure_symm_line_ph3pywf(
-            phonon, has_nac=is_nac, filename="band.yaml"
+            phonon,
+            has_nac=is_nac,
+            filename="band.yaml",
+            line_density=50,
         )
 
         ph3py_dict["band_structure"] = bs.as_dict()
@@ -622,8 +625,8 @@ class Phono3pyMeshConvergenceToDb(FiretaskBase):
         tag = self["tag"]
         db_file = env_chk(self.get("db_file"), fw_spec)
         tag_for_copy = self.get("tag_for_copy", None)
-        t_min = self.get("t_min", 100)
-        t_max = self.get("t_max", 1301)
+        t_min = self.get("t_min", 200)
+        t_max = self.get("t_max", 1401)
         t_step = self.get("t_step", 50)
         mesh_densities = self.get("mesh_densities", [256 * k for k in range(1, 40)])
         mesh_list = self.get("mesh_list", None)
