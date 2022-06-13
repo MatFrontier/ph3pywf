@@ -160,6 +160,7 @@ class DisplacedStructuresAdderTask(FiretaskBase):
         # append StaticFW for BORN file generation
         if is_nac:
             vis_dict_born = vis_dict.copy()
+            vis_dict_born["force_gamma"] = True # ensure gamma centered kpoints
             vis_dict_born[
                 "structure"
             ] = struct_unitcell.as_dict()  # update vis_static_born
@@ -167,6 +168,8 @@ class DisplacedStructuresAdderTask(FiretaskBase):
             vis_static_born = vis_static.__class__.from_dict(
                 vis_dict_born
             )  # update vis_static_born
+            
+
             fw = ForceSymmStaticFW(
                 structure=struct_unitcell,
                 vasp_input_set=vis_static_born,
