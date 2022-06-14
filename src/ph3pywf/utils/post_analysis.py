@@ -170,12 +170,16 @@ class Ph3py_Result:
 
     def plot_bs(
         self,
+        xlim=None,
+        ylim=None,
         save_file=True,
         font_size=12,
         fig_size=(12, 9),
     ):
         plotter = PhononBSPlotter(self.bs)
-        plter = plotter.get_plot(units="thz")
+        plter = plotter.get_plot(xlim=xlim, ylim=ylim, units="thz")
+
+        # update plot style
         ax = plter.gca()
         ax.xaxis.label.set_math_fontfamily("dejavuserif")
         ax.xaxis.label.set_fontsize(font_size)
@@ -203,6 +207,8 @@ class Ph3py_Result:
         plot_total=True,
         plot_partial=True,
         sigma=None,
+        xlim=None,
+        ylim=None,
         save_file=True,
         font_size=12,
         fig_size=(12, 9),
@@ -212,7 +218,9 @@ class Ph3py_Result:
             plotter.add_dos("Total DOS", self.dos)
         if plot_partial:
             plotter.add_dos_dict(self.dos.get_element_dos())
-        plter = plotter.get_plot(units="thz")
+        plter = plotter.get_plot(xlim=xlim, ylim=ylim, units="thz")
+
+        # update plot style
         ax = plter.gca()
         ax.xaxis.label.set_math_fontfamily("dejavuserif")
         ax.xaxis.label.set_fontsize(font_size)
