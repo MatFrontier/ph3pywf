@@ -200,13 +200,18 @@ class Ph3py_Result:
 
     def plot_dos(
         self,
+        plot_total=True,
+        plot_partial=True,
+        sigma=None,
         save_file=True,
         font_size=12,
         fig_size=(12, 9),
     ):
-        plotter = PhononDosPlotter()
-        plotter.add_dos("Total DOS", self.dos)
-        plotter.add_dos_dict(self.dos.get_element_dos())
+        plotter = PhononDosPlotter(sigma=sigma)
+        if plot_total:
+            plotter.add_dos("Total DOS", self.dos)
+        if plot_partial:
+            plotter.add_dos_dict(self.dos.get_element_dos())
         plter = plotter.get_plot(units="thz")
         ax = plter.gca()
         ax.xaxis.label.set_math_fontfamily("dejavuserif")
