@@ -98,7 +98,7 @@ def update_bs(tag, db_file):
         phonon,
         has_nac=is_nac,
         filename="band.yaml",
-        line_density=50,
+        line_density=80,
     )
 
     mmdb.db["ph3py_tasks"].update_one(
