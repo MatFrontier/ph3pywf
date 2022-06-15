@@ -170,14 +170,13 @@ class Ph3py_Result:
 
     def plot_bs(
         self,
-        xlim=None,
         ylim=None,
         save_file=True,
         font_size=12,
         fig_size=(12, 9),
     ):
         plotter = PhononBSPlotter(self.bs)
-        plter = plotter.get_plot(xlim=xlim, ylim=ylim, units="thz")
+        plter = plotter.get_plot(ylim=ylim, units="thz")
 
         # update plot style
         ax = plter.gca()
@@ -296,3 +295,15 @@ def compare_results_at_temp(
     # plt.grid(visible=True, linestyle=":")
 
     plt.show()
+
+
+# test script below
+if __name__ == "__main__":
+    task_label = "2021-11-29-18-55-11-610098"
+    path_to_db_json = "/home/jovyan/atomate/config/db.json"
+
+    result = Ph3py_Result(task_label, path_to_db_json)
+    result.plot_dos(
+        plot_total=False, sigma=0.2, xlim=(0, 25), ylim=(0, 9), save_file=False
+    )
+    # result.plot_bs_dos(freq_lim=(0,25),dos_lim=(0,9))
