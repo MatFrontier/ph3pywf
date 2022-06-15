@@ -211,7 +211,10 @@ class Ph3py_Result:
         save_file=True,
         font_size=12,
         fig_size=(12, 9),
+        vertical=False,
     ):
+        # if vertical:
+        #     xlim, ylim = ylim, xlim
         plotter = PhononDosPlotter(sigma=sigma)
         if plot_total:
             plotter.add_dos("Total DOS", self.dos)
@@ -234,6 +237,16 @@ class Ph3py_Result:
             plter.gca().get_yticklabels(),
             fontdict={"fontfamily": "Times New Roman", "fontsize": font_size},
         )
+        if vertical:
+            xlabel, ylabel = ax.get_ylabel(), ax.get_xlabel()
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(ylabel)
+            for line in ax.lines:
+                newx = line.get_ydata()
+                newy = line.get_xdata()
+                line.set_xdata(newx)
+                line.set_ydata(newy)
+
         fig = plter.gcf()
         fig.set_size_inches(fig_size)
         fig.show()
