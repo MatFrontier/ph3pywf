@@ -14,6 +14,8 @@ from pymatgen.phonon.plotter import PhononBSPlotter, PhononDosPlotter
 import csv
 import itertools
 
+FONTSIZE = 18
+
 
 class Ph3py_Result:
     def __init__(
@@ -69,6 +71,7 @@ class Ph3py_Result:
         plot_dircs=False,
         plot_fitted=True,
         save_file=True,
+        font_size=FONTSIZE,
         fig_size=(12, 9),
         title=None,
         xmax=None,
@@ -76,7 +79,7 @@ class Ph3py_Result:
     ):
         # plot params
         plt.rcParams["font.family"] = "Times New Roman"
-        plt.rcParams["font.size"] = 12
+        plt.rcParams["font.size"] = font_size
         colors = itertools.cycle(
             ["r", "c", "b", "g", "y", "m"]
         )  # color sequence for exp
@@ -141,6 +144,7 @@ class Ph3py_Result:
                 c=next(colors),
                 marker=next(markers),
                 label=ref_labels[i],
+                s=120,
             )
 
         # figure settings
@@ -172,7 +176,7 @@ class Ph3py_Result:
         self,
         ylim=None,
         save_file=True,
-        font_size=12,
+        font_size=FONTSIZE,
         fig_size=(12, 9),
     ):
         plotter = PhononBSPlotter(self.bs)
@@ -209,7 +213,7 @@ class Ph3py_Result:
         xlim=None,
         ylim=None,
         save_file=True,
-        font_size=12,
+        font_size=FONTSIZE,
         fig_size=(12, 9),
         vertical=False,
     ):
