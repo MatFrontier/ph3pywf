@@ -15,6 +15,11 @@ from ph3pywf.utils.mission_control import check_progress_and_rerun, get_tag_from
 
 
 def main():
+    """
+    Usage: guard_ph3pywf <-i ID | -t TAG> [-s SLEEP_TIME_IN_SECONDS]
+    Note: Must specify either FireWork id or tag(task_label)
+    Example: guard_ph3pywf -i 75738 75735 -t 60
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i",
