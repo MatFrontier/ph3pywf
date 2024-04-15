@@ -32,18 +32,132 @@ Installation from source code::
 Requirements
 ============
 
-Python version >=3.8
+Python version >= 3.8
 
 Ph3pyWF is used as an extension of ``atomate`` computational framework 
 and is intended to run on linux-based HPC system. 
 For more user-friendly interaction, it is recommended to use this software in Jupyter development environment. 
 
-<Add instruction for configuring launchpad and MongoDB>
+Atomate, FirWorks installation and configuration guide: `link <https://atomate.org/installation.html>`_
 
-Usage
-=====
+Usage (Example Jupyter Notebook)
+================================
 
-<WIP>
+Create workflow for monoclinic ZrO2:
+
+.. code-block:: python
+
+    import numpy as np
+    from pymatgen.ext.matproj import MPRester
+    from pymatgen.core import Structure
+    from fireworks import LaunchPad
+    import os
+    from ph3pywf.workflows.core import wf_phono3py
+
+    # Required parameters
+    material_id = "mp-2858" # Material id to be searched on MP
+    supercell_size_fc3 = (2,2,2)
+    supercell_size_fc2 = None
+    cutoff_pair_distance = 4.0
+
+    # Get working dir 
+    working_dir = os.getcwd()
+
+    # Get materials structure
+    # If no local structure file, get from MP and save unitcell
+    # structure as "struct_unitcell.json"
+    if f"{material_id}_unitcell.json" in os.listdir(working_dir):
+        # Read saved local structure file
+        print("Found local structure file")
+        struct_unitcell = Structure.from_file(f"{material_id}_unitcell.json")
+
+    else:
+        print("Getting structure from MaterialsProject")
+        # api_key = ''
+        with MPRester() as mpr:
+            struct_unitcell = mpr.get_structure_by_material_id(material_id)
+
+        # Save a local structure file to avoid accessing MP every time
+        with open(f"{material_id}_unitcell.json", "w") as fh:
+            fh.write(struct_unitcell.to_json())
+    
+    # Specify more detailed calculation parameters
+    # Create the workflow
+    c = {
+        "supercell_size_fc3": supercell_size_fc3, 
+        "supercell_size_fc2": supercell_size_fc2,
+        "cutoff_pair_distance": cutoff_pair_distance,
+        "is_nac": True,
+        "USER_INCAR_SETTINGS": {
+            "GGA":"CA",
+            "EDIFF":1.0e-09,
+            "EDIFFG":-1.0e-05
+        },
+        "USER_INCAR_SETTINGS_STATIC": {
+            "EDIFF":1.0e-09
+        },
+        "USER_KPOINTS_SETTINGS": {"reciprocal_density": 64},
+        "USER_KPOINTS_SETTINGS_STATIC": {"reciprocal_density": 32},
+        "metadata": {
+            "tags": [
+                "validation",
+                "primitive unitcell",
+                "NAC"
+            ],
+        }
+    }
+
+    print("Creating workflow...")
+    workflow = wf_phono3py(structure=struct_unitcell, 
+                        c=c,
+                        )
+    print("Created workflow")
+
+    # Initialize the launchpad and add our workflow
+    print("Sending to LaunchPad...")
+    launchpad = LaunchPad.auto_load()
+    launchpad.add_wf(workflow)
+    print("Sent to LaunchPad")
+    print("=== Done ===")
+
+
+Output of above code below. Use tag(task_label) to query submitted workflow and corresponding calculation results.
+
+.. code-block::
+
+    Creating workflow...
+    tag = "2022-03-13-02-15-33-975230"
+    {task_label: {$regex:"2022-03-13-02-15-33-975230"}}
+    Created workflow
+    Sending to LaunchPad...
+
+
+Post analysis:
+
+.. code-block:: python
+
+    from ph3pywf.utils.post_analysis import Ph3py_Result
+
+    task_label = "2022-03-13-02-15-33-975230"
+    path_to_db_json = "/home/jovyan/atomate/config/db.json"
+    ref_filenames = ["SAMPLE_THERMAL_CONDUCTIVITY_REF.csv"]
+    ref_labels = ["SAMPLE_REF_LABEL"]
+    plot_initial = True
+    plot_dircs = False
+    ymax = 500
+    fig_size = (12,9)
+
+    result = Ph3py_Result(task_label, path_to_db_json)
+    result.plot_thermal_conductivity(
+        ref_filenames=ref_filenames, 
+        ref_labels=ref_labels, 
+        plot_initial=plot_initial, 
+        plot_dircs=plot_dircs, 
+        ymax=ymax, 
+        fig_size=fig_size
+    )
+    result.plot_bs()
+    result.plot_dos()
 
 
 
