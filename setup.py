@@ -11,7 +11,7 @@ from setuptools import setup
 if __name__ == "__main__":
     try:
         setup(
-            use_scm_version={"version_scheme": "no-guess-dev"},
+            use_scm_version={"fallback_version": "0.1.dev0"},
             entry_points={
                 "console_scripts": [
                     "guard_ph3pywf = ph3pywf.utils.guard_ph3pywf:main",

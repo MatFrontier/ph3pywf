@@ -356,9 +356,7 @@ def wf_ph3py_kappa_fit_only(
     return Workflow([fw], name=wfname)
 
 
-#########################
-# TESTING MODULES BELOW #
-#########################
+# EXPERIMENTAL MODULES BELOW #
 
 
 def wf_ph3py_convergence_test(

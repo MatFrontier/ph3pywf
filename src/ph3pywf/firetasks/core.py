@@ -561,9 +561,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         return FWAction()
 
 
-#########################
-# TESTING MODULES BELOW #
-#########################
+# EXPERIMENTAL MODULES BELOW #
 
 
 @explicit_serialize

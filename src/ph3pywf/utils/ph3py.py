@@ -390,9 +390,7 @@ def write_yaml_from_dict(d, filename):
         yaml.dump(d, outfile, default_flow_style=False)
 
 
-#####################
-# DATABASE FUCTIONS #
-#####################
+# DATABASE HELPERS #
 
 # TODO: move these to "db"
 def insert_gridfs_file(filename, db, collection):
@@ -507,9 +505,7 @@ def get_from_gridfs(db, task_doc, key, filename=None):
         return get_dict_from_gridfs(fs_id, db, collection)
 
 
-########################
 # POST ANALYSIS HELPER #
-########################
 
 from pymatgen.io.vasp import Kpoints
 
@@ -561,9 +557,7 @@ def convtest_preview_mesh(db_file_local, tag, mesh_densities=None):
         print(f"\t{mesh_d}")  # FOR TESTING
 
 
-##########################
 # OTHER HELPER FUNCTIONS #
-##########################
 
 # TODO: move this to "mission_control"?
 def check_time_of_tasks(db_file_local, tag):
