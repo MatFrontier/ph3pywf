@@ -3,9 +3,6 @@
 __author__ = "Kerui Lai"
 __email__ = "kerui.lai@mail.mcgill.ca"
 
-from ast import Raise
-from logging import raiseExceptions
-import sys
 import time
 from datetime import datetime
 import argparse

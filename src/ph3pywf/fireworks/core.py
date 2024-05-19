@@ -8,61 +8,36 @@ import warnings
 from fireworks import Firework
 from pymatgen.core import Structure
 from pymatgen.io.vasp.sets import (
-    MITMDSet,
-    MITRelaxSet,
     MPRelaxSet,
-    MPScanRelaxSet,
-    MPSOCSet,
     MPStaticSet,
 )
 
 from atomate.common.firetasks.glue_tasks import (
-    CopyFiles,
-    DeleteFiles,
-    GzipDir,
     PassCalcLocs,
 )
 from atomate.vasp.config import (
     DB_FILE,
     HALF_KPOINTS_FIRST_RELAX,
     VASP_CMD,
-    VDW_KERNEL_DIR,
 )
 from atomate.vasp.firetasks.glue_tasks import CopyVaspOutputs, pass_vasp_result
-from atomate.vasp.firetasks.neb_tasks import (
-    TransferNEBTask,
-    WriteNEBFromEndpoints,
-    WriteNEBFromImages,
-)
 from atomate.vasp.firetasks.parse_outputs import BoltztrapToDb, VaspToDb
 from atomate.vasp.firetasks.run_calc import RunBoltztrap, RunVaspCustodian
 from atomate.vasp.firetasks.write_inputs import (
-    ModifyIncar,
-    WriteNormalmodeDisplacedPoscar,
-    WriteScanRelaxFromPrev,
-    WriteTransmutedStructureIOSet,
     WriteVaspFromIOSet,
-    WriteVaspFromIOSetFromInterpolatedPOSCAR,
-    WriteVaspHSEBSFromPrev,
-    WriteVaspNSCFFromPrev,
-    WriteVaspSOCFromPrev,
     WriteVaspStaticFromPrev,
 )
 from custodian.vasp.handlers import (
     VaspErrorHandler,
-    AliasingErrorHandler,
     MeshSymmetryErrorHandler,
     UnconvergedErrorHandler,
     PotimErrorHandler,
     FrozenJobErrorHandler,
     NonConvergingErrorHandler,
     PositiveEnergyErrorHandler,
-    WalltimeHandler,
     StdErrHandler,
-    DriftErrorHandler,
     LargeSigmaHandler,
     IncorrectSmearingHandler,
-    ScanMetalHandler,
 )
 
 

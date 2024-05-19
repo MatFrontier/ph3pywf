@@ -21,12 +21,10 @@ from ph3pywf.utils.ph3py import (
 from fireworks import explicit_serialize
 from atomate.utils.utils import env_chk
 import numpy as np
-from atomate.vasp.fireworks.core import StaticFW
 from ph3pywf.fireworks.core import ForceSymmOptimizeFW, ForceSymmStaticFW
 from pymatgen.io.vasp import Kpoints
 import yaml
 import os
-import sys
 from atomate.utils.utils import get_logger
 from phono3py import Phono3py
 from pymatgen.io.phonopy import get_phonopy_structure
