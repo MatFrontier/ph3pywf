@@ -25,7 +25,6 @@ from atomate.common.firetasks.glue_tasks import (
 from atomate.vasp.config import (
     DB_FILE,
     HALF_KPOINTS_FIRST_RELAX,
-    RELAX_MAX_FORCE,
     VASP_CMD,
     VDW_KERNEL_DIR,
 )
@@ -54,7 +53,6 @@ from custodian.vasp.handlers import (
     AliasingErrorHandler,
     MeshSymmetryErrorHandler,
     UnconvergedErrorHandler,
-    MaxForceErrorHandler,
     PotimErrorHandler,
     FrozenJobErrorHandler,
     NonConvergingErrorHandler,
@@ -80,7 +78,6 @@ class ForceSymmOptimizeFW(Firework):
         db_file=DB_FILE,
         force_gamma=True,
         job_type="double_relaxation_run",
-        max_force_threshold=RELAX_MAX_FORCE,
         auto_npar=">>auto_npar<<",
         half_kpts_first_relax=HALF_KPOINTS_FIRST_RELAX,
         parents=None,
@@ -102,7 +99,6 @@ class ForceSymmOptimizeFW(Firework):
             db_file (str): Path to file specifying db credentials to place output parsing.
             force_gamma (bool): Force gamma centered kpoint generation
             job_type (str): custodian job type (default "double_relaxation_run")
-            max_force_threshold (float): max force on a site allowed at end; otherwise, reject job
             auto_npar (bool or str): whether to set auto_npar. defaults to env_chk: ">>auto_npar<<"
             half_kpts_first_relax (bool): whether to use half the kpoints for the first relaxation
             parents ([Firework]): Parents of this particular Firework.
@@ -149,7 +145,6 @@ class ForceSymmOptimizeFW(Firework):
                 vasp_cmd=vasp_cmd,
                 job_type=job_type,
                 handler_group=handler_group,
-                max_force_threshold=max_force_threshold,
                 ediffg=ediffg,
                 auto_npar=auto_npar,
                 half_kpts_first_relax=half_kpts_first_relax,
