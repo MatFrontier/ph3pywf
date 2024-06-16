@@ -94,7 +94,7 @@ def get_displaced_structures(
         )
 
     # Supercell structures with displacement
-    disp_supercells_fc3 = phonon.get_supercells_with_displacements()
+    disp_supercells_fc3 = phonon.supercells_with_displacements
     # Original supercell structure
     init_supercell_fc3 = phonon.supercell
     # Structure list to be returned
@@ -125,7 +125,7 @@ def get_displaced_structures(
                 filename=yaml_fname_fc2,
             )
 
-        disp_supercells_fc2 = phonon.get_phonon_supercells_with_displacements()
+        disp_supercells_fc2 = phonon.phonon_supercells_with_displacements
         for c in disp_supercells_fc2:
             if c is not None:
                 structure_list_fc2.append(get_pmg_structure(c))
@@ -215,7 +215,7 @@ def run_thermal_conductivity(phono3py, t_min=0, t_max=1001, t_step=10):
     )
 
     # Conductivity_RTA object (https://git.io/vVRUW)
-    cond_rta = phono3py.get_thermal_conductivity()
+    cond_rta = phono3py.thermal_conductivity
 
     return cond_rta
 
