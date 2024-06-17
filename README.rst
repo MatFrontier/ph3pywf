@@ -42,6 +42,86 @@ For more user-friendly interaction, it is recommended to use this software in Ju
 
 Atomate, FirWorks installation and configuration guide: `link <https://atomate.org/installation.html>`_
 
+Environment Configuration
+=========================
+
+It is recommended to prepare workflow and do post-analysis locally using JupyterNotebook. 
+Note that Ph3pyWF and dependencies need to be installed on both local and remote computing machine. 
+
+In local environment, prepare the following config files:
+
+- ``<HOME>/atomate/config/db.json``
+
+.. code-block:: json
+
+    {
+        "host": "<mongodb host url/ip>",
+        "port": <mongodb port (default 27017)>,
+        "database": "<database name>",
+        "collection": "ph3py_tasks",
+        "admin_user": "<admin username>",
+        "admin_password": "<admin password>",
+        "readonly_user": "<readonly username (can also be admin)>",
+        "readonly_password": "<readonly password (can also be admin)>",
+        "aliases": {},
+        "authsource": "<admin username>"
+    }
+
+
+- ``<HOME>/atomate/config/my_fworker.yaml``
+
+.. code-block:: json
+
+    name: test
+    category: ''
+    query: '{}'
+    env:
+        db_file: /home/jovyan/atomate/config/db.json
+
+
+- ``<HOME>/atomate/config/my_launchpad.yaml``
+
+.. code-block:: json
+
+    host: <mongodb host url/ip>
+    port: <mongodb port (default 27017)>
+    name: <database name>
+    username: <admin username>
+    password: <admin password>
+    logdir: <Full path to <HOME>/atomate/logs/>
+    strm_lvl: INFO
+    ssl_ca_file: null
+    user_indices: []
+    wf_user_indices: []
+    authsource: <admin username>
+
+
+- ``<HOME>/.fireworks/FW_config.yaml``
+
+.. code-block::
+
+    CONFIG_FILE_DIR: <Full path to <HOME>/atomate/config/>
+
+
+On the machine that runs VASP jobs, prepare the config files above. Additionally, prepare ``<HOME>/atomate/config/my_qadapter.yaml``. 
+Sample file for SLURM machine (see https://atomate.org/installation.html#my-qadapter-yaml for detail): 
+
+.. code-block::
+
+    _fw_name: CommonAdapter
+    _fw_q_type: SLURM
+    rocket_launch: rlaunch -c <HOME>/atomate/config/ rapidfire
+    nodes: 2
+    walltime: 24:00:00
+    queue: null
+    account: null
+    job_name: null
+    pre_rocket: null
+    post_rocket: null
+    logdir: <Full path to <HOME>/atomate/logs/>
+
+
+
 Usage (Example Jupyter Notebook)
 ================================
 
@@ -75,8 +155,8 @@ Create workflow for monoclinic ZrO2:
 
     else:
         print("Getting structure from MaterialsProject")
-        # api_key = ''
-        with MPRester() as mpr:
+        api_key = "<yout MaterialsProject API key>"
+        with MPRester(api_key) as mpr:
             struct_unitcell = mpr.get_structure_by_material_id(material_id)
 
         # Save a local structure file to avoid accessing MP every time
@@ -133,6 +213,10 @@ Output of above code below. Use tag(task_label) to query submitted workflow and 
     Created workflow
     Sending to LaunchPad...
 
+
+Now the workflow definition has been sent to MongoDB. We can switch to the computing machine where VASP jobs will be executed.
+
+On the computing machine, run ``qlaunch -c <HOME>/atomate/config rapidfire -m 1`` to allocate computing resource (see https://atomate.org/installation.html#submit-the-workflow for detail). 
 
 Post analysis:
 
