@@ -70,7 +70,7 @@ In local environment, prepare the following config files:
 
 - ``<HOME>/atomate/config/my_fworker.yaml``
 
-.. code-block:: json
+.. code-block:: yaml
 
     name: test
     category: ''
@@ -81,7 +81,7 @@ In local environment, prepare the following config files:
 
 - ``<HOME>/atomate/config/my_launchpad.yaml``
 
-.. code-block:: json
+.. code-block:: yaml
 
     host: <mongodb host url/ip>
     port: <mongodb port (default 27017)>
@@ -98,7 +98,7 @@ In local environment, prepare the following config files:
 
 - ``<HOME>/.fireworks/FW_config.yaml``
 
-.. code-block::
+.. code-block:: yaml
 
     CONFIG_FILE_DIR: <Full path to <HOME>/atomate/config/>
 
