@@ -240,6 +240,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         mesh (list): sampling mesh numbers in reciprocal space.
         born_filename (str): filename corresponding to "BORN", a file contains non-analytical term correction parameters.
             Specify to use user provided BORN file.
+        is_LBTE (bool): use direct solution (is_LBTE=True); or use RTA (is_LBTE=False). Default is False. 
         metadata (dict): meta data.
 
     """
@@ -259,6 +260,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
         t_step = self.get("t_step", 50)
         mesh = self.get("mesh", [11, 11, 11])
         born_filename = self.get("born_filename", None)
+        is_LBTE = self.get("is_LBTE", False)
 
         ph3py_dict["task_label"] = tag_for_copy if tag_for_copy else tag
 
@@ -417,7 +419,7 @@ class Phono3pyAnalysisToDb(FiretaskBase):
                 "PostAnalysis: Deleting previous kappa-m{}{}{}.hdf5 file".format(*mesh)
             )
             os.remove("kappa-m{}{}{}.hdf5".format(*mesh))
-        run_thermal_conductivity(phono3py, t_min, t_max, t_step)
+        run_thermal_conductivity(phono3py, is_LBTE, t_min, t_max, t_step)
 
         #         # save fc2 and fc3
         #         logger.info("PostAnalysis: Saving fc2 and fc3")

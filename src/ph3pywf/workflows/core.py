@@ -48,6 +48,7 @@ def wf_phono3py(
                 Primitive matrix with respect to unit cell.
                 shape=(3, 3), dtype='double', order='C'
             mesh (list): sampling mesh numbers in reciprocal space.
+            is_LBTE (bool): use direct solution (is_LBTE=True); or use RTA (is_LBTE=False). Default is False. 
             is_nac (bool): if True, non-analytical term correction is on.
             is_symmetry (bool): parameter for phono3py instance.
             symprec (float): structural symmetry tolerance for Phono3py.
@@ -78,6 +79,7 @@ def wf_phono3py(
     t_step = c.get("t_step", 50)
     primitive_matrix = c.get("primitive_matrix", None)
     mesh = c.get("mesh", [11, 11, 11])
+    is_LBTE = c.get("is_LBTE", False)
     is_nac = c.get("is_nac", False)
     is_symmetry = c.get("is_symmetry", True)
     symprec = c.get("symprec", 1e-5)
@@ -163,6 +165,7 @@ def wf_phono3py(
             t_max=t_max,
             t_step=t_step,
             mesh=mesh,
+            is_LBTE=is_LBTE,
         ),
         name=fw_name,
         parents=parents,
@@ -194,6 +197,7 @@ def wf_ph3py_post_analysis(
     t_step = c.get("t_step", 50)
     mesh = c.get("mesh", None)
     born_filename = c.get("born_filename", None)
+    is_LBTE = c.get("is_LBTE", None)
 
     metadata = c.get("metadata", {})
     metadata["label"] = tag
@@ -224,6 +228,7 @@ def wf_ph3py_post_analysis(
             t_step=t_step,
             mesh=mesh,
             born_filename=born_filename,
+            is_LBTE=is_LBTE,
             tag_for_copy=tag_for_copy,
         ),
         name=fw_name,

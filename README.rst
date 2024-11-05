@@ -218,6 +218,17 @@ Now the workflow definition has been sent to MongoDB. We can switch to the compu
 
 On the computing machine, run ``qlaunch -c <HOME>/atomate/config rapidfire -m 1`` to allocate computing resource (see https://atomate.org/installation.html#submit-the-workflow for detail). 
 
+By default Phono3py uses RTA approach to solve linear Boltzmann Transport Equation. To use direct solution (will cost more time and computing power), set ``is_LBTE=True`` in Workflow input like
+
+.. code-block:: python
+    
+    c = {
+        ...
+        is_LBTE=True,
+        ...
+    }
+
+
 Post analysis:
 
 .. code-block:: python
